@@ -1,0 +1,13 @@
+save_intermediate_files: false
+
+encoding_converter:
+  wav_converter:
+    input_dir: 'speech_examples_small'
+    output_dir: 'convert_preprocessed'
+
+voice_music_separator:
+  ina_speech_segmenter:
+    input_dir: 'convert_preprocessed'
+    output_dir: 'ina_preprocessed'
+    filtered_dir: 'ina_filtered'
+    vad_engine: 'sm'
