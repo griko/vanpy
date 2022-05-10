@@ -2,6 +2,8 @@ from yaml import YAMLObject
 from core.PiplineComponent import PipelineComponent
 from utils.utils import get_audio_files_paths, create_dirs_if_not_exist, cut_by_segments
 from inaSpeechSegmenter import Segmenter
+from typing import Tuple
+import pandas as pd
 import time
 
 
@@ -23,16 +25,15 @@ class INAVoiceSeparator(PipelineComponent):
                 filtered_sections.append((start, stop))
         return voice_sections, filtered_sections
 
-    def process(self) -> str:
-        input_path = self.config['input_dir']
-        paths_list = get_audio_files_paths(input_path, extension='.wav')
+    def process(self, input_dir: str = '', df: pd.DataFrame = None) -> Tuple[str, pd.DataFrame]:
+        paths_list = get_audio_files_paths(input_dir, extension='.wav')
         output_path = self.config['output_dir']
         filtered_path = self.config['filtered_dir']
         create_dirs_if_not_exist(output_path, filtered_path)
 
         if not paths_list:
             self.logger.warning('You\'ve supplied an empty list to process')
-            return input_path
+            return input_dir, df
 
         for f in paths_list:
             try:
@@ -46,4 +47,4 @@ class INAVoiceSeparator(PipelineComponent):
             except AssertionError as err:
                 self.logger.error(f"Error reading {f}")
 
-        return output_path
+        return output_path, df

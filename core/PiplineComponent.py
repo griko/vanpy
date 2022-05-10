@@ -1,9 +1,10 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Dict
+from typing import Dict, Tuple
 from yaml import YAMLObject
 from logging import Logger
 import logging
+import pandas as pd
 
 
 @dataclass
@@ -25,6 +26,9 @@ class PipelineComponent(ABC):
     def get_logger(self) -> Logger:
         return logging.getLogger(f'{self.component_type} - {self.component_name}')
 
+    def get_name(self) -> str:
+        return self.component_name
+
     @abstractmethod
-    def process(self) -> None:
+    def process(self, input_dir: str = '', df: pd.DataFrame = None) -> Tuple[str, pd.DataFrame]:
         pass
