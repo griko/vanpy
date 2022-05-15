@@ -1,5 +1,6 @@
 import os, subprocess
 from typing import List, Tuple
+import gdown
 
 
 def create_dirs_if_not_exist(*args:str) -> None:
@@ -22,3 +23,11 @@ def get_audio_files_paths(folder: str, extension: str = '') -> List[str]:
   return [f'{folder}/{f}' for f in folder_files if f.endswith(extension) and os.path.isfile(f'{folder}/{f}')]
 
 
+def cached_download(url, path):
+    if os.path.exists(path):
+        pass
+    else:
+        create_dirs_if_not_exist(''.join(path.split(os.sep)[:-1]))
+        gdown.download(url, path, quiet=True)
+
+    return path

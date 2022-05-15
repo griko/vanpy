@@ -23,22 +23,25 @@ class CombinedPipeline:
                  speaker_clf_pipeline: SpeakerClassificationPipeline = None,
                  segment_clf_pipeline: SegmentClassificationPipeline = None, config: YAMLObject = None):
         self.config = config
+        self.input_dir = self.config['input_dir']
         self.pre_process_pipline = pre_process_pipline
         self.speaker_clf_pipeline = speaker_clf_pipeline
         self.segment_clf_pipeline = segment_clf_pipeline
         self.logger = logging.getLogger('Pipeline')
 
     def process(self) -> Tuple[str, pd.DataFrame, pd.DataFrame]:
-        preprocessed_files_dir = ''
+        process_dir = self.input_dir
+        process_df = pd.DataFrame()
         # run pre-process pipeline
         if self.pre_process_pipline:
-            for component in self.pre_process_pipline.get_components():
-                preprocessed_files_dir, preprocessed_df = component.process(preprocessed_files_dir, preprocessed_df)
+            process_dir, process_df = self.pre_process_pipline.process(process_dir, process_df)
+            # for component in self.pre_process_pipline.get_components():
+            #     process_dir, process_df = component.process(process_dir, process_df)
         # TODO: run speaker classification pipeline
         if self.speaker_clf_pipeline:
-            speaker_clf_df = pd.DataFrame()
-            for component in self.speaker_clf_pipeline.get_components():
-                speaker_clf_df = component.process(speaker_clf_df)
+            process_dir, process_df = self.speaker_clf_pipeline.process(process_dir, process_df)
+            # for component in self.speaker_clf_pipeline.get_components():
+            #     speaker_clf_df = component.process(process_dir, process_df)
         # TODO: run speaker classification pipeline
 
-        return preprocessed_files_dir, speaker_clf_df, None
+        return process_dir, process_df, None

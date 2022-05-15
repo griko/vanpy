@@ -1,15 +1,16 @@
 from yaml import YAMLObject
 from typing import Tuple
-from core.PiplineComponent import PipelineComponent
+
+from core.PipelinePreprocessingComponent import PipelinePreprocessingComponent
 from pyannote.audio import Inference
 import numpy as np
 import pandas as pd
 
+from core.PiplineComponent import PipelineComponent
 from utils.utils import get_audio_files_paths
 
 
 class PyannoteEmbedding(PipelineComponent):
-
     def __init__(self, yaml_config: YAMLObject):
         super().__init__(component_type='embedding', component_name='pyannote_embedding',
                          yaml_config=yaml_config)

@@ -1,4 +1,6 @@
 from yaml import YAMLObject
+
+from core.PipelinePreprocessingComponent import PipelinePreprocessingComponent
 from core.PiplineComponent import PipelineComponent
 from utils.utils import get_audio_files_paths, create_dirs_if_not_exist, cut_by_segments
 from inaSpeechSegmenter import Segmenter
@@ -8,7 +10,6 @@ import time
 
 
 class INAVoiceSeparator(PipelineComponent):
-
     def __init__(self, yaml_config: YAMLObject):
         super().__init__(component_type='voice_music_separator', component_name='ina_speech_segmenter',
                          yaml_config=yaml_config)
