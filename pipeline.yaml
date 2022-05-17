@@ -1,6 +1,11 @@
 save_intermediate_files: false
 input_dir: 'speech_examples_small'
 
+
+file_mapper:
+  file_mapper:
+
+
 encoding_converter:
   wav_converter:
 #    input_dir: 'speech_examples_small'

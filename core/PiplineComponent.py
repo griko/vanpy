@@ -1,10 +1,19 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Dict, Tuple
+from typing import Dict, Tuple, List
 from yaml import YAMLObject
 from logging import Logger
 import logging
 import pandas as pd
+
+
+@dataclass
+class ComponentPayload:
+    features: Dict
+    df: pd.DataFrame
+
+    def unpack(self) -> Tuple[Dict, pd.DataFrame]:
+        return self.features, self.df
 
 
 @dataclass
@@ -30,5 +39,6 @@ class PipelineComponent(ABC):
         return self.component_name
 
     @abstractmethod
-    def process(self, input_dir: str = '', df: pd.DataFrame = None) -> Tuple[str, pd.DataFrame]:
+    def process(self, input_object: ComponentPayload) -> ComponentPayload:
         pass
+

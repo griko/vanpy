@@ -1,5 +1,5 @@
 from core.Pipline import SegmentClassificationPipeline
-from core.SpeakerClassificationPipline import SpeakerClassificationPipeline
+from core.ClassificationPipline import ClassificationPipeline
 from core.PreprocessPipline import PreprocessPipeline
 from core.CombinedPipeline import CombinedPipeline
 import yaml
@@ -12,8 +12,9 @@ def main():
     with open('pipeline.yaml', 'r') as f:
         config = yaml.load(f, Loader=yaml.FullLoader)
 
+    # processed_column_names, processed_df = FilelistDataFrameCreator.get_filelist_df(config['input_dir'])
     pp_pipeline = PreprocessPipeline(
-        ['wav_converter', 'pyannote_embedding'], config=config) #, 'pyannote_segmenter', 'pyannote_embedding'], config=config)
+        ['file_mapper', 'wav_converter', 'ina_speech_segmenter', 'pyannote_embedding'], config=config) #, 'pyannote_segmenter', 'pyannote_embedding'], config=config)
     # speaker_clf_pipeline = SpeakerClassificationPipeline(['common_voices_gender'], config=config)
     pipline = CombinedPipeline(pp_pipeline, None, None, config=config)
     preprocessed_files_dir, speaker_classification_df, segment_classification_df = pipline.process()

@@ -7,11 +7,11 @@ from core.speaker_classification_components.gender.CVGenderClassifier import CVG
 import pandas as pd
 
 
-class SpeakerClassificationPipeline(BasePipeline):
+class ClassificationPipeline(BasePipeline):
     components_mapper = {
         'common_voices_gender': CVGenderClassifier
     }
 
     def __init__(self, components: List[str], config: YAMLObject):
         super().__init__(components, config)
-        self.logger.info(f'Created Speaker Classification Pipeline with {len(self.components)} components')
+        self.logger.info(f'Created Classification Pipeline with {len(self.components)} components')

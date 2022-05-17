@@ -6,7 +6,7 @@ from pyannote.audio import Inference
 import numpy as np
 import pandas as pd
 
-from core.PiplineComponent import PipelineComponent
+from core.PiplineComponent import PipelineComponent, ComponentPayload
 from utils.utils import get_audio_files_paths
 
 
@@ -18,19 +18,27 @@ class PyannoteEmbedding(PipelineComponent):
                                   window="sliding",
                                   duration=self.config['sliding_window_duration'], step=self.config['sliding_window_step'])
 
-    def process(self, input_dir: str = '', df: pd.DataFrame = None) -> Tuple[str, pd.DataFrame]:
-        paths_list = get_audio_files_paths(input_dir, '.wav')
+    def process(self, input_object: ComponentPayload) -> ComponentPayload:
+        features, df = input_object.unpack()
+        input_column = features['paths_column']
+        paths_list = df[input_column].tolist()
 
+        p_df = pd.DataFrame()
         for f in paths_list:
             try:
                 embedding = self.inference_emb(f)
-                tmp = pd.DataFrame(np.mean(embedding, axis=0)).T
-                tmp['filename'] = f.split("/")[-1]
-                df = pd.concat([tmp, df], ignore_index=True)
+                f_df = pd.DataFrame(np.mean(embedding, axis=0)).T
+                f_df[input_column] = f
+                p_df = pd.concat([p_df, f_df], ignore_index=True)
                 self.logger.info(f'done with {f}')
             except RuntimeError as e:
                 self.logger.error(f'An error occurred in {f}: {e}')
-        return input_dir, df
+
+        embedding_columns = p_df.columns.tolist()
+        embedding_columns.remove(input_column)
+        features['embedding_columns'] = embedding_columns
+        df = pd.merge(left=df, right=p_df, how='outer', left_on=input_column, right_on=input_column)
+        return ComponentPayload(features=features, df=df)
         # df_pyannote = df
         # X_test_pyannote = df_pyannote.drop(['filename'], axis=1)
         # y_test_pyannote = df_pyannote[['filename']]

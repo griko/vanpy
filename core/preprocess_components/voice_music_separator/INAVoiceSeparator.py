@@ -1,8 +1,8 @@
 from yaml import YAMLObject
 
 from core.PipelinePreprocessingComponent import PipelinePreprocessingComponent
-from core.PiplineComponent import PipelineComponent
-from utils.utils import get_audio_files_paths, create_dirs_if_not_exist, cut_by_segments
+from core.PiplineComponent import PipelineComponent, ComponentPayload
+from utils.utils import create_dirs_if_not_exist, cut_segment
 from inaSpeechSegmenter import Segmenter
 from typing import Tuple
 import pandas as pd
@@ -26,26 +26,39 @@ class INAVoiceSeparator(PipelineComponent):
                 filtered_sections.append((start, stop))
         return voice_sections, filtered_sections
 
-    def process(self, input_dir: str = '', df: pd.DataFrame = None) -> Tuple[str, pd.DataFrame]:
-        paths_list = get_audio_files_paths(input_dir, extension='.wav')
-        output_path = self.config['output_dir']
-        filtered_path = self.config['filtered_dir']
-        create_dirs_if_not_exist(output_path, filtered_path)
+    def process(self, input_object: ComponentPayload) -> ComponentPayload:
+        features, df = input_object.unpack()
+        input_column = features['paths_column']
+        paths_list = df[input_column].tolist()
+        output_dir = self.config['output_dir']
+        filtered_dir = self.config['filtered_dir']
+        create_dirs_if_not_exist(output_dir, filtered_dir)
 
         if not paths_list:
             self.logger.warning('You\'ve supplied an empty list to process')
-            return input_dir, df
+            return input_object
 
+        p_df = pd.DataFrame()
+        processed_path = f'{self.get_name()}_processed_path'
+        features['paths_column'] = processed_path
         for f in paths_list:
             try:
                 start = time.time()
                 segmentation = self.seg(f)
                 v_segments, f_segments = INAVoiceSeparator.get_voice_segments(segmentation)
-                cut_by_segments(f, output_path, v_segments)
-                cut_by_segments(f, filtered_path, f_segments)
+                for i, segment in enumerate(v_segments):
+                    output_path = cut_segment(f, output_dir=output_dir, segment=segment, segment_id=i)
+                    f_df = pd.DataFrame.from_dict({processed_path: [output_path],
+                                                   f'{self.get_name()}_segment_start': [segment[0]],
+                                                   f'{self.get_name()}_segment_stop': [segment[1]],
+                                                   input_column: [f]})
+                    p_df = pd.concat([p_df, f_df], ignore_index=True)
                 end = time.time()
                 self.logger.info(f'Extracted {len(v_segments)} from {f} in {end - start} seconds')
+
             except AssertionError as err:
                 self.logger.error(f"Error reading {f}")
 
-        return output_path, df
+        df = pd.merge(left=df, right=p_df, how='outer', left_on=input_column, right_on=input_column)
+        return ComponentPayload(features=features, df=df)
+

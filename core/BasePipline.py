@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from logging import Logger
 from typing import Dict, List, Tuple
 from yaml import YAMLObject
-from core.PiplineComponent import PipelineComponent
+from core.PiplineComponent import PipelineComponent, ComponentPayload
 import pandas as pd
 
 
@@ -24,10 +24,9 @@ class BasePipeline(ABC):
     def get_components(self) -> List[PipelineComponent]:
         return self.components
 
-    def process(self, input_dir: str = '', df: pd.DataFrame = None) -> Tuple[str, pd.DataFrame]:
-        process_dir = input_dir
-        process_df = df
+    def process(self, input_object: ComponentPayload) -> ComponentPayload:
+        process_object = input_object
         for component in self.components:
             self.logger.info(f'Processing with {component.get_name()}')
-            process_dir, process_df = component.process(process_dir, process_df)
-        return process_dir, process_df
+            process_object = component.process(process_object)
+        return process_object
