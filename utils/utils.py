@@ -37,7 +37,7 @@ def cached_download(url, path):
     if os.path.exists(path):
         pass
     else:
-        create_dirs_if_not_exist(''.join(path.split(os.sep)[:-1]))
+        create_dirs_if_not_exist('/'.join(path.split('/')[:-1]))
         gdown.download(url, path, quiet=True)
 
     return path

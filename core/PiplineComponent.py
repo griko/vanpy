@@ -12,6 +12,19 @@ class ComponentPayload:
     features: Dict
     df: pd.DataFrame
 
+    def __init__(self, input_path: str = '', features: Dict = None, df: pd.DataFrame = None):
+        if input_path:
+            self.features = {}
+            self.features['input_path'] = input_path
+            self.features['paths_column'] = ''
+            self.features['feature_columns'] = []
+            self.features['classification_columns'] = []
+            self.df = pd.DataFrame()
+        if features:
+            self.features = features
+        if pd.DataFrame:
+            self.df = df
+
     def unpack(self) -> Tuple[Dict, pd.DataFrame]:
         return self.features, self.df
 
@@ -41,4 +54,3 @@ class PipelineComponent(ABC):
     @abstractmethod
     def process(self, input_object: ComponentPayload) -> ComponentPayload:
         pass
-

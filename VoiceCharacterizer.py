@@ -15,9 +15,11 @@ def main():
     # processed_column_names, processed_df = FilelistDataFrameCreator.get_filelist_df(config['input_dir'])
     pp_pipeline = PreprocessPipeline(
         ['file_mapper', 'wav_converter', 'ina_speech_segmenter', 'pyannote_embedding'], config=config) #, 'pyannote_segmenter', 'pyannote_embedding'], config=config)
-    # speaker_clf_pipeline = SpeakerClassificationPipeline(['common_voices_gender'], config=config)
-    pipline = CombinedPipeline(pp_pipeline, None, None, config=config)
-    preprocessed_files_dir, speaker_classification_df, segment_classification_df = pipline.process()
+    speaker_clf_pipeline = ClassificationPipeline(['common_voices_gender'], config=config)
+    pipline = CombinedPipeline([pp_pipeline, speaker_clf_pipeline], config=config)
+    processed_df = pipline.process()
+
+    print(processed_df)
     # speaker_clf_pipeline = SpeakerClassificationPipeline(['common_voices_age', 'common_voices_gender'],
     #                                                      embedding='pyannote')
     # segment_clf_pipeline = SegmentClassificationPipeline(['speaker_id', 'speechbrain_emotion', 'trainscript_wav2vec'],

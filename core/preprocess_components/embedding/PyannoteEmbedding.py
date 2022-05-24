@@ -34,9 +34,9 @@ class PyannoteEmbedding(PipelineComponent):
             except RuntimeError as e:
                 self.logger.error(f'An error occurred in {f}: {e}')
 
-        embedding_columns = p_df.columns.tolist()
-        embedding_columns.remove(input_column)
-        features['embedding_columns'] = embedding_columns
+        feature_columns = p_df.columns.tolist()
+        feature_columns.remove(input_column)
+        features['feature_columns'].extend(feature_columns)
         df = pd.merge(left=df, right=p_df, how='outer', left_on=input_column, right_on=input_column)
         return ComponentPayload(features=features, df=df)
         # df_pyannote = df
