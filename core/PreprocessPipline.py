@@ -4,7 +4,6 @@ import pandas as pd
 from yaml import YAMLObject
 
 from core.BasePipline import BasePipeline
-from core.PipelinePreprocessingComponent import PipelinePreprocessingComponent
 from core.PiplineComponent import PipelineComponent
 from core.preprocess_components.embedding.PyannoteEmbedding import PyannoteEmbedding
 from core.preprocess_components.encoding_converter.WAVConverter import WAVConverter

@@ -28,6 +28,15 @@ class ComponentPayload:
     def unpack(self) -> Tuple[Dict, pd.DataFrame]:
         return self.features, self.df
 
+    def get_features_df(self):
+        columns = [self.features['paths_column']]
+        columns.extend(self.features['feature_columns'])
+        return self.df[columns]
+
+    def get_classification_df(self):
+        columns = [self.features['paths_column']]
+        columns.extend(self.features['classification_columns'])
+        return self.df[columns]
 
 @dataclass
 class PipelineComponent(ABC):
@@ -54,3 +63,4 @@ class PipelineComponent(ABC):
     @abstractmethod
     def process(self, input_object: ComponentPayload) -> ComponentPayload:
         pass
+

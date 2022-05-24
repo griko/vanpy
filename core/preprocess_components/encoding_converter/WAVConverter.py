@@ -1,6 +1,4 @@
 import subprocess
-
-from core.PipelinePreprocessingComponent import PipelinePreprocessingComponent
 from core.PiplineComponent import PipelineComponent, ComponentPayload
 from utils.utils import create_dirs_if_not_exist
 from yaml import YAMLObject

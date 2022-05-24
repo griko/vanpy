@@ -1,15 +1,14 @@
-from typing import List, Tuple
-
+from typing import List
 from yaml import YAMLObject
-
 from core.BasePipline import BasePipeline
-from core.speaker_classification_components.gender.CVGenderClassifier import CVGenderClassifier
-import pandas as pd
+from core.segment_classification_components.age.CVAgeClassifier import CVAgeClassifier
+from core.segment_classification_components.gender.CVGenderClassifier import CVGenderClassifier
 
 
 class ClassificationPipeline(BasePipeline):
     components_mapper = {
-        'common_voices_gender': CVGenderClassifier
+        'common_voices_gender': CVGenderClassifier,
+        'common_voices_age': CVAgeClassifier
     }
 
     def __init__(self, components: List[str], config: YAMLObject):

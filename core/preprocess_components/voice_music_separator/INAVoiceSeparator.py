@@ -1,10 +1,7 @@
 from yaml import YAMLObject
-
-from core.PipelinePreprocessingComponent import PipelinePreprocessingComponent
 from core.PiplineComponent import PipelineComponent, ComponentPayload
 from utils.utils import create_dirs_if_not_exist, cut_segment
 from inaSpeechSegmenter import Segmenter
-from typing import Tuple
 import pandas as pd
 import time
 

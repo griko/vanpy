@@ -1,7 +1,4 @@
 from yaml import YAMLObject
-from typing import Tuple
-
-from core.PipelinePreprocessingComponent import PipelinePreprocessingComponent
 from pyannote.audio import Inference
 import numpy as np
 import pandas as pd
