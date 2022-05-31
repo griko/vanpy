@@ -1,7 +1,5 @@
 from typing import List
-
 from yaml import YAMLObject
-
 from core.BasePipline import BasePipeline
 from core.feature_extraction_components.embedding.PyannoteEmbedding import PyannoteEmbedding
 

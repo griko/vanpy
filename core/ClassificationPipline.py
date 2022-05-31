@@ -3,12 +3,14 @@ from yaml import YAMLObject
 from core.BasePipline import BasePipeline
 from core.segment_classification_components.age.CVAgeClassifier import CVAgeClassifier
 from core.segment_classification_components.gender.CVGenderClassifier import CVGenderClassifier
+from core.segment_classification_components.emotion.IEMOCAPEmotionClassifier import IEMOCAPEmotionClassifier
 
 
 class ClassificationPipeline(BasePipeline):
     components_mapper = {
         'common_voices_gender': CVGenderClassifier,
-        'common_voices_age': CVAgeClassifier
+        'common_voices_age': CVAgeClassifier,
+        'speech_brain_iemocap_emotion': IEMOCAPEmotionClassifier
     }
 
     def __init__(self, components: List[str], config: YAMLObject):

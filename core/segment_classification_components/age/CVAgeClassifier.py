@@ -16,14 +16,15 @@ class CVAgeClassifier(PipelineComponent):
                          yaml_config=yaml_config)
         self.verbal_labels = self.config['verbal_labels']
         self.classification_column_name = self.config['classification_column_name']
+        self.pretrained_models_dir = self.config['pretrained_models_dir']
 
     def load_model(self):
         self.logger.info("Loading XGBoost age classification model, trained on under-sampled Mozilla Common Voice "
                          "dataset with pyannote2.0 embedding [512 features]")
         model_path = cached_download('https://drive.google.com/uc?id=1WvMe5WWoLUIKfeqhSrlDV2ywjvHHz307',
-                                     'pretrained_models/common_voice/xgb_us_age_512_model.pkl')
+                                     f'{self.pretrained_models_dir}/xgb_us_age_512_model.pkl')
         transformer_path = cached_download('https://drive.google.com/uc?id=1D0-JWItMMADoi6dSQkpNZTiUrOLVs0ZM',
-                                           'pretrained_models/common_voice/xgb_us_age_512_full_processor.pkl')
+                                            f'{self.pretrained_models_dir}/xgb_us_age_512_full_processor.pkl')
         self.model = pickle.load(open(model_path, "rb"))
         self.transformer = pickle.load(open(transformer_path, "rb"))
 

@@ -17,7 +17,7 @@ def main():
     feature_extraction_pipeline = FeatureExtractionPipeline(
         ['pyannote_embedding'], config=config)
     speaker_clf_pipeline = ClassificationPipeline(
-        ['common_voices_gender', 'common_voices_age'], config=config)
+        ['common_voices_gender', 'common_voices_age', 'speech_brain_iemocap_emotion'], config=config)
     pipline = CombinedPipeline(
         [preprocessing_pipeline, feature_extraction_pipeline, speaker_clf_pipeline], config=config)
     processed_payload = pipline.process()

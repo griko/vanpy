@@ -16,14 +16,15 @@ class CVGenderClassifier(PipelineComponent):
                          yaml_config=yaml_config)
         self.verbal_labels = self.config['verbal_labels']
         self.classification_column_name = self.config['classification_column_name']
+        self.pretrained_models_dir = self.config['pretrained_models_dir']
 
     def load_model(self):
         self.logger.info("Loading XGBoost gender classification model, trained on Mozilla Common Voice "
                          "dataset with pyannote2.0 embedding [512 features]")
         model_path = cached_download('https://drive.google.com/uc?id=1AVxCtZqccWhCJ4uVJb13WViuWS9e9uBi',
-                                     'pretrained_models/common_voice/xgb_gender_512_model.pkl')
+                                      f'{self.pretrained_models_dir}/xgb_gender_512_model.pkl')
         transformer_path = cached_download('https://drive.google.com/uc?id=1bCiT5YGQd_CmpvA5DjoDUGZRl53TkbwE',
-                                           'pretrained_models/common_voice/xgb_gender_512_full_processor.pkl')
+                                            f'{self.pretrained_models_dir}/xgb_gender_512_full_processor.pkl')
         self.model = pickle.load(open(model_path, "rb"))
         self.transformer = pickle.load(open(transformer_path, "rb"))
 

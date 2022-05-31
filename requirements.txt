@@ -40,6 +40,7 @@ greenlet==1.1.2
 grpcio==1.46.0
 h5py==3.6.0
 huggingface-hub==0.5.1
+HyperPyYAML==1.0.1
 idna==3.3
 imageio==2.19.0
 importlib-metadata==4.11.3
@@ -97,14 +98,18 @@ pytorch-metric-learning==1.3.0
 pytz==2022.1
 PyWavelets==1.3.0
 PyYAML==6.0
+regex==2022.4.24
 requests==2.27.1
 requests-oauthlib==1.3.1
 resampy==0.2.2
 rsa==4.8
+ruamel.yaml==0.17.21
+ruamel.yaml.clib==0.2.6
 scikit-image==0.19.2
 scikit-learn==1.0.2
 scipy==1.8.0
 semver==2.13.0
+sentencepiece==0.1.96
 serpent==1.40
 shellingham==1.4.0
 simplejson==3.17.6
@@ -115,6 +120,7 @@ sortedcontainers==2.4.0
 SoundFile==0.10.3.post1
 soupsieve==2.3.2.post1
 spectralcluster==0.2.4
+speechbrain==0.5.11
 SQLAlchemy==1.4.36
 stevedore==3.5.0
 sympy==1.10.1
@@ -128,6 +134,7 @@ termcolor==1.1.0
 tf-estimator-nightly==2.8.0.dev2021122109
 threadpoolctl==3.1.0
 tifffile==2022.5.4
+tokenizers==0.12.1
 torch==1.11.0
 torch-audiomentations @ git+https://github.com/asteroid-team/torch-audiomentations@3304c7ae0004f8ca5f7b87a78d002969a5450144
 torch-pitch-shift==1.2.2
@@ -135,6 +142,7 @@ torchaudio==0.11.0
 torchmetrics==0.8.2
 torchvision==0.12.0
 tqdm==4.64.0
+transformers==4.19.2
 typer==0.4.1
 typing_extensions==4.2.0
 urllib3==1.26.9

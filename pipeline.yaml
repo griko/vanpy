@@ -17,9 +17,16 @@ feature_extraction:
 
 segment_classifier:
   common_voices_gender:
+    pretrained_models_dir: 'pretrained_models/common_voice'
     classification_column_name: 'common_voices_gender_classification'
     verbal_labels: true
 
   common_voices_age:
+    pretrained_models_dir: 'pretrained_models/common_voice'
     classification_column_name: 'common_voices_age_classification'
+    verbal_labels: true
+
+  speech_brain_iemocap_emotion:
+    pretrained_models_dir: 'pretrained_models/speech_brain_iemocap_emotion'
+    classification_column_name: 'speech_brain_iemocap_emotion'
     verbal_labels: true
