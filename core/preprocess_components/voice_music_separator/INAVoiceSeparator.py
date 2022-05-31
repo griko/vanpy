@@ -7,10 +7,14 @@ import time
 
 
 class INAVoiceSeparator(PipelineComponent):
+    model = None
+
     def __init__(self, yaml_config: YAMLObject):
         super().__init__(component_type='voice_music_separator', component_name='ina_speech_segmenter',
                          yaml_config=yaml_config)
-        self.seg = Segmenter(vad_engine=self.config['vad_engine'])
+
+    def load_model(self):
+        self.model = Segmenter(vad_engine=self.config['vad_engine'])
 
     @classmethod
     def get_voice_segments(cls, segmentation):
@@ -24,6 +28,9 @@ class INAVoiceSeparator(PipelineComponent):
         return voice_sections, filtered_sections
 
     def process(self, input_object: ComponentPayload) -> ComponentPayload:
+        if not self.model:
+            self.load_model()
+
         features, df = input_object.unpack()
         input_column = features['paths_column']
         paths_list = df[input_column].tolist()
@@ -41,7 +48,7 @@ class INAVoiceSeparator(PipelineComponent):
         for f in paths_list:
             try:
                 start = time.time()
-                segmentation = self.seg(f)
+                segmentation = self.model(f)
                 v_segments, f_segments = INAVoiceSeparator.get_voice_segments(segmentation)
                 for i, segment in enumerate(v_segments):
                     output_path = cut_segment(f, output_dir=output_dir, segment=segment, segment_id=i)

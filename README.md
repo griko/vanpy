@@ -16,7 +16,7 @@ Predicts 'female'/'male', trained on Mozilla Common Voices Dataset after extract
 Reaches 92.8% accuracy on a train set (! recheck)
 ### CVAgeClassifier
 Predicts 'teens'/'twenties'/'thirties'/'fourties'/'fifties+', trained on Mozilla Common Voices Dataset after extracting pyannote embedding. 
-Reaches 92.8% accuracy on a train set
+Reaches TBD% accuracy on a train set
 
 
 ## ComponentPayload
