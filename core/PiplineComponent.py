@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Dict, Tuple, List
+from typing import Dict, Tuple
 from yaml import YAMLObject
 from logging import Logger
 import logging
@@ -38,6 +38,7 @@ class ComponentPayload:
         columns.extend(self.features['classification_columns'])
         return self.df[columns]
 
+
 @dataclass
 class PipelineComponent(ABC):
     component_type: str
@@ -63,4 +64,3 @@ class PipelineComponent(ABC):
     @abstractmethod
     def process(self, input_object: ComponentPayload) -> ComponentPayload:
         pass
-

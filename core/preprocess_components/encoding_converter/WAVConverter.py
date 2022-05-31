@@ -7,7 +7,7 @@ import pandas as pd
 
 class WAVConverter(PipelineComponent):
     def __init__(self, yaml_config: YAMLObject):
-        super().__init__(component_type='encoding_converter', component_name='wav_converter',
+        super().__init__(component_type='preprocessing', component_name='wav_converter',
                          yaml_config=yaml_config)
 
     def process(self, input_object: ComponentPayload) -> ComponentPayload:

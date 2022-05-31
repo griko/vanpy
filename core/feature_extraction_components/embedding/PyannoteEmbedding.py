@@ -10,7 +10,7 @@ class PyannoteEmbedding(PipelineComponent):
     model = None
 
     def __init__(self, yaml_config: YAMLObject):
-        super().__init__(component_type='embedding', component_name='pyannote_embedding',
+        super().__init__(component_type='feature_extraction', component_name='pyannote_embedding',
                          yaml_config=yaml_config)
 
     def load_model(self):
@@ -43,4 +43,3 @@ class PyannoteEmbedding(PipelineComponent):
         features['feature_columns'].extend(feature_columns)
         df = pd.merge(left=df, right=p_df, how='outer', left_on=input_column, right_on=input_column)
         return ComponentPayload(features=features, df=df)
-

@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from logging import Logger
 import pandas as pd
 import logging
-from typing import Tuple, List
+from typing import List
 
 from core.BasePipline import BasePipeline
 from core.PiplineComponent import ComponentPayload

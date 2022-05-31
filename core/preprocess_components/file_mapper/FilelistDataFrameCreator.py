@@ -1,5 +1,3 @@
-from typing import Tuple
-
 import pandas as pd
 
 from core.PiplineComponent import PipelineComponent, ComponentPayload
@@ -9,7 +7,7 @@ from yaml import YAMLObject
 
 class FilelistDataFrameCreator(PipelineComponent):
     def __init__(self, yaml_config: YAMLObject):
-        super().__init__(component_type='file_mapper', component_name='file_mapper',
+        super().__init__(component_type='preprocessing', component_name='file_mapper',
                          yaml_config=yaml_config)
 
     def process(self, input_object: ComponentPayload) -> ComponentPayload:
@@ -23,4 +21,3 @@ class FilelistDataFrameCreator(PipelineComponent):
             f_df = pd.DataFrame.from_dict({processed_path: [f]})
             p_df = pd.concat([p_df, f_df], ignore_index=True)
         return ComponentPayload(features=features, df=p_df)
-

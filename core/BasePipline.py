@@ -2,10 +2,9 @@ import logging
 from abc import ABC
 from dataclasses import dataclass
 from logging import Logger
-from typing import Dict, List, Tuple
+from typing import Dict, List
 from yaml import YAMLObject
 from core.PiplineComponent import PipelineComponent, ComponentPayload
-import pandas as pd
 
 
 @dataclass

@@ -10,7 +10,7 @@ class INAVoiceSeparator(PipelineComponent):
     model = None
 
     def __init__(self, yaml_config: YAMLObject):
-        super().__init__(component_type='voice_music_separator', component_name='ina_speech_segmenter',
+        super().__init__(component_type='preprocessing', component_name='ina_speech_segmenter',
                          yaml_config=yaml_config)
 
     def load_model(self):
@@ -61,8 +61,7 @@ class INAVoiceSeparator(PipelineComponent):
                 self.logger.info(f'Extracted {len(v_segments)} from {f} in {end - start} seconds')
 
             except AssertionError as err:
-                self.logger.error(f"Error reading {f}")
+                self.logger.error(f"Error reading {f}.\n{err}")
 
         df = pd.merge(left=df, right=p_df, how='outer', left_on=input_column, right_on=input_column)
         return ComponentPayload(features=features, df=df)
-
