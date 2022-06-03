@@ -1,7 +1,7 @@
 from typing import List
 from yaml import YAMLObject
-from core.BasePipline import BasePipeline
-from core.feature_extraction_components.embedding.PyannoteEmbedding import PyannoteEmbedding
+from audio_pipeline.core.BasePipline import BasePipeline
+from audio_pipeline.core.feature_extraction_components.PyannoteEmbedding import PyannoteEmbedding
 
 
 class FeatureExtractionPipeline(BasePipeline):

@@ -1,9 +1,9 @@
 from typing import List
 from yaml import YAMLObject
-from core.BasePipline import BasePipeline
-from core.preprocess_components.encoding_converter.WAVConverter import WAVConverter
-from core.preprocess_components.voice_music_separator.INAVoiceSeparator import INAVoiceSeparator
-from core.preprocess_components.file_mapper.FilelistDataFrameCreator import FilelistDataFrameCreator
+from audio_pipeline.core.BasePipline import BasePipeline
+from audio_pipeline.core.preprocess_components.WAVConverter import WAVConverter
+from audio_pipeline.core.preprocess_components.INAVoiceSeparator import INAVoiceSeparator
+from audio_pipeline.core.preprocess_components.FilelistDataFrameCreator import FilelistDataFrameCreator
 
 
 class PreprocessPipeline(BasePipeline):

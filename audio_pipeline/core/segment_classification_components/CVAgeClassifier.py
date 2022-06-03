@@ -1,7 +1,7 @@
 import pickle
 from yaml import YAMLObject
-from core.PiplineComponent import PipelineComponent, ComponentPayload
-from utils.utils import cached_download
+from audio_pipeline.core.PiplineComponent import PipelineComponent, ComponentPayload
+from audio_pipeline.utils.utils import cached_download
 
 
 class CVAgeClassifier(PipelineComponent):

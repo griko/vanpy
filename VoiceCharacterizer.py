@@ -1,7 +1,7 @@
-from core.ClassificationPipline import ClassificationPipeline
-from core.FeatureExtractionPipline import FeatureExtractionPipeline
-from core.PreprocessPipline import PreprocessPipeline
-from core.CombinedPipeline import CombinedPipeline
+from audio_pipeline.core.ClassificationPipline import ClassificationPipeline
+from audio_pipeline.core.FeatureExtractionPipline import FeatureExtractionPipeline
+from audio_pipeline.core.PreprocessPipline import PreprocessPipeline
+from audio_pipeline.core.CombinedPipeline import CombinedPipeline
 import yaml
 import logging
 

@@ -1,7 +1,6 @@
 import pandas as pd
-
-from core.PiplineComponent import PipelineComponent, ComponentPayload
-from utils.utils import get_audio_files_paths
+from audio_pipeline.core.PiplineComponent import PipelineComponent, ComponentPayload
+from audio_pipeline.utils.utils import get_audio_files_paths
 from yaml import YAMLObject
 
 

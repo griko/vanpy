@@ -1,6 +1,6 @@
 from yaml import YAMLObject
-from core.PiplineComponent import PipelineComponent, ComponentPayload
-from utils.utils import create_dirs_if_not_exist, cut_segment
+from audio_pipeline.core.PiplineComponent import PipelineComponent, ComponentPayload
+from audio_pipeline.utils.utils import create_dirs_if_not_exist, cut_segment
 from inaSpeechSegmenter import Segmenter
 import pandas as pd
 import time

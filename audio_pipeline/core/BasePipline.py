@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from logging import Logger
 from typing import Dict, List
 from yaml import YAMLObject
-from core.PiplineComponent import PipelineComponent, ComponentPayload
+from audio_pipeline.core.PiplineComponent import PipelineComponent, ComponentPayload
 
 
 @dataclass

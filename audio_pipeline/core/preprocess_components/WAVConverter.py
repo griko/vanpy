@@ -1,6 +1,6 @@
 import subprocess
-from core.PiplineComponent import PipelineComponent, ComponentPayload
-from utils.utils import create_dirs_if_not_exist
+from audio_pipeline.core.PiplineComponent import PipelineComponent, ComponentPayload
+from audio_pipeline.utils.utils import create_dirs_if_not_exist
 from yaml import YAMLObject
 import pandas as pd
 

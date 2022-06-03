@@ -1,7 +1,6 @@
 import os
-
 from yaml import YAMLObject
-from core.PiplineComponent import PipelineComponent, ComponentPayload
+from audio_pipeline.core.PiplineComponent import PipelineComponent, ComponentPayload
 from speechbrain.pretrained.interfaces import foreign_class
 
 
@@ -51,6 +50,6 @@ class IEMOCAPEmotionClassifier(PipelineComponent):
 
     @classmethod
     def cleanup_softlinks(cls):
-        for link in os.listdir('.'):
+        for link in os.listdir('emotion'):
             if '.wav' in link and os.path.islink(link):
                 os.unlink(link)

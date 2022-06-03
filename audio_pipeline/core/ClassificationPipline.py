@@ -1,9 +1,9 @@
 from typing import List
 from yaml import YAMLObject
-from core.BasePipline import BasePipeline
-from core.segment_classification_components.age.CVAgeClassifier import CVAgeClassifier
-from core.segment_classification_components.gender.CVGenderClassifier import CVGenderClassifier
-from core.segment_classification_components.emotion.IEMOCAPEmotionClassifier import IEMOCAPEmotionClassifier
+from audio_pipeline.core.BasePipline import BasePipeline
+from audio_pipeline.core.segment_classification_components.CVAgeClassifier import CVAgeClassifier
+from audio_pipeline.core.segment_classification_components.CVGenderClassifier import CVGenderClassifier
+from audio_pipeline.core.segment_classification_components.IEMOCAPEmotionClassifier import IEMOCAPEmotionClassifier
 
 
 class ClassificationPipeline(BasePipeline):
