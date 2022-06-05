@@ -6,7 +6,6 @@ from speechbrain.pretrained.interfaces import foreign_class
 
 class IEMOCAPEmotionClassifier(PipelineComponent):
     model = None
-    label_conversion_dict = {0: 'teens', 1: 'twenties', 2: 'thirties', 3: 'fourties', 4: 'fifties+'}
     classification_column_name: str = ''
     pretrained_models_dir: str = ''
     verbal_labels: bool = False
