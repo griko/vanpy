@@ -5,7 +5,7 @@ with open('requirements.txt') as f:
 
 setup(
     name='voice_characterizer',
-    version='0.52',
+    version='0.53',
     description='Voice characterization framework',
     author='Gregory Koushnir',
     author_email='koushgre@post.bgu.ac.il',

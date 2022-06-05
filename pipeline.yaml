@@ -1,4 +1,3 @@
-save_intermediate_files: true  # TODO: not implemented
 input_dir: 'speech_examples_small'
 
 preprocessing:

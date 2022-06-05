@@ -50,6 +50,6 @@ class IEMOCAPEmotionClassifier(PipelineComponent):
 
     @classmethod
     def cleanup_softlinks(cls):
-        for link in os.listdir('emotion'):
+        for link in os.listdir():
             if '.wav' in link and os.path.islink(link):
                 os.unlink(link)
