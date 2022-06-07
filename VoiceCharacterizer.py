@@ -13,7 +13,7 @@ def main():
         config = yaml.load(f, Loader=yaml.FullLoader)
 
     preprocessing_pipeline = PreprocessPipeline(
-        ['file_mapper', 'wav_converter', 'ina_speech_segmenter'], config=config)
+        ['file_mapper', 'wav_converter', 'pyannote_vad'], config=config)
     feature_extraction_pipeline = FeatureExtractionPipeline(
         ['pyannote_embedding'], config=config)
     speaker_clf_pipeline = ClassificationPipeline(

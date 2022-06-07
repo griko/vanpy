@@ -11,6 +11,12 @@ preprocessing:
     output_dir: 'ina_preprocessed'
     filtered_dir: 'ina_filtered'
     vad_engine: 'sm'
+  pyannote_vad:
+    output_dir: 'pyannote_vad_preprocessed'
+    onset: 0.85             # onset activation threshold
+    offset: 0.8             # offset activation threshold
+    min_duration_on: 0.1    # remove speech regions shorter than that many seconds
+    min_duration_off: 0.0   # fill non-speech regions shorter than that many seconds
 
 feature_extraction:
   pyannote_embedding:
