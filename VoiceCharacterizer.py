@@ -22,7 +22,7 @@ def main():
         [preprocessing_pipeline, feature_extraction_pipeline, speaker_clf_pipeline], config=config)
     processed_payload = pipline.process()
 
-    print(processed_payload.get_classification_df())
+    print(processed_payload.get_classification_df(all_paths_columns=True))
     # speaker_clf_pipeline = SpeakerClassificationPipeline(['common_voices_age', 'common_voices_gender'],
     #                                                      embedding='pyannote')
     # segment_clf_pipeline = SegmentClassificationPipeline(['speaker_id', 'speechbrain_emotion', 'trainscript_wav2vec'],

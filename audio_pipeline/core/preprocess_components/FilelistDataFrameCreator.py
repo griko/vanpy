@@ -9,14 +9,15 @@ class FilelistDataFrameCreator(PipelineComponent):
         super().__init__(component_type='preprocessing', component_name='file_mapper',
                          yaml_config=yaml_config)
 
-    def process(self, input_object: ComponentPayload) -> ComponentPayload:
-        features, df = input_object.unpack()
-        input_folder = features['input_path']
+    def process(self, input_payload: ComponentPayload) -> ComponentPayload:
+        metadata, df = input_payload.unpack()
+        input_folder = metadata['input_path']
         paths_list = get_audio_files_paths(input_folder)
         processed_path = f'{self.component_name}_paths'
-        features['paths_column'] = processed_path
+        metadata['paths_column'] = processed_path
+        metadata['all_paths_columns'].append(processed_path)
         p_df = pd.DataFrame()
         for f in paths_list:
             f_df = pd.DataFrame.from_dict({processed_path: [f]})
             p_df = pd.concat([p_df, f_df], ignore_index=True)
-        return ComponentPayload(features=features, df=p_df)
+        return ComponentPayload(metadata=metadata, df=p_df)

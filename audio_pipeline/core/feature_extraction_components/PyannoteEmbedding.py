@@ -19,12 +19,12 @@ class PyannoteEmbedding(PipelineComponent):
                                duration=self.config['sliding_window_duration'],
                                step=self.config['sliding_window_step'])
 
-    def process(self, input_object: ComponentPayload) -> ComponentPayload:
+    def process(self, input_payload: ComponentPayload) -> ComponentPayload:
         if not self.model:
             self.load_model()
 
-        features, df = input_object.unpack()
-        input_column = features['paths_column']
+        metadata, df = input_payload.unpack()
+        input_column = metadata['paths_column']
         paths_list = df[input_column].tolist()
 
         p_df = pd.DataFrame()
@@ -40,6 +40,6 @@ class PyannoteEmbedding(PipelineComponent):
 
         feature_columns = p_df.columns.tolist()
         feature_columns.remove(input_column)
-        features['feature_columns'].extend(feature_columns)
+        metadata['feature_columns'].extend(feature_columns)
         df = pd.merge(left=df, right=p_df, how='outer', left_on=input_column, right_on=input_column)
-        return ComponentPayload(features=features, df=df)
+        return ComponentPayload(metadata=metadata, df=df)

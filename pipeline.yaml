@@ -4,6 +4,9 @@ preprocessing:
   file_mapper:
   wav_converter:
     output_dir: 'convert_preprocessed'
+    ab: '256k'  # bitrate
+    ac: 1       # number of channels
+    ar: '16k'   # sample frequency
   ina_speech_segmenter:
     output_dir: 'ina_preprocessed'
     filtered_dir: 'ina_filtered'

@@ -27,12 +27,12 @@ class INAVoiceSeparator(PipelineComponent):
                 filtered_sections.append((start, stop))
         return voice_sections, filtered_sections
 
-    def process(self, input_object: ComponentPayload) -> ComponentPayload:
+    def process(self, input_payload: ComponentPayload) -> ComponentPayload:
         if not self.model:
             self.load_model()
 
-        features, df = input_object.unpack()
-        input_column = features['paths_column']
+        metadata, df = input_payload.unpack()
+        input_column = metadata['paths_column']
         paths_list = df[input_column].tolist()
         output_dir = self.config['output_dir']
         filtered_dir = self.config['filtered_dir']
@@ -40,11 +40,12 @@ class INAVoiceSeparator(PipelineComponent):
 
         if not paths_list:
             self.logger.warning('You\'ve supplied an empty list to process')
-            return input_object
+            return input_payload
 
         p_df = pd.DataFrame()
         processed_path = f'{self.get_name()}_processed_path'
-        features['paths_column'] = processed_path
+        metadata['paths_column'] = processed_path
+        metadata['all_paths_columns'].append(processed_path)
         for f in paths_list:
             try:
                 start = time.time()
@@ -64,4 +65,4 @@ class INAVoiceSeparator(PipelineComponent):
                 self.logger.error(f"Error reading {f}.\n{err}")
 
         df = pd.merge(left=df, right=p_df, how='outer', left_on=input_column, right_on=input_column)
-        return ComponentPayload(features=features, df=df)
+        return ComponentPayload(metadata=metadata, df=df)

@@ -28,17 +28,17 @@ class CVAgeClassifier(PipelineComponent):
         self.model = pickle.load(open(model_path, "rb"))
         self.transformer = pickle.load(open(transformer_path, "rb"))
 
-    def process(self, input_object: ComponentPayload) -> ComponentPayload:
+    def process(self, input_payload: ComponentPayload) -> ComponentPayload:
         if not self.model:
             self.load_model()
 
-        payload_features = input_object.features
-        payload_df = input_object.df
-        X = payload_df[payload_features['feature_columns']]
+        payload_metadata = input_payload.metadata
+        payload_df = input_payload.df
+        X = payload_df[payload_metadata['feature_columns']]
         X.columns = X.columns.astype(str)  # expecting features_columns to be ['0','1',...'511']
         X = self.transformer.transform(X)
         y_pred = self.model.predict(X)
         payload_df[self.classification_column_name] = \
             [self.label_conversion_dict[x] if self.verbal_labels else x for x in y_pred]
-        payload_features['classification_columns'].extend([self.classification_column_name])
-        return ComponentPayload(features=payload_features, df=payload_df)
+        payload_metadata['classification_columns'].extend([self.classification_column_name])
+        return ComponentPayload(metadata=payload_metadata, df=payload_df)

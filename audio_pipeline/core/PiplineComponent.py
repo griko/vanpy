@@ -9,33 +9,36 @@ import pandas as pd
 
 @dataclass
 class ComponentPayload:
-    features: Dict
+    metadata: Dict
     df: pd.DataFrame
 
-    def __init__(self, input_path: str = '', features: Dict = None, df: pd.DataFrame = None):
+    def __init__(self, input_path: str = '', metadata: Dict = None, df: pd.DataFrame = None):
         if input_path:
-            self.features = {}
-            self.features['input_path'] = input_path
-            self.features['paths_column'] = ''
-            self.features['feature_columns'] = []
-            self.features['classification_columns'] = []
+            self.metadata = {'input_path': input_path, 'paths_column': '', 'all_paths_columns': [],
+                             'feature_columns': [], 'classification_columns': []}
             self.df = pd.DataFrame()
-        if features:
-            self.features = features
+        if metadata:
+            self.metadata = metadata
         if pd.DataFrame:
             self.df = df
 
     def unpack(self) -> Tuple[Dict, pd.DataFrame]:
-        return self.features, self.df
+        return self.metadata, self.df
 
-    def get_features_df(self):
-        columns = [self.features['paths_column']]
-        columns.extend(self.features['feature_columns'])
+    def get_features_df(self, all_paths_columns=False):
+        if not all_paths_columns:
+            columns = [self.metadata['paths_column']]
+        else:
+            columns = [self.metadata['all_paths_columns']]
+        columns.extend(self.metadata['feature_columns'])
         return self.df[columns]
 
-    def get_classification_df(self):
-        columns = [self.features['paths_column']]
-        columns.extend(self.features['classification_columns'])
+    def get_classification_df(self, all_paths_columns=False):
+        if not all_paths_columns:
+            columns = [self.metadata['paths_column']]
+        else:
+            columns = self.metadata['all_paths_columns']
+        columns.extend(self.metadata['classification_columns'])
         return self.df[columns]
 
 
@@ -62,5 +65,5 @@ class PipelineComponent(ABC):
         return self.component_name
 
     @abstractmethod
-    def process(self, input_object: ComponentPayload) -> ComponentPayload:
+    def process(self, input_payload: ComponentPayload) -> ComponentPayload:
         pass

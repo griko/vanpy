@@ -23,8 +23,8 @@ class BasePipeline(ABC):
     def get_components(self) -> List[PipelineComponent]:
         return self.components
 
-    def process(self, input_object: ComponentPayload) -> ComponentPayload:
-        process_object = input_object
+    def process(self, input_payload: ComponentPayload) -> ComponentPayload:
+        process_object = input_payload
         for component in self.components:
             self.logger.info(f'Processing with {component.get_name()}')
             process_object = component.process(process_object)
