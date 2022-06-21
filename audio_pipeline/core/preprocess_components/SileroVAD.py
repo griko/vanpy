@@ -1,31 +1,25 @@
-from yaml import YAMLObject
-from audio_pipeline.core.PiplineComponent import PipelineComponent, ComponentPayload
-from audio_pipeline.utils.utils import create_dirs_if_not_exist, cut_segment
-from inaSpeechSegmenter import Segmenter
-import pandas as pd
 import time
 
+from yaml import YAMLObject
+import torch
+import pandas as pd
 
-class INAVoiceSeparator(PipelineComponent):
+from audio_pipeline.core.PiplineComponent import PipelineComponent, ComponentPayload
+from audio_pipeline.utils.utils import cut_segment, create_dirs_if_not_exist
+
+
+class SileroVAD(PipelineComponent):
     model = None
+    utils = None
+    sampling_rate: int
 
     def __init__(self, yaml_config: YAMLObject):
-        super().__init__(component_type='preprocessing', component_name='ina_speech_segmenter',
+        super().__init__(component_type='preprocessing', component_name='silero_vad',
                          yaml_config=yaml_config)
+        self.sampling_rate = self.config['sampling_rate']
 
     def load_model(self):
-        self.model = Segmenter(vad_engine=self.config['vad_engine'])
-
-    @staticmethod
-    def get_voice_segments(segmentation):
-        voice_sections, filtered_sections = [], []
-        for s in segmentation:
-            kind, start, stop = s
-            if kind == 'female' or kind == 'male':
-                voice_sections.append((start, stop))
-            else:
-                filtered_sections.append((start, stop))
-        return voice_sections, filtered_sections
+        self.model, self.utils = torch.hub.load(repo_or_dir='snakers4/silero-vad', model='silero_vad', force_reload=False)
 
     def process(self, input_payload: ComponentPayload) -> ComponentPayload:
         if not self.model:
@@ -35,12 +29,17 @@ class INAVoiceSeparator(PipelineComponent):
         input_column = metadata['paths_column']
         paths_list = df[input_column].tolist()
         output_dir = self.config['output_dir']
-        filtered_dir = self.config['filtered_dir']
-        create_dirs_if_not_exist(output_dir, filtered_dir)
+        create_dirs_if_not_exist(output_dir)
 
         if not paths_list:
             self.logger.warning('You\'ve supplied an empty list to process')
             return input_payload
+
+        (get_speech_timestamps,
+         save_audio,
+         read_audio,
+         VADIterator,
+         collect_chunks) = self.utils
 
         p_df = pd.DataFrame()
         processed_path = f'{self.get_name()}_processed_path'
@@ -49,8 +48,10 @@ class INAVoiceSeparator(PipelineComponent):
         for f in paths_list:
             try:
                 start = time.time()
-                segmentation = self.model(f)
-                v_segments, f_segments = INAVoiceSeparator.get_voice_segments(segmentation)
+                wav = read_audio(f, sampling_rate=self.sampling_rate)
+                # get speech timestamps from full audio file
+                v_segments = [(x['start'] / self.sampling_rate, x['end'] / self.sampling_rate) for x in
+                              get_speech_timestamps(wav, self.model, sampling_rate=self.sampling_rate)]
                 for i, segment in enumerate(v_segments):
                     output_path = cut_segment(f, output_dir=output_dir, segment=segment, segment_id=i)
                     f_df = pd.DataFrame.from_dict({processed_path: [output_path],
@@ -60,9 +61,8 @@ class INAVoiceSeparator(PipelineComponent):
                     p_df = pd.concat([p_df, f_df], ignore_index=True)
                 end = time.time()
                 self.logger.info(f'Extracted {len(v_segments)} from {f} in {end - start} seconds')
-
-            except AssertionError as err:
-                self.logger.error(f"Error reading {f}.\n{err}")
+            except RuntimeError as err:
+                self.logger.error(f"Could not create VAD pipline for {f} with pyannote.\n{err}")
 
         df = pd.merge(left=df, right=p_df, how='outer', left_on=input_column, right_on=input_column)
         return ComponentPayload(metadata=metadata, df=df)

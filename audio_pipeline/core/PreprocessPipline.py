@@ -2,6 +2,7 @@ from typing import List
 from yaml import YAMLObject
 from audio_pipeline.core.BasePipline import BasePipeline
 from audio_pipeline.core.preprocess_components.PyannoteVAD import PyannoteVAD
+from audio_pipeline.core.preprocess_components.SileroVAD import SileroVAD
 from audio_pipeline.core.preprocess_components.WAVConverter import WAVConverter
 from audio_pipeline.core.preprocess_components.INAVoiceSeparator import INAVoiceSeparator
 from audio_pipeline.core.preprocess_components.FilelistDataFrameCreator import FilelistDataFrameCreator
@@ -12,7 +13,8 @@ class PreprocessPipeline(BasePipeline):
         'file_mapper': FilelistDataFrameCreator,
         'wav_converter': WAVConverter,
         'ina_speech_segmenter': INAVoiceSeparator,
-        'pyannote_vad': PyannoteVAD
+        'pyannote_vad': PyannoteVAD,
+        'silero_vad': SileroVAD
     }
 
     def __init__(self, components: List[str], config: YAMLObject):

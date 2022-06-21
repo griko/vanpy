@@ -17,6 +17,9 @@ preprocessing:
     offset: 0.8             # offset activation threshold
     min_duration_on: 0.1    # remove speech regions shorter than that many seconds
     min_duration_off: 0.0   # fill non-speech regions shorter than that many seconds
+  silero_vad:
+    output_dir: 'silero_vad_preprocessed'
+    sampling_rate: 16000
 
 feature_extraction:
   pyannote_embedding:

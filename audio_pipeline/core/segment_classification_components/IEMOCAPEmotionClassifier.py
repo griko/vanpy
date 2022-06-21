@@ -47,8 +47,8 @@ class IEMOCAPEmotionClassifier(PipelineComponent):
         IEMOCAPEmotionClassifier.cleanup_softlinks()
         return ComponentPayload(metadata=payload_metadata, df=payload_df)
 
-    @classmethod
-    def cleanup_softlinks(cls):
+    @staticmethod
+    def cleanup_softlinks():
         for link in os.listdir():
             if '.wav' in link and os.path.islink(link):
                 os.unlink(link)

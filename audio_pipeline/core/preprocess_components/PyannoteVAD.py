@@ -24,8 +24,8 @@ class PyannoteVAD(PipelineComponent):
         self.model = VoiceActivityDetection(segmentation="pyannote/segmentation")
         self.model.instantiate(self.params)
 
-    @classmethod
-    def get_voice_segments(cls, segmentation):
+    @staticmethod
+    def get_voice_segments(segmentation):
         sections = []
         for i, v in enumerate(segmentation.itersegments()):
             start, stop = v
