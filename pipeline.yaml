@@ -49,3 +49,7 @@ segment_classifier:
     pretrained_models_dir: 'pretrained_models/speech_brain_iemocap_emotion'
     classification_column_name: 'speech_brain_iemocap_emotion'
     verbal_labels: true
+
+  wav2vec2stt:
+    pretrained_models_dir: 'pretrained_models/wav2vec2'
+    classification_column_name: 'wav2vec2_trainscript'
