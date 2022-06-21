@@ -1,6 +1,8 @@
 import pickle
 from yaml import YAMLObject
-from audio_pipeline.core.PiplineComponent import PipelineComponent, ComponentPayload
+
+from audio_pipeline.core.ComponentPayload import ComponentPayload
+from audio_pipeline.core.PiplineComponent import PipelineComponent
 from audio_pipeline.utils.utils import cached_download
 
 

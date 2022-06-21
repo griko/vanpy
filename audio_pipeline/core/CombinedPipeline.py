@@ -28,6 +28,7 @@ class CombinedPipeline:
         cp: ComponentPayload = ComponentPayload(input_path=process_dir)
 
         for pipeline in self.pipelines:
-            cp = pipeline.process(cp)
+            if pipeline is not None:
+                cp = pipeline.process(cp)
 
         return cp

@@ -15,14 +15,15 @@ def main():
     preprocessing_pipeline = PreprocessPipeline(
         ['file_mapper', 'silero_vad'], config=config)#'wav_converter', 'pyannote_vad'], config=config)
     feature_extraction_pipeline = FeatureExtractionPipeline(
-        ['speechbrain_embedding'], config=config)
-    speaker_clf_pipeline = ClassificationPipeline(
-        ['speech_brain_iemocap_emotion'], config=config)
+        ['librosa_features_extractor'], config=config) # speechbrain_embedding
+    speaker_clf_pipeline = None
+        #ClassificationPipeline(
+        #['speech_brain_iemocap_emotion'], config=config)
     pipline = CombinedPipeline(
         [preprocessing_pipeline, feature_extraction_pipeline, speaker_clf_pipeline], config=config)
     processed_payload = pipline.process()
 
-    print(processed_payload.get_classification_df(all_paths_columns=True))
+    print(processed_payload.get_classification_df(all_paths_columns=True, meta_columns=True))
     # speaker_clf_pipeline = SpeakerClassificationPipeline(['common_voices_age', 'common_voices_gender'],
     #                                                      embedding='pyannote')
     # segment_clf_pipeline = SegmentClassificationPipeline(['speaker_id', 'speechbrain_emotion', 'trainscript_wav2vec'],

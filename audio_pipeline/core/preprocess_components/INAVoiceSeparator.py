@@ -1,5 +1,7 @@
 from yaml import YAMLObject
-from audio_pipeline.core.PiplineComponent import PipelineComponent, ComponentPayload
+
+from audio_pipeline.core.ComponentPayload import ComponentPayload
+from audio_pipeline.core.PiplineComponent import PipelineComponent
 from audio_pipeline.utils.utils import create_dirs_if_not_exist, cut_segment
 from inaSpeechSegmenter import Segmenter
 import pandas as pd
@@ -46,6 +48,9 @@ class INAVoiceSeparator(PipelineComponent):
         processed_path = f'{self.get_name()}_processed_path'
         metadata['paths_column'] = processed_path
         metadata['all_paths_columns'].append(processed_path)
+        segment_start_column_name = f'{self.get_name()}_segment_start'
+        segment_stop_column_name = f'{self.get_name()}_segment_stop'
+        metadata['meta_columns'].extend([segment_start_column_name, segment_stop_column_name])
         for f in paths_list:
             try:
                 start = time.time()
@@ -54,8 +59,8 @@ class INAVoiceSeparator(PipelineComponent):
                 for i, segment in enumerate(v_segments):
                     output_path = cut_segment(f, output_dir=output_dir, segment=segment, segment_id=i)
                     f_df = pd.DataFrame.from_dict({processed_path: [output_path],
-                                                   f'{self.get_name()}_segment_start': [segment[0]],
-                                                   f'{self.get_name()}_segment_stop': [segment[1]],
+                                                   segment_start_column_name: [segment[0]],
+                                                   segment_stop_column_name: [segment[1]],
                                                    input_column: [f]})
                     p_df = pd.concat([p_df, f_df], ignore_index=True)
                 end = time.time()

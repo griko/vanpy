@@ -1,6 +1,8 @@
 import os
 from yaml import YAMLObject
-from audio_pipeline.core.PiplineComponent import PipelineComponent, ComponentPayload
+
+from audio_pipeline.core.ComponentPayload import ComponentPayload
+from audio_pipeline.core.PiplineComponent import PipelineComponent
 from speechbrain.pretrained.interfaces import foreign_class
 
 

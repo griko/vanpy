@@ -3,7 +3,8 @@ from pyannote.audio import Inference
 import numpy as np
 import pandas as pd
 
-from audio_pipeline.core.PiplineComponent import PipelineComponent, ComponentPayload
+from audio_pipeline.core.ComponentPayload import ComponentPayload
+from audio_pipeline.core.PiplineComponent import PipelineComponent
 
 
 class PyannoteEmbedding(PipelineComponent):
