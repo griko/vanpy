@@ -1,3 +1,5 @@
+import time
+
 import librosa
 from yaml import YAMLObject
 import numpy as np
@@ -23,9 +25,14 @@ class LibrosaFeaturesExtractor(PipelineComponent):
         input_column = metadata['paths_column']
         paths_list = df[input_column].tolist()
 
+        file_performance_column_name = ''
+        if self.config['performance_measurement']:
+            file_performance_column_name = f'perf_{self.get_name()}_get_features'
+            metadata['meta_columns'].extend([file_performance_column_name])
         p_df = pd.DataFrame()
         for f in paths_list:
             try:
+                t_start_feature_extraction = time.time()
                 y, sr = librosa.load(f, sr=self.sampling_rate)
                 f_df = pd.DataFrame([{input_column: f}])
                 if 'mfcc' in self.features:
@@ -40,6 +47,9 @@ class LibrosaFeaturesExtractor(PipelineComponent):
                 if 'zero_crossing_rate' in self.features:
                     zero_crossing_rate = np.count_nonzero(np.array(librosa.zero_crossings(y, pad=False)))/len(y)
                     f_df['zero_crossing_rate'] = zero_crossing_rate
+                t_end_feature_extraction = time.time()
+                if self.config['performance_measurement']:
+                    f_df[file_performance_column_name] = t_end_feature_extraction - t_start_feature_extraction
 
                 p_df = pd.concat([p_df, f_df], ignore_index=True)
                 self.logger.info(f'done with {f}')

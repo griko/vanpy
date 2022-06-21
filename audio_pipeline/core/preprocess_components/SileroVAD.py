@@ -45,25 +45,34 @@ class SileroVAD(PipelineComponent):
         processed_path = f'{self.get_name()}_processed_path'
         metadata['paths_column'] = processed_path
         metadata['all_paths_columns'].append(processed_path)
-        segment_start_column_name = f'{self.get_name()}_segment_start'
-        segment_stop_column_name = f'{self.get_name()}_segment_stop'
-        metadata['meta_columns'].extend([segment_start_column_name, segment_stop_column_name])
+        segment_start_column_name = segment_stop_column_name = ''
+        if self.config['add_segment_metadata']:
+            segment_start_column_name = f'{self.get_name()}_segment_start'
+            segment_stop_column_name = f'{self.get_name()}_segment_stop'
+            metadata['meta_columns'].extend([segment_start_column_name, segment_stop_column_name])
+        file_performance_column_name = ''
+        if self.config['performance_measurement']:
+            file_performance_column_name = f'perf_{self.get_name()}_get_voice_segments'
+            metadata['meta_columns'].extend([file_performance_column_name])
         for f in paths_list:
             try:
-                start = time.time()
+                t_start_segmentation = time.time()
                 wav = read_audio(f, sampling_rate=self.sampling_rate)
                 # get speech timestamps from full audio file
                 v_segments = [(x['start'] / self.sampling_rate, x['end'] / self.sampling_rate) for x in
                               get_speech_timestamps(wav, self.model, sampling_rate=self.sampling_rate)]
+                t_end_segmentation = time.time()
                 for i, segment in enumerate(v_segments):
                     output_path = cut_segment(f, output_dir=output_dir, segment=segment, segment_id=i)
-                    f_df = pd.DataFrame.from_dict({processed_path: [output_path],
-                                                   segment_start_column_name: [segment[0]],
-                                                   segment_stop_column_name: [segment[1]],
-                                                   input_column: [f]})
+                    f_d = {processed_path: [output_path], input_column: [f]}
+                    if self.config['add_segment_metadata']:
+                        f_d[segment_start_column_name] = [segment[0]]
+                        f_d[segment_stop_column_name] = [segment[1]]
+                    if self.config['performance_measurement']:
+                        f_d[file_performance_column_name] = t_end_segmentation - t_start_segmentation
+                    f_df = pd.DataFrame.from_dict(f_d)
                     p_df = pd.concat([p_df, f_df], ignore_index=True)
-                end = time.time()
-                self.logger.info(f'Extracted {len(v_segments)} from {f} in {end - start} seconds')
+                self.logger.info(f'Extracted {len(v_segments)} from {f} in {t_end_segmentation - t_start_segmentation} seconds')
             except RuntimeError as err:
                 self.logger.error(f"Could not create VAD pipline for {f} with pyannote.\n{err}")
 

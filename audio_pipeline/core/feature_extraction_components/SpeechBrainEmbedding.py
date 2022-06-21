@@ -1,3 +1,5 @@
+import time
+
 from yaml import YAMLObject
 import torchaudio
 from speechbrain.pretrained import EncoderClassifier
@@ -24,13 +26,21 @@ class SpeechBrainEmbedding(PipelineComponent):
         input_column = metadata['paths_column']
         paths_list = df[input_column].tolist()
 
+        file_performance_column_name = ''
+        if self.config['performance_measurement']:
+            file_performance_column_name = f'perf_{self.get_name()}_get_features'
+            metadata['meta_columns'].extend([file_performance_column_name])
         p_df = pd.DataFrame()
         for f in paths_list:
             try:
+                t_start_feature_extraction = time.time()
                 signal, fs = torchaudio.load(f)
                 embedding = self.model.encode_batch(signal)
                 f_df = pd.DataFrame(embedding.to('cpu').numpy().ravel()).T
                 f_df[input_column] = f
+                t_end_feature_extraction = time.time()
+                if self.config['performance_measurement']:
+                    f_df[file_performance_column_name] = t_end_feature_extraction - t_start_feature_extraction
                 p_df = pd.concat([p_df, f_df], ignore_index=True)
                 self.logger.info(f'done with {f}')
             except RuntimeError as e:

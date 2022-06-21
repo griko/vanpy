@@ -10,19 +10,26 @@ preprocessing:
   ina_speech_segmenter:
     output_dir: 'ina_preprocessed'
     filtered_dir: 'ina_filtered'
+    add_segment_metadata: true
+    performance_measurement: true
     vad_engine: 'sm'
   pyannote_vad:
     output_dir: 'pyannote_vad_preprocessed'
+    add_segment_metadata: true
+    performance_measurement: true
     onset: 0.85             # onset activation threshold
     offset: 0.8             # offset activation threshold
     min_duration_on: 0.1    # remove speech regions shorter than that many seconds
     min_duration_off: 0.0   # fill non-speech regions shorter than that many seconds
   silero_vad:
     output_dir: 'silero_vad_preprocessed'
+    add_segment_metadata: true
+    performance_measurement: true
     sampling_rate: 16000
 
 feature_extraction:
   librosa_features_extractor:
+    performance_measurement: true
     sampling_rate: 16000
     n_mfcc: 13
     features:
@@ -30,9 +37,11 @@ feature_extraction:
       - delta_mfcc
       - zero_crossing_rate
   pyannote_embedding:
+    performance_measurement: true
     sliding_window_duration: 3.0
     sliding_window_step: 1.0
   speechbrain_embedding:
+    performance_measurement: true
 
 segment_classifier:
   common_voices_gender:
@@ -53,3 +62,4 @@ segment_classifier:
   wav2vec2stt:
     pretrained_models_dir: 'pretrained_models/wav2vec2'
     classification_column_name: 'wav2vec2_trainscript'
+    performance_measurement: true

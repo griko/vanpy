@@ -1,3 +1,5 @@
+import time
+
 import torch
 import librosa
 from yaml import YAMLObject
@@ -36,7 +38,9 @@ class Wav2Vec2STT(PipelineComponent):
             return input_payload
         
         stts = []
+        performance_metric = []
         for f in paths_list:
+            t_start_transcribing = time.time()
             # Loading the audio file
             audio, rate = librosa.load(f, sr=16000)
             # Taking an input value
@@ -48,8 +52,14 @@ class Wav2Vec2STT(PipelineComponent):
             # Passing the prediction to the tokenzer decode to get the transcription
             transcription = self.tokenizer.batch_decode(prediction)[0]
             stts.append(transcription)
+            t_end_transcribing = time.time()
+            performance_metric.append(t_end_transcribing - t_start_transcribing)
 
         payload_df[self.classification_column_name] = stts
         payload_metadata['classification_columns'].extend([self.classification_column_name])
+        if self.config['performance_measurement']:
+            file_performance_column_name = f'perf_{self.get_name()}_get_transcription'
+            payload_df[file_performance_column_name] = performance_metric
+            payload_metadata['meta_columns'].extend([file_performance_column_name])
 
         return ComponentPayload(metadata=payload_metadata, df=payload_df)
