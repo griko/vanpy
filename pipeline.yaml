@@ -22,6 +22,7 @@ feature_extraction:
   pyannote_embedding:
     sliding_window_duration: 3.0
     sliding_window_step: 1.0
+  speechbrain_embedding:
 
 segment_classifier:
   common_voices_gender:

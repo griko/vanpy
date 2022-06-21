@@ -1,7 +1,6 @@
 from yaml import YAMLObject
 from audio_pipeline.core.PiplineComponent import PipelineComponent, ComponentPayload
 from audio_pipeline.utils.utils import create_dirs_if_not_exist, cut_segment
-from pyannote.audio import Inference
 from pyannote.audio.pipelines import VoiceActivityDetection
 import pandas as pd
 import time
@@ -65,7 +64,7 @@ class PyannoteVAD(PipelineComponent):
                 end = time.time()
                 self.logger.info(f'Extracted {len(v_segments)} from {f} in {end - start} seconds')
             except RuntimeError as err:
-                print(f"Could not create VAD pipline for {f} with pyannote.\n{err}")
+                self.logger.error(f"Could not create VAD pipline for {f} with pyannote.\n{err}")
 
         df = pd.merge(left=df, right=p_df, how='outer', left_on=input_column, right_on=input_column)
         return ComponentPayload(metadata=metadata, df=df)

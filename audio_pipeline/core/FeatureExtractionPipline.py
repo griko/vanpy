@@ -2,11 +2,13 @@ from typing import List
 from yaml import YAMLObject
 from audio_pipeline.core.BasePipline import BasePipeline
 from audio_pipeline.core.feature_extraction_components.PyannoteEmbedding import PyannoteEmbedding
+from audio_pipeline.core.feature_extraction_components.SpeechBrainEmbedding import SpeechBrainEmbedding
 
 
 class FeatureExtractionPipeline(BasePipeline):
     components_mapper = {
-        'pyannote_embedding': PyannoteEmbedding
+        'pyannote_embedding': PyannoteEmbedding,
+        'speechbrain_embedding': SpeechBrainEmbedding
     }
 
     def __init__(self, components: List[str], config: YAMLObject):
