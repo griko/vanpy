@@ -1,8 +1,8 @@
 from yaml import YAMLObject
 
-from audio_pipeline.core.ComponentPayload import ComponentPayload
-from audio_pipeline.core.PiplineComponent import PipelineComponent
-from audio_pipeline.utils.utils import create_dirs_if_not_exist, cut_segment
+from vanpy.core.ComponentPayload import ComponentPayload
+from vanpy.core.PiplineComponent import PipelineComponent
+from vanpy.utils.utils import create_dirs_if_not_exist, cut_segment
 from pyannote.audio.pipelines import VoiceActivityDetection
 import pandas as pd
 import time

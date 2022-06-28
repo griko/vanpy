@@ -1,10 +1,10 @@
 from typing import List
 from yaml import YAMLObject
-from audio_pipeline.core.BasePipline import BasePipeline
-from audio_pipeline.core.segment_classification_components.CVAgeClassifier import CVAgeClassifier
-from audio_pipeline.core.segment_classification_components.CVGenderClassifier import CVGenderClassifier
-from audio_pipeline.core.segment_classification_components.IEMOCAPEmotionClassifier import IEMOCAPEmotionClassifier
-from audio_pipeline.core.segment_classification_components.Wav2Vec2STT import Wav2Vec2STT
+from vanpy.core.BasePipline import BasePipeline
+from vanpy.core.segment_classification_components.CVAgeClassifier import CVAgeClassifier
+from vanpy.core.segment_classification_components.CVGenderClassifier import CVGenderClassifier
+from vanpy.core.segment_classification_components.IEMOCAPEmotionClassifier import IEMOCAPEmotionClassifier
+from vanpy.core.segment_classification_components.Wav2Vec2STT import Wav2Vec2STT
 
 
 class ClassificationPipeline(BasePipeline):

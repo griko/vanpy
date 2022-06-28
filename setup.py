@@ -1,15 +1,15 @@
 from setuptools import setup, find_packages
 
-with open('requirements.txt') as f:
-    required = f.read().splitlines()
+# with open('requirements.txt') as f:
+#     required = f.read().splitlines()
 
 setup(
-    name='voice_characterizer',
+    name='vanpy',
     version='0.53',
-    description='Voice characterization framework',
+    description='Voice ANalysis framework',
     author='Gregory Koushnir',
     author_email='koushgre@post.bgu.ac.il',
-    packages=find_packages(include=['audio_pipeline.core', 'audio_pipeline.core.*', 'audio_pipeline.utils', 'audio_pipeline.utils.*']),
+    packages=find_packages(include=['vanpy.core', 'vanpy.core.*', 'vanpy.utils', 'vanpy.utils.*']),
     install_requires=[
         'gdown>=4.4.0',
         'huggingface-hub>=0.5.1',

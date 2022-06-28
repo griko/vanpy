@@ -4,8 +4,8 @@ import pandas as pd
 import logging
 from typing import List
 
-from audio_pipeline.core.BasePipline import BasePipeline
-from audio_pipeline.core.PiplineComponent import ComponentPayload
+from vanpy.core.BasePipline import BasePipeline
+from vanpy.core.PiplineComponent import ComponentPayload
 from yaml import YAMLObject
 
 

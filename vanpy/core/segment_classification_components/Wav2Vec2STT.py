@@ -4,8 +4,8 @@ import torch
 import librosa
 from yaml import YAMLObject
 from transformers import Wav2Vec2ForCTC, Wav2Vec2Tokenizer
-from audio_pipeline.core.ComponentPayload import ComponentPayload
-from audio_pipeline.core.PiplineComponent import PipelineComponent
+from vanpy.core.ComponentPayload import ComponentPayload
+from vanpy.core.PiplineComponent import PipelineComponent
 
 
 class Wav2Vec2STT(PipelineComponent):

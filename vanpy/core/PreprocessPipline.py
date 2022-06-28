@@ -1,11 +1,11 @@
 from typing import List
 from yaml import YAMLObject
-from audio_pipeline.core.BasePipline import BasePipeline
-from audio_pipeline.core.preprocess_components.PyannoteVAD import PyannoteVAD
-from audio_pipeline.core.preprocess_components.SileroVAD import SileroVAD
-from audio_pipeline.core.preprocess_components.WAVConverter import WAVConverter
-from audio_pipeline.core.preprocess_components.INAVoiceSeparator import INAVoiceSeparator
-from audio_pipeline.core.preprocess_components.FilelistDataFrameCreator import FilelistDataFrameCreator
+from vanpy.core.BasePipline import BasePipeline
+from vanpy.core.preprocess_components.PyannoteVAD import PyannoteVAD
+from vanpy.core.preprocess_components.SileroVAD import SileroVAD
+from vanpy.core.preprocess_components.WAVConverter import WAVConverter
+from vanpy.core.preprocess_components.INAVoiceSeparator import INAVoiceSeparator
+from vanpy.core.preprocess_components.FilelistDataFrameCreator import FilelistDataFrameCreator
 
 
 class PreprocessPipeline(BasePipeline):

@@ -5,7 +5,7 @@ from yaml import YAMLObject
 from logging import Logger
 import logging
 
-from audio_pipeline.core.ComponentPayload import ComponentPayload
+from vanpy.core.ComponentPayload import ComponentPayload
 
 
 @dataclass

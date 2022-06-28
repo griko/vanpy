@@ -4,8 +4,8 @@ from yaml import YAMLObject
 import torchaudio
 from speechbrain.pretrained import EncoderClassifier
 import pandas as pd
-from audio_pipeline.core.ComponentPayload import ComponentPayload
-from audio_pipeline.core.PiplineComponent import PipelineComponent
+from vanpy.core.ComponentPayload import ComponentPayload
+from vanpy.core.PiplineComponent import PipelineComponent
 
 
 class SpeechBrainEmbedding(PipelineComponent):

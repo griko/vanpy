@@ -5,8 +5,8 @@ from yaml import YAMLObject
 import numpy as np
 import pandas as pd
 
-from audio_pipeline.core.ComponentPayload import ComponentPayload
-from audio_pipeline.core.PiplineComponent import PipelineComponent
+from vanpy.core.ComponentPayload import ComponentPayload
+from vanpy.core.PiplineComponent import PipelineComponent
 
 
 class LibrosaFeaturesExtractor(PipelineComponent):

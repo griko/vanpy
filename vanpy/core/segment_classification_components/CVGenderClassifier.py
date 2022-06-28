@@ -1,9 +1,9 @@
 import pickle
 from yaml import YAMLObject
 
-from audio_pipeline.core.ComponentPayload import ComponentPayload
-from audio_pipeline.core.PiplineComponent import PipelineComponent
-from audio_pipeline.utils.utils import cached_download
+from vanpy.core.ComponentPayload import ComponentPayload
+from vanpy.core.PiplineComponent import PipelineComponent
+from vanpy.utils.utils import cached_download
 
 
 class CVGenderClassifier(PipelineComponent):

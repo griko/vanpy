@@ -1,8 +1,8 @@
 import subprocess
 
-from audio_pipeline.core.ComponentPayload import ComponentPayload
-from audio_pipeline.core.PiplineComponent import PipelineComponent
-from audio_pipeline.utils.utils import create_dirs_if_not_exist
+from vanpy.core.ComponentPayload import ComponentPayload
+from vanpy.core.PiplineComponent import PipelineComponent
+from vanpy.utils.utils import create_dirs_if_not_exist
 from yaml import YAMLObject
 import pandas as pd
 

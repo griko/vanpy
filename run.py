@@ -1,7 +1,7 @@
-from audio_pipeline.core.ClassificationPipline import ClassificationPipeline
-from audio_pipeline.core.FeatureExtractionPipline import FeatureExtractionPipeline
-from audio_pipeline.core.PreprocessPipline import PreprocessPipeline
-from audio_pipeline.core.CombinedPipeline import CombinedPipeline
+from vanpy.core.ClassificationPipline import ClassificationPipeline
+from vanpy.core.FeatureExtractionPipline import FeatureExtractionPipeline
+from vanpy.core.PreprocessPipline import PreprocessPipeline
+from vanpy.core.CombinedPipeline import CombinedPipeline
 import yaml
 import logging
 

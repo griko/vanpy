@@ -80,6 +80,8 @@ Predicts 'neu'/'ang'/'hap'/'sad'. Reaches 78.7% accuracy on the test set, as pub
 ### Wav2Vec2STT
 Character-level speech-to-text model trained on *facebook/wav2vec2-base-960h* dataset.
 
+*input*: audio file (doesn't require feature extraction)
+
 ## ComponentPayload
 Received and passed further between `PiplineComponent`s. Includes:
 - *metadata*: Dict
