@@ -17,9 +17,9 @@ Expending the library with a new classifier
 
 *TODO*
 
-## General description
+## Description
 **vanpy** can be useful in multiple ways. It contains of 3 optional pipelines, that make preprocessing, feature 
-extraction and classification of a voice segments an easy task:
+extraction and classification/STT of a voice segments an easy task:
 
 1. The preprocessing pipline deals with audio files format and voice segment cutting. 
 2. The feature extraction pipline runs
@@ -77,14 +77,24 @@ Predicts 'neu'/'ang'/'hap'/'sad'. Reaches 78.7% accuracy on the test set, as pub
 
 *input*: audio file (doesn't require feature extraction)
 
+### Wav2Vec2STT
+Character-level speech-to-text model trained on *facebook/wav2vec2-base-960h* dataset.
+
 ## ComponentPayload
 Received and passed further between `PiplineComponent`s. Includes:
-- features: Dict
+- *metadata*: Dict
   - 'input_path' - the path to the input directory to map audio files from
   - 'paths_column' - rewritable parameter, each preprocessing component at the end of its action writes the column name of the **df** where the files' paths are listed
+  - 'all_paths_columns' - a list of all column names of **df** that were used as 'path_column' for preprocessing components
   - 'feature_columns' - a list of column names of **df** where the features for classifiers are hold
-- df: pd.DataFrame
+  - 'meta_columns' - a list of column names of **df** which contain additional information, such as time required to execute the component on a segment or VAD boundaries 
+  - 'classification_columns' - a list of column names of **df** with classification/STT results
+- *df*: pd.DataFrame
   - includes all the collected information through the preprocessing and classification
     - each preprocessor adds a column of paths where the processed files are hold
     - embedding/feature extraction components add the embedding/features columns
     - each classifier adds a classification column
+
+Methods:
+- *get_features_df* -> pd.DataFrame - get contents of *'paths_column'* and *'feature_columns'*. (optional: *'all_paths_columns'*, *'meta_columns'*) 
+- *get_classification_df* -> pd.DataFrame - get contents of *'paths_column'* and *'classification_columns'*. (optional: *'all_paths_columns'*, *'meta_columns'*)
