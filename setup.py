@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='vanpy',
-    version='0.53',
+    version='0.63',
     description='Voice ANalysis framework',
     author='Gregory Koushnir',
     author_email='koushgre@post.bgu.ac.il',

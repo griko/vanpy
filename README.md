@@ -7,11 +7,11 @@ flexible manner for easy extendability, that allows to extract and classify voic
 ## Examples
 You can use the following google colab notebook to inspect the capabilities of the library
  
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/griko/voice_characterizer/blob/main/example/voice_characterization_example.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/griko/vanpy/blob/main/example/vanpy_example.ipynb)
 
 Voice emotion classification model training and evaluation on RAVDESS dataset using **vanpy**
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/griko/voice_characterizer/blob/main/examples/using_voice_characterizer_to_classify_emotions_on_RAVDESS_dataset.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/griko/vanpy/blob/main/examples/using_vanpy_to_classify_emotions_on_RAVDESS_dataset.ipynb)
 
 Expending the library with a new classifier
 
@@ -38,7 +38,7 @@ Configuration of all the components is made through the `pipline.yaml` configura
 ### Filelist-DataFrame Creator
 Used to initialize the `ComponentPayload` with a list of paths to audio files from mapped in the *input_dir* directory in the config file **pipeline.yaml**
 ### WAVConverter
-Converts files to 1-channel, 16KHz, 256k bitrate
+Converts files to a specific number of channels, sample and bit rate (e.g. 1-channel, 16KHz, 256k bitrate)
 ### INA Voice Separator
 Separates voice and music segments
 ### PyannoteVAD
@@ -50,15 +50,15 @@ Voice Activity Detector by silero - removes low amplitude sections, leaving inte
 ### Pyannote Embedding
 Uses pyannote-audio 2.0 to extract mean 512-feature embedding vector from the segment
 ### SpeechBrainEmbedding
-Uses SpeechBrain to extract mean 512 (?TODO: recheck)-feature embedding vector from the segment
+Uses SpeechBrain to extract mean 512-feature embedding vector from the segment
 ### LibrosaFeaturesExtractor
 Uses librosa to extract MFCC, delta-MFCC and zero-cross-rate from the segment
 
 ## Supported classification models:
 ### Common Voices Gender Classifier
-Gender Classification, trained on Mozilla Common Voices Dataset after extracting pyannote embedding.
+Gender Classification, trained on undersampled Mozilla Common Voices Dataset v6.1 after extracting pyannote embedding.
 
-Predicts 'female'/'male'. Reaches 92.8% accuracy on the test set (!TODO: recheck)
+Predicts 'female'/'male'. Reaches 94.8% accuracy on the test set.
 
 *input*: 512 features of pyannote2.0 embedding
 ### Common Voices Age Classifier
