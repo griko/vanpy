@@ -22,14 +22,6 @@ def main():
     processed_payload = pipline.process()
 
     print(processed_payload.get_classification_df(all_paths_columns=True, meta_columns=True))
-    # speaker_clf_pipeline = SpeakerClassificationPipeline(['common_voices_age', 'common_voices_gender'],
-    #                                                      embedding='pyannote')
-    # segment_clf_pipeline = SegmentClassificationPipeline(['speaker_id', 'speechbrain_emotion', 'trainscript_wav2vec'],
-    #                                                      embedding='pyannote')
-    #
-    # preprocessed_files_dir, speaker_classification_df, segment_classification_df = Pipeline(pp_pipeline,
-    #                                                                                         speaker_clf_pipeline,
-    #                                                                                         segment_clf_pipeline)
 
 
 if __name__ == '__main__':

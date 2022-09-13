@@ -18,8 +18,5 @@ class FilelistDataFrameCreator(PipelineComponent):
         processed_path = f'{self.component_name}_paths'
         metadata['paths_column'] = processed_path
         metadata['all_paths_columns'].append(processed_path)
-        p_df = pd.DataFrame()
-        for f in paths_list:
-            f_df = pd.DataFrame.from_dict({processed_path: [f]})
-            p_df = pd.concat([p_df, f_df], ignore_index=True)
+        p_df = pd.DataFrame(paths_list, columns=[processed_path])
         return ComponentPayload(metadata=metadata, df=p_df)
