@@ -7,7 +7,7 @@ flexible manner for easy extendability, that allows to extract and classify voic
 ## Examples
 You can use the following google colab notebook to inspect the capabilities of the library
  
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/griko/vanpy/blob/main/example/vanpy_example.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/griko/vanpy/blob/main/examples/vanpy_example.ipynb)
 
 Voice emotion classification model training and evaluation on RAVDESS dataset using **vanpy**
 

@@ -7,10 +7,11 @@ import pandas as pd
 
 from vanpy.core.ComponentPayload import ComponentPayload
 from vanpy.core.PiplineComponent import PipelineComponent
+from typing import List
 
 
 class LibrosaFeaturesExtractor(PipelineComponent):
-    features: list[str] = None
+    features: List[str] = None
     sampling_rate: int
 
     def __init__(self, yaml_config: YAMLObject):
