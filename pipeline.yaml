@@ -1,4 +1,5 @@
 input_dir: 'speech_examples_small'
+segment_name_separator: "_"
 
 preprocessing:
   file_mapper:
@@ -24,6 +25,11 @@ preprocessing:
   silero_vad:
     output_dir: 'silero_vad_preprocessed'
     add_segment_metadata: true
+    performance_measurement: true
+    sampling_rate: 16000
+    overwrite: false
+  espnet_se:
+    output_dir: 'espnet_se_preprocessed'
     performance_measurement: true
     sampling_rate: 16000
 

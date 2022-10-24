@@ -1,14 +1,14 @@
 from yaml import YAMLObject
 
 from vanpy.core.ComponentPayload import ComponentPayload
-from vanpy.core.PiplineComponent import PipelineComponent
+from vanpy.core.preprocess_components.SegmenterComponent import SegmenterComponent
 from vanpy.utils.utils import create_dirs_if_not_exist, cut_segment
 from inaSpeechSegmenter import Segmenter
 import pandas as pd
 import time
 
 
-class INAVoiceSeparator(PipelineComponent):
+class INAVoiceSeparator(SegmenterComponent):
     model = None
 
     def __init__(self, yaml_config: YAMLObject):
@@ -40,23 +40,16 @@ class INAVoiceSeparator(PipelineComponent):
         filtered_dir = self.config['filtered_dir']
         create_dirs_if_not_exist(output_dir, filtered_dir)
 
+        p_df = pd.DataFrame()
+        processed_path, metadata = self.segmenter_create_columns(metadata)
+        p_df, paths_list = self.get_file_paths_and_processed_df_if_not_overwriting(p_df, paths_list, processed_path,
+                                                                                   input_column, output_dir)
+
         if not paths_list:
             self.logger.warning('You\'ve supplied an empty list to process')
-            return input_payload
+            df = pd.merge(left=df, right=p_df, how='outer', left_on=input_column, right_on=input_column)
+            return ComponentPayload(metadata=metadata, df=df)
 
-        p_df = pd.DataFrame()
-        processed_path = f'{self.get_name()}_processed_path'
-        metadata['paths_column'] = processed_path
-        metadata['all_paths_columns'].append(processed_path)
-        segment_start_column_name = segment_stop_column_name = ''
-        if self.config['add_segment_metadata']:
-            segment_start_column_name = f'{self.get_name()}_segment_start'
-            segment_stop_column_name = f'{self.get_name()}_segment_stop'
-            metadata['meta_columns'].extend([segment_start_column_name, segment_stop_column_name])
-        file_performance_column_name = ''
-        if self.config['performance_measurement']:
-            file_performance_column_name = f'perf_{self.get_name()}_get_voice_segments'
-            metadata['meta_columns'].extend([file_performance_column_name])
         for f in paths_list:
             try:
                 t_start_segmentation = time.time()
@@ -64,13 +57,10 @@ class INAVoiceSeparator(PipelineComponent):
                 v_segments, f_segments = INAVoiceSeparator.get_voice_segments(segmentation)
                 t_end_segmentation = time.time()
                 for i, segment in enumerate(v_segments):
-                    output_path = cut_segment(f, output_dir=output_dir, segment=segment, segment_id=i)
+                    output_path = cut_segment(f, output_dir=output_dir, segment=segment, segment_id=i, separator=self.segment_name_separator)
                     f_d = {processed_path: [output_path], input_column: [f]}
-                    if self.config['add_segment_metadata']:
-                        f_d[segment_start_column_name] = [segment[0]]
-                        f_d[segment_stop_column_name] = [segment[1]]
-                    if self.config['performance_measurement']:
-                        f_d[file_performance_column_name] = t_end_segmentation - t_start_segmentation
+                    self.add_segment_metadata(f_d, segment[0], segment[1])
+                    self.add_performance_metadata(f_d, t_start_segmentation, t_end_segmentation)
                     f_df = pd.DataFrame.from_dict(f_d)
                     p_df = pd.concat([p_df, f_df], ignore_index=True)
                 self.logger.info(f'Extracted {len(v_segments)} from {f} in {t_end_segmentation - t_start_segmentation} seconds')
