@@ -9,11 +9,11 @@ def create_dirs_if_not_exist(*args: str) -> None:
         os.makedirs(arg, exist_ok=True)
 
 
-def cut_segment(input_path: str, output_dir: str, segment: Tuple[float, float], segment_id: int, separator: str) -> str:
+def cut_segment(input_path: str, output_dir: str, segment: Tuple[float, float], segment_id: int) -> str:
     create_dirs_if_not_exist(output_dir)
     start, stop = segment
     f = ''.join(str(input_path).split("/")[-1].split(".")[:-1])
-    output_path = f'{output_dir}/{f}{separator}{segment_id}.wav'
+    output_path = f'{output_dir}/{f}_{segment_id}.wav'
     subprocess.run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-ss", f"{start}", "-to", f"{stop}", "-y", "-i",
                     f"{input_path}", "-ab", "256k", "-ac", "1", "-ar", "16k", output_path, '-dn',
                     '-ignore_unknown', '-sn'])

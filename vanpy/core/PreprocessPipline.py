@@ -1,7 +1,6 @@
 from typing import List
 from yaml import YAMLObject
 from vanpy.core.BasePipline import BasePipeline
-# from vanpy.core.preprocess_components.ESPnetSpeechEnhancement import ESPnetSpeechEnhancement
 from vanpy.core.preprocess_components.PyannoteVAD import PyannoteVAD
 from vanpy.core.preprocess_components.SileroVAD import SileroVAD
 from vanpy.core.preprocess_components.WAVConverter import WAVConverter
@@ -15,8 +14,7 @@ class PreprocessPipeline(BasePipeline):
         'wav_converter': WAVConverter,
         'ina_speech_segmenter': INAVoiceSeparator,
         'pyannote_vad': PyannoteVAD,
-        'silero_vad': SileroVAD,
-        # 'espnet-se': ESPnetSpeechEnhancement
+        'silero_vad': SileroVAD
     }
 
     def __init__(self, components: List[str], config: YAMLObject):
