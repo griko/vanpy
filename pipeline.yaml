@@ -1,5 +1,9 @@
 input_dir: 'speech_examples_small'
 segment_name_separator: "_"
+intermediate_payload_path: 'results'
+pre_load: false
+intermediate_df_to_load: ''
+intermediate_metadata_to_load: ''
 
 preprocessing:
   file_mapper:
@@ -28,6 +32,7 @@ preprocessing:
     performance_measurement: true
     sampling_rate: 16000
     overwrite: false
+    save_payload: true
   espnet_se:
     output_dir: 'espnet_se_preprocessed'
     performance_measurement: true
