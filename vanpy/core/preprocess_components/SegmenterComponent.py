@@ -44,10 +44,14 @@ class SegmenterComponent(PipelineComponent, ABC):
         unprocessed_paths_list = []
         if not self.config['overwrite']:
             existing_file_list = get_audio_files_paths(output_dir)
-            existing_file_set = {f'{self.segment_name_separator}'
-                                     .join('.'.join(p.split("/")[-1].split(".")[0:-1])
-                                           .split(f'{self.segment_name_separator}')[:-1]): p for p in
-                                 existing_file_list}
+            existing_file_set = {}
+            for p in existing_file_list:
+                short_name = f'{self.segment_name_separator}'.join('.'.join(p.split("/")[-1].split(".")[0:-1])
+                                           .split(f'{self.segment_name_separator}')[:-1])
+                if short_name in existing_file_set:
+                    existing_file_set[short_name].append(p)
+                else:
+                    existing_file_set[short_name] = [p]
             for f in paths_list:
                 file_name_without_extension = f.split("/")[-1].split(".")[0]
                 if file_name_without_extension in existing_file_set:
@@ -56,6 +60,8 @@ class SegmenterComponent(PipelineComponent, ABC):
                     p_df = pd.concat([p_df, f_df], ignore_index=True)
                 else:
                     unprocessed_paths_list.append(f)
+            if processed_path in p_df:
+                p_df = p_df.explode(processed_path).reset_index().drop(['index'], axis=1)
         else:
             unprocessed_paths_list = paths_list
         return p_df, unprocessed_paths_list

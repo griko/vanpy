@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Dict, Tuple
+from typing import Dict, Tuple, List
 import pandas as pd
 
 
@@ -30,12 +30,19 @@ class ComponentPayload:
             columns.extend(self.metadata['meta_columns'])
         return columns
 
-    def get_features_df(self, all_paths_columns=False, meta_columns=False):
+    def get_declared_columns(self, ext_columns: List[str], all_paths_columns=False, meta_columns=False):
         columns = self.get_columns(all_paths_columns, meta_columns)
-        columns.extend(self.metadata['feature_columns'])
+        for cols in ext_columns:
+            columns.extend(self.metadata[cols])
+        columns = list(set(columns) & set(self.df.columns))
         return self.df[columns]
 
+    def get_features_df(self, all_paths_columns=False, meta_columns=False):
+        return self.get_declared_columns(['feature_columns'], all_paths_columns, meta_columns)
+
     def get_classification_df(self, all_paths_columns=False, meta_columns=False):
-        columns = self.get_columns(all_paths_columns, meta_columns)
-        columns.extend(self.metadata['classification_columns'])
-        return self.df[columns]
+        return self.get_declared_columns(['classification_columns'], all_paths_columns, meta_columns)
+
+    def get_full_df(self, all_paths_columns=False, meta_columns=False):
+        return self.get_declared_columns(['feature_columns', 'classification_columns'], all_paths_columns, meta_columns)
+

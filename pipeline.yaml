@@ -7,17 +7,22 @@ intermediate_metadata_to_load: ''
 
 preprocessing:
   file_mapper:
+    save_payload: true
   wav_converter:
     output_dir: 'convert_preprocessed'
     ab: '256k'  # bitrate
     ac: 1       # number of channels
     ar: '16k'   # sample frequency
+    overwrite: false
+    save_payload: true
   ina_speech_segmenter:
     output_dir: 'ina_preprocessed'
     filtered_dir: 'ina_filtered'
     add_segment_metadata: true
     performance_measurement: true
     vad_engine: 'sm'
+    overwrite: false
+    save_payload: true
   pyannote_vad:
     output_dir: 'pyannote_vad_preprocessed'
     add_segment_metadata: true
@@ -26,6 +31,8 @@ preprocessing:
     offset: 0.8             # offset activation threshold
     min_duration_on: 0.1    # remove speech regions shorter than that many seconds
     min_duration_off: 0.0   # fill non-speech regions shorter than that many seconds
+    overwrite: false
+    save_payload: true
   silero_vad:
     output_dir: 'silero_vad_preprocessed'
     add_segment_metadata: true
@@ -33,6 +40,7 @@ preprocessing:
     sampling_rate: 16000
     overwrite: false
     save_payload: true
+    save_payload_periodicity: 10000  # save intermediate payload results every X processed files
   espnet_se:
     output_dir: 'espnet_se_preprocessed'
     performance_measurement: true
@@ -47,30 +55,37 @@ feature_extraction:
       - mfcc
       - delta_mfcc
       - zero_crossing_rate
+    save_payload: true
   pyannote_embedding:
     performance_measurement: true
     sliding_window_duration: 3.0
     sliding_window_step: 1.0
+    save_payload: true
   speechbrain_embedding:
     performance_measurement: true
+    save_payload: true
 
 segment_classifier:
   common_voices_gender:
     pretrained_models_dir: 'pretrained_models/common_voice'
     classification_column_name: 'common_voices_gender_classification'
     verbal_labels: true
+    save_payload: true
 
   common_voices_age:
     pretrained_models_dir: 'pretrained_models/common_voice'
     classification_column_name: 'common_voices_age_classification'
     verbal_labels: true
+    save_payload: true
 
   speech_brain_iemocap_emotion:
     pretrained_models_dir: 'pretrained_models/speech_brain_iemocap_emotion'
     classification_column_name: 'speech_brain_iemocap_emotion'
     verbal_labels: true
+    save_payload: true
 
   wav2vec2stt:
     pretrained_models_dir: 'pretrained_models/wav2vec2'
     classification_column_name: 'wav2vec2_trainscript'
     performance_measurement: true
+    save_payload: true
