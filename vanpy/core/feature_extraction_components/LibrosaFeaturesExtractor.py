@@ -48,6 +48,14 @@ class LibrosaFeaturesExtractor(PipelineComponent):
                 if 'zero_crossing_rate' in self.features:
                     zero_crossing_rate = np.count_nonzero(np.array(librosa.zero_crossings(y, pad=False)))/len(y)
                     f_df['zero_crossing_rate'] = zero_crossing_rate
+                if 'spectral_centroid' in self.features:
+                    f_df['spectral_centroid'] = np.mean(librosa.feature.spectral_centroid(y=y, sr=self.sampling_rate))
+                if 'spectral_bandwidth' in self.features:
+                    f_df['spectral_bandwidth'] = np.mean(librosa.feature.spectral_bandwidth(y=y, sr=self.sampling_rate))
+                if 'spectral_contrast' in self.features:
+                    f_df['spectral_contrast'] = np.mean(librosa.feature.spectral_contrast(y=y, sr=self.sampling_rate))
+                if 'spectral_flatness' in self.features:
+                    f_df['spectral_flatness'] = np.mean(librosa.feature.spectral_flatness(y=y))
                 t_end_feature_extraction = time.time()
                 if self.config['performance_measurement']:
                     f_df[file_performance_column_name] = t_end_feature_extraction - t_start_feature_extraction

@@ -15,14 +15,14 @@ def main():
         config = yaml_placeholder_replacement(config)
 
     preprocessing_pipeline = PreprocessPipeline(
-        ['file_mapper', 'silero_vad'], config=config)  # 'wav_converter', 'espnet-se', 'silero_vad', 'pyannote_vad'], config=config)
-    # feature_extraction_pipeline = FeatureExtractionPipeline(
-    #     ['speechbrain_embedding'], config=config)  # librosa_features_extractor
+        ['file_mapper'], config=config)  # 'wav_converter', 'espnet-se', 'silero_vad', 'pyannote_vad'], config=config)
+    feature_extraction_pipeline = FeatureExtractionPipeline(
+        ['librosa_features_extractor'], config=config)  # librosa_features_extractor, speechbrain_embedding
     # speaker_clf_pipeline = ClassificationPipeline(['wav2vec2stt'], config=config)  # speech_brain_iemocap_emotion
     # pipline = CombinedPipeline(
     #     [preprocessing_pipeline, feature_extraction_pipeline, speaker_clf_pipeline], config=config)
     pipline = CombinedPipeline(
-            [preprocessing_pipeline], config=config)
+            [preprocessing_pipeline, feature_extraction_pipeline], config=config)
     processed_payload = pipline.process()
 
     print(processed_payload.get_classification_df(all_paths_columns=True, meta_columns=True))

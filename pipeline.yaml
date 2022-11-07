@@ -1,9 +1,6 @@
 input_dir: 'speech_examples_small'
 segment_name_separator: "_"
 intermediate_payload_path: 'results'
-pre_load: false
-intermediate_df_to_load: ''
-intermediate_metadata_to_load: ''
 
 preprocessing:
   file_mapper:
@@ -58,6 +55,10 @@ feature_extraction:
       - mfcc
       - delta_mfcc
       - zero_crossing_rate
+      - spectral_centroid
+      - spectral_bandwidth
+      - spectral_contrast
+      - spectral_flatness
     save_payload: true
   pyannote_embedding:
     performance_measurement: true
