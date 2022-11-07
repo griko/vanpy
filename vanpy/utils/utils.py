@@ -32,3 +32,18 @@ def cached_download(url, path):
         create_dirs_if_not_exist('/'.join(path.split('/')[:-1]))
         gdown.download(url, path, quiet=True)
     return path
+
+
+def yaml_placeholder_replacement(full, val=None, initial=True):
+    val = val or full if initial else val
+    if isinstance(val, dict):
+        for k, v in val.items():
+            val[k] = yaml_placeholder_replacement(full, v, False)
+    elif isinstance(val, list):
+        for idx, i in enumerate(val):
+            val[idx] = yaml_placeholder_replacement(full, i, False)
+    elif isinstance(val, str):
+        while "{{" in val and "}}" in val:
+            val = full[val.split("}}")[0].split("{{")[1]] + ''.join(val.split("}}")[1:])
+
+    return val

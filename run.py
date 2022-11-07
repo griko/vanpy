@@ -4,6 +4,7 @@ from vanpy.core.PreprocessPipline import PreprocessPipeline
 from vanpy.core.CombinedPipeline import CombinedPipeline
 import yaml
 import logging
+from vanpy.utils.utils import yaml_placeholder_replacement
 
 
 def main():
@@ -11,6 +12,7 @@ def main():
 
     with open('pipeline.yaml', 'r') as f:
         config = yaml.load(f, Loader=yaml.FullLoader)
+        config = yaml_placeholder_replacement(config)
 
     preprocessing_pipeline = PreprocessPipeline(
         ['file_mapper', 'silero_vad'], config=config)  # 'wav_converter', 'espnet-se', 'silero_vad', 'pyannote_vad'], config=config)

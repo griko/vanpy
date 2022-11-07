@@ -7,7 +7,10 @@ intermediate_metadata_to_load: ''
 
 preprocessing:
   file_mapper:
-    save_payload: true
+    save_payload: false  # use it if you want to save the payload when the component process is completed
+    load_payload: true  # use it if you want to load a previously saved payload
+    load_df_path: '{{intermediate_payload_path}}/preprocessing_silero_vad_df_20221031175555_final.csv'
+    load_meta_path: '{{intermediate_payload_path}}/preprocessing_silero_vad_metadata_20221031175555_final.pickle'
   wav_converter:
     output_dir: 'convert_preprocessed'
     ab: '256k'  # bitrate
@@ -41,10 +44,10 @@ preprocessing:
     overwrite: false
     save_payload: true
     save_payload_periodicity: 10000  # save intermediate payload results every X processed files
-  espnet_se:
-    output_dir: 'espnet_se_preprocessed'
-    performance_measurement: true
-    sampling_rate: 16000
+#  espnet_se:
+#    output_dir: 'espnet_se_preprocessed'
+#    performance_measurement: true
+#    sampling_rate: 16000
 
 feature_extraction:
   librosa_features_extractor:
