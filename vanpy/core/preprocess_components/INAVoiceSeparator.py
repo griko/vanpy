@@ -50,7 +50,7 @@ class INAVoiceSeparator(SegmenterComponent):
             df = pd.merge(left=df, right=p_df, how='outer', left_on=input_column, right_on=input_column)
             return ComponentPayload(metadata=metadata, df=df)
 
-        for f in paths_list:
+        for j, f in enumerate(paths_list):
             try:
                 t_start_segmentation = time.time()
                 segmentation = self.model(f)
@@ -63,10 +63,10 @@ class INAVoiceSeparator(SegmenterComponent):
                     self.add_performance_metadata(f_d, t_start_segmentation, t_end_segmentation)
                     f_df = pd.DataFrame.from_dict(f_d)
                     p_df = pd.concat([p_df, f_df], ignore_index=True)
-                self.logger.info(f'Extracted {len(v_segments)} from {f} in {t_end_segmentation - t_start_segmentation} seconds')
+                self.logger.info(f'Extracted {len(v_segments)} from {f} in {t_end_segmentation - t_start_segmentation} seconds, {j}/{len(paths_list)}')
 
             except AssertionError as err:
-                self.logger.error(f"Error reading {f}.\n{err}")
+                self.logger.error(f"An error occurred in {f}, {j}/{len(paths_list)}: {e}")
 
         df = pd.merge(left=df, right=p_df, how='outer', left_on=input_column, right_on=input_column)
         return ComponentPayload(metadata=metadata, df=df)

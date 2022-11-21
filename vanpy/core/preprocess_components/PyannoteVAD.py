@@ -23,7 +23,10 @@ class PyannoteVAD(SegmenterComponent):
                         }
 
     def load_model(self):
-        self.model = VoiceActivityDetection(segmentation="pyannote/segmentation")
+        from pyannote.audio import Model
+        model = Model.from_pretrained("pyannote/segmentation",
+                                      use_auth_token="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")
+        self.model = VoiceActivityDetection(segmentation=model)
         self.model.instantiate(self.params)
 
     @staticmethod
@@ -54,7 +57,7 @@ class PyannoteVAD(SegmenterComponent):
             df = pd.merge(left=df, right=p_df, how='outer', left_on=input_column, right_on=input_column)
             return ComponentPayload(metadata=metadata, df=df)
 
-        for f in paths_list:
+        for j, f in enumerate(paths_list):
             try:
                 t_start_segmentation = time.time()
                 v_segments = PyannoteVAD.get_voice_segments(self.model(f))
@@ -67,9 +70,9 @@ class PyannoteVAD(SegmenterComponent):
                     f_df = pd.DataFrame.from_dict(f_d)
                     p_df = pd.concat([p_df, f_df], ignore_index=True)
                 end = time.time()
-                self.logger.info(f'Extracted {len(v_segments)} from {f} in {end - t_start_segmentation} seconds')
+                self.logger.info(f'Extracted {len(v_segments)} from {f} in {end - t_start_segmentation} seconds, {j}/{len(paths_list)}')
             except RuntimeError as err:
-                self.logger.error(f"Could not create VAD pipline for {f} with pyannote.\n{err}")
+                self.logger.error(f"An error occurred in {f}, {j}/{len(paths_list)}: {e}")
 
         df = pd.merge(left=df, right=p_df, how='outer', left_on=input_column, right_on=input_column)
         return ComponentPayload(metadata=metadata, df=df)

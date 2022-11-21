@@ -35,7 +35,7 @@ class PyannoteEmbedding(PipelineComponent):
             file_performance_column_name = f'perf_{self.get_name()}_get_features'
             metadata['meta_columns'].extend([file_performance_column_name])
         p_df = pd.DataFrame()
-        for f in paths_list:
+        for j, f in enumerate(paths_list):
             try:
                 t_start_feature_extraction = time.time()
                 embedding = self.model(f)
@@ -45,9 +45,9 @@ class PyannoteEmbedding(PipelineComponent):
                 if self.config['performance_measurement']:
                     f_df[file_performance_column_name] = t_end_feature_extraction - t_start_feature_extraction
                 p_df = pd.concat([p_df, f_df], ignore_index=True)
-                self.logger.info(f'done with {f}')
+                self.logger.info(f'done with {f}, {j}/{len(paths_list)}')
             except RuntimeError as e:
-                self.logger.error(f'An error occurred in {f}: {e}')
+                self.logger.error(f'An error occurred in {f}, {j}/{len(paths_list)}: {e}')
 
         feature_columns = p_df.columns.tolist()
         feature_columns.remove(input_column)

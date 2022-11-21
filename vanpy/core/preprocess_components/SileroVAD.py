@@ -64,10 +64,10 @@ class SileroVAD(SegmenterComponent):
                     f_df = pd.DataFrame.from_dict(f_d)
                     p_df = pd.concat([p_df, f_df], ignore_index=True)
                 self.logger.info(
-                    f'Extracted {len(v_segments)} from {f} in {t_end_segmentation - t_start_segmentation} seconds')
+                    f'Extracted {len(v_segments)} from {f} in {t_end_segmentation - t_start_segmentation} seconds, {j}/{len(paths_list)}')
 
             except RuntimeError as err:
-                self.logger.error(f"Could not create VAD pipline for {f} with pyannote.\n{err}")
+                self.logger.error(f"An error occurred in {f}, {j}/{len(paths_list)}: {e}")
             self.save_intermediate_payload(j, ComponentPayload(metadata=metadata, df=p_df))
 
         df = pd.merge(left=df, right=p_df, how='outer', left_on=input_column, right_on=input_column)

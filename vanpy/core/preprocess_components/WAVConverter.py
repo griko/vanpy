@@ -31,7 +31,7 @@ class WAVConverter(PipelineComponent):
         ab = self.config['ab']
         ac = self.config['ac']
         ar = self.config['ar']
-        for f in paths_list:
+        for j, f in enumerate(paths_list):
             filename = ''.join(f.split("/")[-1].split(".")[:-1])
             if not output_dir:
                 input_path = ''.join(f.split("/")[:-1])
@@ -45,7 +45,7 @@ class WAVConverter(PipelineComponent):
             f_df = pd.DataFrame.from_dict({processed_path: [f'{output_dir}/{output_filename}'],
                                            input_column: [f]})
             p_df = pd.concat([p_df, f_df], ignore_index=True)
-            self.logger.info(f'done with {f}')
+            self.logger.info(f'Converted {f}, {j}/{len(paths_list)}')
 
         df = pd.merge(left=df, right=p_df, how='outer', left_on=input_column, right_on=input_column)
 
