@@ -15,7 +15,7 @@ def main():
         config = yaml_placeholder_replacement(config)
 
     preprocessing_pipeline = PreprocessPipeline(
-        ['file_mapper'], config=config)  # 'wav_converter', 'espnet-se', 'silero_vad', 'pyannote_vad'], config=config)
+        ['file_mapper', 'silero_vad'], config=config)  # 'wav_converter', 'espnet-se', 'silero_vad', 'pyannote_vad'], config=config)
     feature_extraction_pipeline = FeatureExtractionPipeline(
         ['librosa_features_extractor'], config=config)  # librosa_features_extractor, speechbrain_embedding
     # speaker_clf_pipeline = ClassificationPipeline(['wav2vec2stt'], config=config)  # speech_brain_iemocap_emotion

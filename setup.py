@@ -16,7 +16,7 @@ setup(
         'huggingface-hub>=0.5.1',
         'inaSpeechSegmenter>=0.7.3',
         'pandas>=1.3.2',
-        'pyannote.audio @ https://github.com/pyannote/pyannote-audio/archive/develop.zip',
+        'pyannote.audio>=2.0.1',  # pyannote.audio @ https://github.com/pyannote/pyannote-audio/archive/develop.zip'
         'PyYAML>=6.0',
         'speechbrain>=0.5.11',
         'transformers==4.19.2',

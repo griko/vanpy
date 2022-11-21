@@ -2,11 +2,15 @@ import os
 import subprocess
 from typing import List, Tuple
 import gdown
+import logging
+
+logger = logging.getLogger(f'vanpy utils')
 
 
 def create_dirs_if_not_exist(*args: str) -> None:
     for arg in args:
         os.makedirs(arg, exist_ok=True)
+        # logger.info(f'Created dir {arg}')
 
 
 def cut_segment(input_path: str, output_dir: str, segment: Tuple[float, float], segment_id: int, separator: str) -> str:
@@ -22,6 +26,7 @@ def cut_segment(input_path: str, output_dir: str, segment: Tuple[float, float], 
 
 def get_audio_files_paths(folder: str, extension: str = '') -> List[str]:
     folder_files = os.listdir(folder)
+    logger.info(f'Finished listdir on {folder}')
     return [f'{folder}/{f}' for f in folder_files if f.endswith(extension) and os.path.isfile(f'{folder}/{f}')]
 
 

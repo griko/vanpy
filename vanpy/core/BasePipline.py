@@ -30,6 +30,7 @@ class BasePipeline(ABC):
         for component in self.components:
             self.logger.info(f'Processing with {component.get_name()}')
             payload_object = component.process(payload_object)
+            # payload_object.remove_redundant_index_columns()  # get rid of "Unnamed XX" columns
             component.save_component_payload(payload_object)  # save intermediate results, if enabled
 
         return payload_object

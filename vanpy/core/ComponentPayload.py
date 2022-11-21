@@ -46,3 +46,8 @@ class ComponentPayload:
     def get_full_df(self, all_paths_columns=False, meta_columns=False):
         return self.get_declared_columns(['feature_columns', 'classification_columns'], all_paths_columns, meta_columns)
 
+    def remove_redundant_index_columns(self):
+        for c in self.df.columns:
+            if c.startswith('Unnamed') or c == '':
+                self.df.drop([c], axis=1, inplace=True)
+

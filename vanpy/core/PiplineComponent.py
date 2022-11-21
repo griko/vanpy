@@ -42,6 +42,7 @@ class PipelineComponent(ABC):
     # @staticmethod
     def save_component_payload(self, input_payload: ComponentPayload, intermediate=False) -> None:
         subscript = 'intermediate' if intermediate else 'final'
+        self.get_logger().info(f'Called Saved payload {self.get_name(), self.config["intermediate_payload_path"], self.config["save_payload"]}')
         if "save_payload" in self.config and self.config["save_payload"]:
             create_dirs_if_not_exist(self.config["intermediate_payload_path"])
             metadata, df = input_payload.unpack()
@@ -49,8 +50,9 @@ class PipelineComponent(ABC):
                 pickle.dump(metadata, handle, protocol=pickle.HIGHEST_PROTOCOL)
             # input_payload.get_classification_df(all_paths_columns=True, meta_columns=True).to_csv(f'{self.config["intermediate_payload_path"]}/{self.component_type}_{self.component_name}_clf_df_{datetime.now().strftime("%Y%m%d%H%M%S")}_{subscript}.csv')
             input_payload.get_full_df(all_paths_columns=True, meta_columns=True).to_csv(
-                f'{self.config["intermediate_payload_path"]}/{self.component_type}_{self.component_name}_df_{datetime.now().strftime("%Y%m%d%H%M%S")}_{subscript}.csv')
+                f'{self.config["intermediate_payload_path"]}/{self.component_type}_{self.component_name}_df_{datetime.now().strftime("%Y%m%d%H%M%S")}_{subscript}.csv', index=False)
+            self.get_logger().info(f'Saved payload in {self.config["intermediate_payload_path"]}')
 
     def save_intermediate_payload(self, i: int, input_payload: ComponentPayload):
-        if 'save_payload_periodicity' in self.config and i % self.config['save_payload_periodicity'] == 0:
+        if 'save_payload_periodicity' in self.config and i % self.config['save_payload_periodicity'] == 0 and i > 0:
             self.save_component_payload(input_payload, intermediate=True)

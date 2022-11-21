@@ -43,10 +43,10 @@ class SpeechBrainEmbedding(PipelineComponent):
                     f_df[file_performance_column_name] = t_end_feature_extraction - t_start_feature_extraction
                 p_df = pd.concat([p_df, f_df], ignore_index=True)
                 self.logger.info(f'done with {f}')
-            except RuntimeError as e:
+            except (TypeError, RuntimeError) as e:
                 self.logger.error(f'An error occurred in {f}: {e}')
 
-        feature_columns = p_df.columns.tolist()
+        feature_columns = [str(x) for x in range(512)]
         feature_columns.remove(input_column)
         metadata['feature_columns'].extend(feature_columns)
         df = pd.merge(left=df, right=p_df, how='outer', left_on=input_column, right_on=input_column)
