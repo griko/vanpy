@@ -20,12 +20,12 @@ class SegmenterComponent(PipelineComponent, ABC):
         metadata['paths_column'] = processed_path
         metadata['all_paths_columns'].append(processed_path)
         self.segment_start_column_name = self.segment_stop_column_name = ''
-        if self.config['add_segment_metadata']:
+        if 'add_segment_metadata' in self.config and self.config['add_segment_metadata']:
             self.segment_start_column_name = f'{self.get_name()}_segment_start'
             self.segment_stop_column_name = f'{self.get_name()}_segment_stop'
             metadata['meta_columns'].extend([self.segment_start_column_name, self.segment_stop_column_name])
         self.file_performance_column_name = ''
-        if self.config['performance_measurement']:
+        if 'performance_measurement' in self.config and self.config['performance_measurement']:
             self.file_performance_column_name = f'perf_{self.get_name()}_get_voice_segments'
             metadata['meta_columns'].extend([self.file_performance_column_name])
         return processed_path, metadata
@@ -44,6 +44,7 @@ class SegmenterComponent(PipelineComponent, ABC):
         unprocessed_paths_list = []
         if not self.config['overwrite']:
             existing_file_list = get_audio_files_paths(output_dir)
+            existing_file_list_names = ['.'.join(f.split("/")[-1].split('.')[0:-1]) for f in existing_file_list]
             existing_file_set = {}
             for p in existing_file_list:
                 short_name = f'{self.segment_name_separator}'.join('.'.join(p.split("/")[-1].split(".")[0:-1])
@@ -57,6 +58,10 @@ class SegmenterComponent(PipelineComponent, ABC):
                 if file_name_without_extension in existing_file_set:
                     f_df = pd.DataFrame.from_dict(
                         {processed_path: [existing_file_set[file_name_without_extension]], input_column: [f]})
+                    p_df = pd.concat([p_df, f_df], ignore_index=True)
+                elif file_name_without_extension in existing_file_list_names:
+                    f_df = pd.DataFrame.from_dict(
+                        {processed_path: [existing_file_list[existing_file_list_names.index(file_name_without_extension)]], input_column: [f]})
                     p_df = pd.concat([p_df, f_df], ignore_index=True)
                 else:
                     unprocessed_paths_list.append(f)

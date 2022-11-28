@@ -65,7 +65,7 @@ class INAVoiceSeparator(SegmenterComponent):
                     p_df = pd.concat([p_df, f_df], ignore_index=True)
                 self.logger.info(f'Extracted {len(v_segments)} from {f} in {t_end_segmentation - t_start_segmentation} seconds, {j}/{len(paths_list)}')
 
-            except AssertionError as err:
+            except AssertionError as e:
                 self.logger.error(f"An error occurred in {f}, {j}/{len(paths_list)}: {e}")
 
         df = pd.merge(left=df, right=p_df, how='outer', left_on=input_column, right_on=input_column)

@@ -49,7 +49,7 @@ class PipelineComponent(ABC):
             with open(f'{self.config["intermediate_payload_path"]}/{self.component_type}_{self.component_name}_metadata_{datetime.now().strftime("%Y%m%d%H%M%S")}_{subscript}.pickle', 'wb') as handle:
                 pickle.dump(metadata, handle, protocol=pickle.HIGHEST_PROTOCOL)
             # input_payload.get_classification_df(all_paths_columns=True, meta_columns=True).to_csv(f'{self.config["intermediate_payload_path"]}/{self.component_type}_{self.component_name}_clf_df_{datetime.now().strftime("%Y%m%d%H%M%S")}_{subscript}.csv')
-            input_payload.get_full_df(all_paths_columns=True, meta_columns=True).to_csv(
+            df.to_csv(
                 f'{self.config["intermediate_payload_path"]}/{self.component_type}_{self.component_name}_df_{datetime.now().strftime("%Y%m%d%H%M%S")}_{subscript}.csv', index=False)
             self.get_logger().info(f'Saved payload in {self.config["intermediate_payload_path"]}')
 

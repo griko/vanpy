@@ -4,7 +4,7 @@ intermediate_payload_path: 'results'
 
 preprocessing:
   file_mapper:
-    save_payload: true  # use it if you want to save the payload when the component process is completed
+    save_payload: false  # use it if you want to save the payload when the component process is completed
     load_payload: false  # use it if you want to load a previously saved payload
     load_df_path: '{{intermediate_payload_path}}/preprocessing_silero_vad_df_20221031175555_final.csv'
     load_meta_path: '{{intermediate_payload_path}}/preprocessing_silero_vad_metadata_20221031175555_final.pickle'
@@ -34,7 +34,7 @@ preprocessing:
     overwrite: false
     save_payload: true
   silero_vad:
-    output_dir: 'silero_vad_preprocessed'
+    output_dir: '{{input_dir}}/silero_vad_preprocessed'
     add_segment_metadata: true
     performance_measurement: true
     sampling_rate: 16000

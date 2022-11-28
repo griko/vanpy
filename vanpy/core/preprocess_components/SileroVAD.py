@@ -66,7 +66,7 @@ class SileroVAD(SegmenterComponent):
                 self.logger.info(
                     f'Extracted {len(v_segments)} from {f} in {t_end_segmentation - t_start_segmentation} seconds, {j}/{len(paths_list)}')
 
-            except RuntimeError as err:
+            except RuntimeError as e:
                 self.logger.error(f"An error occurred in {f}, {j}/{len(paths_list)}: {e}")
             self.save_intermediate_payload(j, ComponentPayload(metadata=metadata, df=p_df))
 

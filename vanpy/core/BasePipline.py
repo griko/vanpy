@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from logging import Logger
 from typing import Dict, List
 from yaml import YAMLObject
+import inspect
 
 from vanpy.core.ComponentPayload import ComponentPayload
 from vanpy.core.PiplineComponent import PipelineComponent
@@ -29,6 +30,9 @@ class BasePipeline(ABC):
         payload_object = input_payload
         for component in self.components:
             self.logger.info(f'Processing with {component.get_name()}')
+            # if inspect.iscoroutinefunction(component.process):
+            #     payload_object = await component.process(payload_object)
+            # else:
             payload_object = component.process(payload_object)
             # payload_object.remove_redundant_index_columns()  # get rid of "Unnamed XX" columns
             component.save_component_payload(payload_object)  # save intermediate results, if enabled

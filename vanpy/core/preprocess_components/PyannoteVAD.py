@@ -37,6 +37,9 @@ class PyannoteVAD(SegmenterComponent):
             sections.append((start, stop))
         return sections
 
+    def get_voice_segments(self, f):
+        return PyannoteVAD.get_voice_segments(self.model(f))
+
     def process(self, input_payload: ComponentPayload) -> ComponentPayload:
         if not self.model:
             self.load_model()
@@ -60,7 +63,7 @@ class PyannoteVAD(SegmenterComponent):
         for j, f in enumerate(paths_list):
             try:
                 t_start_segmentation = time.time()
-                v_segments = PyannoteVAD.get_voice_segments(self.model(f))
+                v_segments = self.get_voice_segments(f)
                 t_end_segmentation = time.time()
                 for i, segment in enumerate(v_segments):
                     output_path = cut_segment(f, output_dir=output_dir, segment=segment, segment_id=i, separator=self.segment_name_separator)
@@ -71,7 +74,7 @@ class PyannoteVAD(SegmenterComponent):
                     p_df = pd.concat([p_df, f_df], ignore_index=True)
                 end = time.time()
                 self.logger.info(f'Extracted {len(v_segments)} from {f} in {end - t_start_segmentation} seconds, {j}/{len(paths_list)}')
-            except RuntimeError as err:
+            except RuntimeError as e:
                 self.logger.error(f"An error occurred in {f}, {j}/{len(paths_list)}: {e}")
 
         df = pd.merge(left=df, right=p_df, how='outer', left_on=input_column, right_on=input_column)
