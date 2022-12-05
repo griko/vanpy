@@ -42,7 +42,7 @@ class PipelineComponent(ABC):
     # @staticmethod
     def save_component_payload(self, input_payload: ComponentPayload, intermediate=False) -> None:
         subscript = 'intermediate' if intermediate else 'final'
-        self.get_logger().info(f'Called Saved payload {self.get_name(), self.config["intermediate_payload_path"], self.config["save_payload"]}')
+        self.get_logger().info(f'Called Saved payload {self.get_name(), "save_payload" in self.config and self.config["save_payload"]}, intermediate {intermediate}')
         if "save_payload" in self.config and self.config["save_payload"]:
             create_dirs_if_not_exist(self.config["intermediate_payload_path"])
             metadata, df = input_payload.unpack()
