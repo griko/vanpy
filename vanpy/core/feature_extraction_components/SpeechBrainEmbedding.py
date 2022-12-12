@@ -23,6 +23,7 @@ class SpeechBrainEmbedding(PipelineComponent):
             self.load_model()
 
         metadata, df = input_payload.unpack()
+        df = df.reset_index().drop(['index'], axis=1, errors='ignore')
         input_column = metadata['paths_column']
         paths_list = df[input_column].tolist()
 
@@ -30,7 +31,19 @@ class SpeechBrainEmbedding(PipelineComponent):
         if self.config['performance_measurement']:
             file_performance_column_name = f'perf_{self.get_name()}_get_features'
             metadata['meta_columns'].extend([file_performance_column_name])
-        p_df = pd.DataFrame()
+            if file_performance_column_name in df.columns:
+                df = df.drop([file_performance_column_name], axis=1)
+            df.insert(0, file_performance_column_name, None)
+
+        # replace the feature columns
+        signal, fs = torchaudio.load(paths_list[0])
+        embedding = self.model.encode_batch(signal)
+        f_df = pd.DataFrame(embedding.to('cpu').numpy().ravel()).T
+        for c in f_df.columns[::-1]:
+            if c in df.columns:
+                df = df.drop([c], axis=1)
+            df.insert(0, c, None)
+
         for j, f in enumerate(paths_list):
             try:
                 t_start_feature_extraction = time.time()
@@ -41,12 +54,12 @@ class SpeechBrainEmbedding(PipelineComponent):
                 t_end_feature_extraction = time.time()
                 if self.config['performance_measurement']:
                     f_df[file_performance_column_name] = t_end_feature_extraction - t_start_feature_extraction
-                p_df = pd.concat([p_df, f_df], ignore_index=True)
+                for c in f_df.columns:
+                    df.iloc[j, df.columns.get_loc(c)] = f_df.iloc[0, f_df.columns.get_loc(c)]
                 self.logger.info(f'done with {f}, {j}/{len(paths_list)}')
             except (TypeError, RuntimeError) as e:
                 self.logger.error(f'An error occurred in {f}, {j}/{len(paths_list)}: {e}')
 
         feature_columns = [str(x) for x in range(512)]
         metadata['feature_columns'].extend(feature_columns)
-        df = pd.merge(left=df, right=p_df, how='outer', left_on=input_column, right_on=input_column)
         return ComponentPayload(metadata=metadata, df=df)
