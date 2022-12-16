@@ -52,3 +52,7 @@ def yaml_placeholder_replacement(full, val=None, initial=True):
             val = full[val.split("}}")[0].split("{{")[1]] + ''.join(val.split("}}")[1:])
 
     return val
+
+
+def get_null_wav_path():
+    return os.path.join(os.path.dirname(os.path.abspath(__file__)), "empty.wav")

@@ -2,11 +2,13 @@ import time
 
 from yaml import YAMLObject
 from pyannote.audio import Inference
+from pyannote.audio import Model
 import numpy as np
 import pandas as pd
 
 from vanpy.core.ComponentPayload import ComponentPayload
 from vanpy.core.PiplineComponent import PipelineComponent
+from vanpy.utils.utils import get_null_wav_path
 
 
 class PyannoteEmbedding(PipelineComponent):
@@ -17,7 +19,9 @@ class PyannoteEmbedding(PipelineComponent):
                          yaml_config=yaml_config)
 
     def load_model(self):
-        self.model = Inference("pyannote%2Fembedding",
+        model = Model.from_pretrained("pyannote%2Fembedding",
+                                      use_auth_token="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")
+        self.model = Inference(model,
                                window="sliding",
                                duration=self.config['sliding_window_duration'],
                                step=self.config['sliding_window_step'])
@@ -27,6 +31,7 @@ class PyannoteEmbedding(PipelineComponent):
             self.load_model()
 
         metadata, df = input_payload.unpack()
+        df = df.reset_index().drop(['index'], axis=1, errors='ignore')
         input_column = metadata['paths_column']
         paths_list = df[input_column].tolist()
 
@@ -34,7 +39,20 @@ class PyannoteEmbedding(PipelineComponent):
         if self.config['performance_measurement']:
             file_performance_column_name = f'perf_{self.get_name()}_get_features'
             metadata['meta_columns'].extend([file_performance_column_name])
-        p_df = pd.DataFrame()
+            if file_performance_column_name in df.columns:
+                df = df.drop([file_performance_column_name], axis=1)
+            df.insert(0, file_performance_column_name, None)
+
+        # replace the feature columns
+        embedding = self.model(get_null_wav_path())
+        f_df = pd.DataFrame(np.mean(embedding, axis=0)).T
+        for c in f_df.columns[::-1]:
+            c = f'{c}_{self.get_name()}'
+            if c in df.columns:
+                df = df.drop([c], axis=1)
+            df.insert(0, c, None)
+        feature_columns = f_df.columns.tolist()
+
         for j, f in enumerate(paths_list):
             try:
                 t_start_feature_extraction = time.time()
@@ -44,13 +62,11 @@ class PyannoteEmbedding(PipelineComponent):
                 t_end_feature_extraction = time.time()
                 if self.config['performance_measurement']:
                     f_df[file_performance_column_name] = t_end_feature_extraction - t_start_feature_extraction
-                p_df = pd.concat([p_df, f_df], ignore_index=True)
+                for c in f_df.columns:
+                    df.at[j, f'{c}_{self.get_name()}'] = f_df.iloc[0, f_df.columns.get_loc(c)]
                 self.logger.info(f'done with {f}, {j}/{len(paths_list)}')
             except RuntimeError as e:
                 self.logger.error(f'An error occurred in {f}, {j}/{len(paths_list)}: {e}')
 
-        feature_columns = p_df.columns.tolist()
-        feature_columns.remove(input_column)
         metadata['feature_columns'].extend(feature_columns)
-        df = pd.merge(left=df, right=p_df, how='outer', left_on=input_column, right_on=input_column)
         return ComponentPayload(metadata=metadata, df=df)

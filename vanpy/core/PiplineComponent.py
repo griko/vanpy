@@ -27,6 +27,7 @@ class PipelineComponent(ABC):
         config = yaml_config[self.component_type][self.component_name]
         config = {} if config is None else config
         config["intermediate_payload_path"] = yaml_config["intermediate_payload_path"]
+        config["device"] = yaml_config["device"]
         return config
 
     def get_logger(self) -> Logger:

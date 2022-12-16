@@ -6,6 +6,7 @@ from speechbrain.pretrained import EncoderClassifier
 import pandas as pd
 from vanpy.core.ComponentPayload import ComponentPayload
 from vanpy.core.PiplineComponent import PipelineComponent
+from vanpy.utils.utils import get_null_wav_path
 
 
 class SpeechBrainEmbedding(PipelineComponent):
@@ -36,10 +37,11 @@ class SpeechBrainEmbedding(PipelineComponent):
             df.insert(0, file_performance_column_name, None)
 
         # replace the feature columns
-        signal, fs = torchaudio.load(paths_list[0])
+        signal, fs = torchaudio.load(get_null_wav_path())
         embedding = self.model.encode_batch(signal)
-        f_df = pd.DataFrame(embedding.to('cpu').numpy().ravel()).T
+        f_df = pd.DataFrame(embedding.to(self.config['device']).numpy().ravel()).T
         for c in f_df.columns[::-1]:
+            c = f'{c}_{self.get_name()}'
             if c in df.columns:
                 df = df.drop([c], axis=1)
             df.insert(0, c, None)
@@ -49,13 +51,13 @@ class SpeechBrainEmbedding(PipelineComponent):
                 t_start_feature_extraction = time.time()
                 signal, fs = torchaudio.load(f)
                 embedding = self.model.encode_batch(signal)
-                f_df = pd.DataFrame(embedding.to('cpu').numpy().ravel()).T
+                f_df = pd.DataFrame(embedding.to(self.config['device']).numpy().ravel()).T
                 f_df[input_column] = f
                 t_end_feature_extraction = time.time()
                 if self.config['performance_measurement']:
                     f_df[file_performance_column_name] = t_end_feature_extraction - t_start_feature_extraction
                 for c in f_df.columns:
-                    df.iloc[j, df.columns.get_loc(c)] = f_df.iloc[0, f_df.columns.get_loc(c)]
+                    df.at[j, f'{c}_{self.get_name()}'] = f_df.iloc[0, f_df.columns.get_loc(c)]
                 self.logger.info(f'done with {f}, {j}/{len(paths_list)}')
             except (TypeError, RuntimeError) as e:
                 self.logger.error(f'An error occurred in {f}, {j}/{len(paths_list)}: {e}')

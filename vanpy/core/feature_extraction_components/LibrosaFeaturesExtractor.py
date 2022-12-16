@@ -23,6 +23,7 @@ class LibrosaFeaturesExtractor(PipelineComponent):
 
     def process(self, input_payload: ComponentPayload) -> ComponentPayload:
         metadata, df = input_payload.unpack()
+        df = df.reset_index().drop(['index'], axis=1, errors='ignore')
         input_column = metadata['paths_column']
         paths_list = df[input_column].tolist()
 
@@ -30,7 +31,14 @@ class LibrosaFeaturesExtractor(PipelineComponent):
         if self.config['performance_measurement']:
             file_performance_column_name = f'perf_{self.get_name()}_get_features'
             metadata['meta_columns'].extend([file_performance_column_name])
-        p_df = pd.DataFrame()
+
+        # replace the feature columns
+        cols = ['zero_crossing_rate', 'spectral_centroid', 'spectral_bandwidth', 'spectral_contrast', 'spectral_flatness']
+        cols.extend([f'mfcc_{i}' for i in range(self.n_mfcc)])
+        cols.extend([f'd_mfcc_{i}' for i in range(self.n_mfcc)])
+        feature_columns = ''
+        df = df.drop(cols, axis=1, errors='ignore')
+
         for j, f in enumerate(paths_list):
             try:
                 t_start_feature_extraction = time.time()
@@ -60,13 +68,12 @@ class LibrosaFeaturesExtractor(PipelineComponent):
                 if self.config['performance_measurement']:
                     f_df[file_performance_column_name] = t_end_feature_extraction - t_start_feature_extraction
 
-                p_df = pd.concat([p_df, f_df], ignore_index=True)
+                feature_columns = f_df.columns
+                for c in f_df.columns:
+                    df.at[j, c] = f_df.iloc[0, f_df.columns.get_loc(c)]
                 self.logger.info(f'done with {f}, {j}/{len(paths_list)}')
             except RuntimeError as e:
                 self.logger.error(f'An error occurred in {f}, {j}/{len(paths_list)}: {e}')
 
-        feature_columns = p_df.columns.tolist()
-        feature_columns.remove(input_column)
         metadata['feature_columns'].extend(feature_columns)
-        df = pd.merge(left=df, right=p_df, how='outer', left_on=input_column, right_on=input_column)
         return ComponentPayload(metadata=metadata, df=df)

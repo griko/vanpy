@@ -1,6 +1,7 @@
 input_dir: 'speech_examples_small'
 segment_name_separator: "_"
 intermediate_payload_path: 'results'
+device: 'cpu'  # 'cpu'/'cuda'
 
 preprocessing:
   file_mapper:
