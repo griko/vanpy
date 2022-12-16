@@ -69,6 +69,7 @@ feature_extraction:
   speechbrain_embedding:
     performance_measurement: true
     save_payload: true
+    model: spkrec-ecapa-voxceleb  # e.g. spkrec-ecapa-voxceleb, spkrec-xvect-voxceleb, ...
 
 segment_classifier:
   common_voices_gender:

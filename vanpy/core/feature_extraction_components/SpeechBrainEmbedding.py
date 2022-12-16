@@ -17,7 +17,8 @@ class SpeechBrainEmbedding(PipelineComponent):
                          yaml_config=yaml_config)
 
     def load_model(self):
-        self.model = EncoderClassifier.from_hparams(source="speechbrain/spkrec-xvect-voxceleb", savedir="pretrained_models/spkrec-xvect-voxceleb")
+        mdl = self.config['model'] if self.config['model'] else 'spkrec-ecapa-voxceleb'
+        self.model = EncoderClassifier.from_hparams(source=f"speechbrain/{mdl}", savedir=f"pretrained_models/{mdl}")
 
     def process(self, input_payload: ComponentPayload) -> ComponentPayload:
         if not self.model:
