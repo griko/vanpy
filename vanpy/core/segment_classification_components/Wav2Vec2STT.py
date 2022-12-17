@@ -49,7 +49,7 @@ class Wav2Vec2STT(PipelineComponent):
             logits = self.model(input_values).logits
             # Storing predicted ids
             prediction = torch.argmax(logits, dim=-1)
-            # Passing the prediction to the tokenzer decode to get the transcription
+            # Passing the prediction to the tokenizer decode to get the transcription
             transcription = self.tokenizer.batch_decode(prediction)[0]
             stts.append(transcription)
             t_end_transcribing = time.time()

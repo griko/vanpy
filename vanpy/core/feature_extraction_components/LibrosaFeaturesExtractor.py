@@ -72,7 +72,7 @@ class LibrosaFeaturesExtractor(PipelineComponent):
                 for c in f_df.columns:
                     df.at[j, c] = f_df.iloc[0, f_df.columns.get_loc(c)]
                 self.logger.info(f'done with {f}, {j}/{len(paths_list)}')
-            except RuntimeError as e:
+            except (RuntimeError, TypeError) as e:
                 self.logger.error(f'An error occurred in {f}, {j}/{len(paths_list)}: {e}')
 
         metadata['feature_columns'].extend(feature_columns)
