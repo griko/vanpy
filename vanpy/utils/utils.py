@@ -55,4 +55,7 @@ def yaml_placeholder_replacement(full, val=None, initial=True):
 
 
 def get_null_wav_path():
-    return os.path.join(os.path.dirname(os.path.abspath(__file__)), "empty.wav")
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "empty.wav")
+    if not os.path.isfile(path):
+        gdown.download('https://drive.google.com/uc?export=download&confirm=9iBg&id=1URDocYaa0tKe3KLiFJd5ct7tsczA3mX4', path, quiet=True)
+    return path
