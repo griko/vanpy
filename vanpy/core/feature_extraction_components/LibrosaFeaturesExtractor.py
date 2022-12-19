@@ -1,6 +1,7 @@
 import time
 
 import librosa
+from librosa.util.exceptions import ParameterError
 from yaml import YAMLObject
 import numpy as np
 import pandas as pd
@@ -72,7 +73,7 @@ class LibrosaFeaturesExtractor(PipelineComponent):
                 for c in f_df.columns:
                     df.at[j, c] = f_df.iloc[0, f_df.columns.get_loc(c)]
                 self.logger.info(f'done with {f}, {j}/{len(paths_list)}')
-            except (RuntimeError, TypeError) as e:
+            except (RuntimeError, TypeError, ParameterError) as e:
                 self.logger.error(f'An error occurred in {f}, {j}/{len(paths_list)}: {e}')
 
         metadata['feature_columns'].extend(feature_columns)
