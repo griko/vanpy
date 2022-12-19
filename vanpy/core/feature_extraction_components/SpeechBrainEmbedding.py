@@ -64,6 +64,7 @@ class SpeechBrainEmbedding(PipelineComponent):
                 self.logger.info(f'done with {f}, {j}/{len(paths_list)}')
             except (TypeError, RuntimeError) as e:
                 self.logger.error(f'An error occurred in {f}, {j}/{len(paths_list)}: {e}')
+            self.save_intermediate_payload(j, ComponentPayload(metadata=metadata, df=df))
 
         feature_columns = [str(x) for x in range(512)]
         metadata['feature_columns'].extend(feature_columns)

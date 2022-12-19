@@ -41,7 +41,7 @@ preprocessing:
     sampling_rate: 16000
     overwrite: false
     save_payload: true
-    save_payload_periodicity: 10000  # save intermediate payload results every X processed files
+    save_payload_periodicity: 50000  # save intermediate payload results every X processed files
 #  espnet_se:
 #    output_dir: 'espnet_se_preprocessed'
 #    performance_measurement: true
@@ -61,14 +61,17 @@ feature_extraction:
       - spectral_contrast
       - spectral_flatness
     save_payload: true
+    save_payload_periodicity: 50000  # save intermediate payload results every X processed files
   pyannote_embedding:
     performance_measurement: true
     sliding_window_duration: 3.0
     sliding_window_step: 1.0
     save_payload: true
+    save_payload_periodicity: 50000  # save intermediate payload results every X processed files
   speechbrain_embedding:
     performance_measurement: true
     save_payload: true
+    save_payload_periodicity: 50000  # save intermediate payload results every X processed files
     model: spkrec-ecapa-voxceleb  # e.g. spkrec-ecapa-voxceleb, spkrec-xvect-voxceleb, ...
 
 segment_classifier:

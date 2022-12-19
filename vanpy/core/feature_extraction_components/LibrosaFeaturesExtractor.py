@@ -75,6 +75,7 @@ class LibrosaFeaturesExtractor(PipelineComponent):
                 self.logger.info(f'done with {f}, {j}/{len(paths_list)}')
             except (RuntimeError, TypeError, ParameterError) as e:
                 self.logger.error(f'An error occurred in {f}, {j}/{len(paths_list)}: {e}')
+            self.save_intermediate_payload(j, ComponentPayload(metadata=metadata, df=df))
 
         metadata['feature_columns'].extend(feature_columns)
         return ComponentPayload(metadata=metadata, df=df)

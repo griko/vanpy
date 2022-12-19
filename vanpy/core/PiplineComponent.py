@@ -26,8 +26,9 @@ class PipelineComponent(ABC):
     def import_config(self, yaml_config: YAMLObject) -> Dict:
         config = yaml_config[self.component_type][self.component_name]
         config = {} if config is None else config
-        config["intermediate_payload_path"] = yaml_config["intermediate_payload_path"]
-        config["device"] = yaml_config["device"]
+        for item in yaml_config:  # pass through all root level configs
+            if isinstance(item, str) and item not in config:
+                config[item] = yaml_config[item]
         return config
 
     def get_logger(self) -> Logger:
