@@ -33,10 +33,12 @@ class WAVConverter(SegmenterComponent):
             self.logger.warning('You\'ve supplied an empty list to process')
             df = pd.merge(left=df, right=p_df, how='outer', left_on=input_column, right_on=input_column)
             return ComponentPayload(metadata=metadata, df=df)
+        self.config['items_in_paths_list'] = len(paths_list) - 1
 
         ab = self.config['ab']
         ac = self.config['ac']
         ar = self.config['ar']
+
         for j, f in enumerate(paths_list):
             filename = ''.join(f.split("/")[-1].split(".")[:-1])
             if not output_dir:
@@ -48,7 +50,7 @@ class WAVConverter(SegmenterComponent):
             f_df = pd.DataFrame.from_dict({processed_path: [f'{output_dir}/{output_filename}'],
                                            input_column: [f]})
             p_df = pd.concat([p_df, f_df], ignore_index=True)
-            self.latent_info_log(f'Converted {f}, {j}/{len(paths_list)}')
+            self.latent_info_log(f'Converted {f}, {j + 1}/{len(paths_list)}', iteration=j)
         df = pd.merge(left=df, right=p_df, how='outer', left_on=input_column, right_on=input_column)
 
         return ComponentPayload(metadata=metadata, df=df)

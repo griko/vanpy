@@ -23,11 +23,14 @@ class PipelineComponent(ABC):
         self.config = self.import_config(yaml_config)
         self.logger = self.get_logger()
 
-    def latent_info_log(self, iteration: int, message: str) -> None:
+    def latent_info_log(self, message: str, iteration: int, last_item: bool = False) -> None:
         log_each_x_records = 1
         if self.config['log_each_x_records']:
             log_each_x_records = self.config['log_each_x_records']
-        if iteration % log_each_x_records == 0:
+        last_item = False
+        if self.config['items_in_paths_list']:
+            last_item = iteration == self.config['items_in_paths_list']
+        if iteration % log_each_x_records == 0 or last_item:
             self.logger.info(message)
 
     def import_config(self, yaml_config: YAMLObject) -> Dict:
@@ -51,15 +54,19 @@ class PipelineComponent(ABC):
     # @staticmethod
     def save_component_payload(self, input_payload: ComponentPayload, intermediate=False) -> None:
         subscript = 'intermediate' if intermediate else 'final'
-        self.get_logger().info(f'Called Saved payload {self.get_name(), "save_payload" in self.config and self.config["save_payload"]}, intermediate {intermediate}')
+        self.get_logger().info(
+            f'Called Saved payload {self.get_name(), "save_payload" in self.config and self.config["save_payload"]}, intermediate {intermediate}')
         if "save_payload" in self.config and self.config["save_payload"]:
             create_dirs_if_not_exist(self.config["intermediate_payload_path"])
             metadata, df = input_payload.unpack()
-            with open(f'{self.config["intermediate_payload_path"]}/{self.component_type}_{self.component_name}_metadata_{datetime.now().strftime("%Y%m%d%H%M%S")}_{subscript}.pickle', 'wb') as handle:
+            with open(
+                f'{self.config["intermediate_payload_path"]}/{self.component_type}_{self.component_name}_metadata_{datetime.now().strftime("%Y%m%d%H%M%S")}_{subscript}.pickle',
+                'wb') as handle:
                 pickle.dump(metadata, handle, protocol=pickle.HIGHEST_PROTOCOL)
             # input_payload.get_classification_df(all_paths_columns=True, meta_columns=True).to_csv(f'{self.config["intermediate_payload_path"]}/{self.component_type}_{self.component_name}_clf_df_{datetime.now().strftime("%Y%m%d%H%M%S")}_{subscript}.csv')
             df.to_csv(
-                f'{self.config["intermediate_payload_path"]}/{self.component_type}_{self.component_name}_df_{datetime.now().strftime("%Y%m%d%H%M%S")}_{subscript}.csv', index=False)
+                f'{self.config["intermediate_payload_path"]}/{self.component_type}_{self.component_name}_df_{datetime.now().strftime("%Y%m%d%H%M%S")}_{subscript}.csv',
+                index=False)
             self.get_logger().info(f'Saved payload in {self.config["intermediate_payload_path"]}')
 
     def save_intermediate_payload(self, i: int, input_payload: ComponentPayload):

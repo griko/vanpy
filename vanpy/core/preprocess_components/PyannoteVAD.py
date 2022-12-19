@@ -59,6 +59,7 @@ class PyannoteVAD(SegmenterComponent):
             self.logger.warning('You\'ve supplied an empty list to process')
             df = pd.merge(left=df, right=p_df, how='outer', left_on=input_column, right_on=input_column)
             return ComponentPayload(metadata=metadata, df=df)
+        self.config['items_in_paths_list'] = len(paths_list) - 1
 
         for j, f in enumerate(paths_list):
             try:
@@ -73,9 +74,9 @@ class PyannoteVAD(SegmenterComponent):
                     f_df = pd.DataFrame.from_dict(f_d)
                     p_df = pd.concat([p_df, f_df], ignore_index=True)
                 end = time.time()
-                self.latent_info_log(f'Extracted {len(v_segments)} from {f} in {end - t_start_segmentation} seconds, {j}/{len(paths_list)}')
+                self.latent_info_log(f'Extracted {len(v_segments)} from {f} in {end - t_start_segmentation} seconds, {j + 1}/{len(paths_list)}', iteration=j)
             except RuntimeError as e:
-                self.logger.error(f"An error occurred in {f}, {j}/{len(paths_list)}: {e}")
+                self.logger.error(f"An error occurred in {f}, {j + 1}/{len(paths_list)}: {e}")
 
         df = pd.merge(left=df, right=p_df, how='outer', left_on=input_column, right_on=input_column)
         return ComponentPayload(metadata=metadata, df=df)

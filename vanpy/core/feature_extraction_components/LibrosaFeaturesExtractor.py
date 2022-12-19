@@ -27,6 +27,7 @@ class LibrosaFeaturesExtractor(PipelineComponent):
         df = df.reset_index().drop(['index'], axis=1, errors='ignore')
         input_column = metadata['paths_column']
         paths_list = df[input_column].tolist()
+        self.config['items_in_paths_list'] = len(paths_list) - 1
 
         file_performance_column_name = ''
         if self.config['performance_measurement']:
@@ -39,6 +40,7 @@ class LibrosaFeaturesExtractor(PipelineComponent):
         cols.extend([f'd_mfcc_{i}' for i in range(self.n_mfcc)])
         feature_columns = ''
         df = df.drop(cols, axis=1, errors='ignore')
+
 
         for j, f in enumerate(paths_list):
             try:
@@ -72,9 +74,9 @@ class LibrosaFeaturesExtractor(PipelineComponent):
                 feature_columns = f_df.columns
                 for c in f_df.columns:
                     df.at[j, c] = f_df.iloc[0, f_df.columns.get_loc(c)]
-                self.latent_info_log(j, f'done with {f}, {j}/{len(paths_list)}')
+                self.latent_info_log(f'done with {f}, {j + 1}/{len(paths_list)}', iteration=j)
             except (RuntimeError, TypeError, ParameterError) as e:
-                self.logger.error(f'An error occurred in {f}, {j}/{len(paths_list)}: {e}')
+                self.logger.error(f'An error occurred in {f}, {j + 1}/{len(paths_list)}: {e}')
             self.save_intermediate_payload(j, ComponentPayload(metadata=metadata, df=df))
 
         metadata['feature_columns'].extend(feature_columns)
