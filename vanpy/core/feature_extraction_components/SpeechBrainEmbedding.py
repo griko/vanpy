@@ -61,7 +61,7 @@ class SpeechBrainEmbedding(PipelineComponent):
                     f_df[file_performance_column_name] = t_end_feature_extraction - t_start_feature_extraction
                 for c in f_df.columns:
                     df.at[j, f'{c}_{self.get_name()}'] = f_df.iloc[0, f_df.columns.get_loc(c)]
-                self.logger.info(f'done with {f}, {j}/{len(paths_list)}')
+                self.latent_info_log(f'done with {f}, {j}/{len(paths_list)}')
             except (TypeError, RuntimeError) as e:
                 self.logger.error(f'An error occurred in {f}, {j}/{len(paths_list)}: {e}')
             self.save_intermediate_payload(j, ComponentPayload(metadata=metadata, df=df))

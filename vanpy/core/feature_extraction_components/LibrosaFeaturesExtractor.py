@@ -72,7 +72,7 @@ class LibrosaFeaturesExtractor(PipelineComponent):
                 feature_columns = f_df.columns
                 for c in f_df.columns:
                     df.at[j, c] = f_df.iloc[0, f_df.columns.get_loc(c)]
-                self.logger.info(f'done with {f}, {j}/{len(paths_list)}')
+                self.latent_info_log(j, f'done with {f}, {j}/{len(paths_list)}')
             except (RuntimeError, TypeError, ParameterError) as e:
                 self.logger.error(f'An error occurred in {f}, {j}/{len(paths_list)}: {e}')
             self.save_intermediate_payload(j, ComponentPayload(metadata=metadata, df=df))

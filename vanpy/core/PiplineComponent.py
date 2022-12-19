@@ -23,6 +23,13 @@ class PipelineComponent(ABC):
         self.config = self.import_config(yaml_config)
         self.logger = self.get_logger()
 
+    def latent_info_log(self, iteration: int, message: str) -> None:
+        log_each_x_records = 1
+        if self.config['log_each_x_records']:
+            log_each_x_records = self.config['log_each_x_records']
+        if iteration % log_each_x_records == 0:
+            self.logger.info(message)
+
     def import_config(self, yaml_config: YAMLObject) -> Dict:
         config = yaml_config[self.component_type][self.component_name]
         config = {} if config is None else config

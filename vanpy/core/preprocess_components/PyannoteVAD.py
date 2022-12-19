@@ -73,7 +73,7 @@ class PyannoteVAD(SegmenterComponent):
                     f_df = pd.DataFrame.from_dict(f_d)
                     p_df = pd.concat([p_df, f_df], ignore_index=True)
                 end = time.time()
-                self.logger.info(f'Extracted {len(v_segments)} from {f} in {end - t_start_segmentation} seconds, {j}/{len(paths_list)}')
+                self.latent_info_log(f'Extracted {len(v_segments)} from {f} in {end - t_start_segmentation} seconds, {j}/{len(paths_list)}')
             except RuntimeError as e:
                 self.logger.error(f"An error occurred in {f}, {j}/{len(paths_list)}: {e}")
 

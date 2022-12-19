@@ -48,8 +48,7 @@ class WAVConverter(SegmenterComponent):
             f_df = pd.DataFrame.from_dict({processed_path: [f'{output_dir}/{output_filename}'],
                                            input_column: [f]})
             p_df = pd.concat([p_df, f_df], ignore_index=True)
-            self.logger.info(f'Converted {f}, {j}/{len(paths_list)}')
-
+            self.latent_info_log(f'Converted {f}, {j}/{len(paths_list)}')
         df = pd.merge(left=df, right=p_df, how='outer', left_on=input_column, right_on=input_column)
 
         return ComponentPayload(metadata=metadata, df=df)

@@ -63,7 +63,7 @@ class SileroVAD(SegmenterComponent):
                     self.add_performance_metadata(f_d, t_start_segmentation, t_end_segmentation)
                     f_df = pd.DataFrame.from_dict(f_d)
                     p_df = pd.concat([p_df, f_df], ignore_index=True)
-                self.logger.info(
+                self.latent_info_log(
                     f'Extracted {len(v_segments)} from {f} in {t_end_segmentation - t_start_segmentation} seconds, {j}/{len(paths_list)}')
 
             except RuntimeError as e:
