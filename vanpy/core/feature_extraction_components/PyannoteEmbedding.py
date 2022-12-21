@@ -5,6 +5,7 @@ from pyannote.audio import Inference
 from pyannote.audio import Model
 import numpy as np
 import pandas as pd
+import torch
 
 from vanpy.core.ComponentPayload import ComponentPayload
 from vanpy.core.PiplineComponent import PipelineComponent
@@ -21,10 +22,17 @@ class PyannoteEmbedding(PipelineComponent):
     def load_model(self):
         model = Model.from_pretrained("pyannote%2Fembedding",
                                       use_auth_token="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")
-        self.model = Inference(model,
-                               window="sliding",
-                               duration=self.config['sliding_window_duration'],
-                               step=self.config['sliding_window_step'])
+        if torch.cuda.is_available():
+            self.model = Inference(model,
+                                   window="sliding",
+                                   duration=self.config['sliding_window_duration'],
+                                   step=self.config['sliding_window_step'],
+                                   device="cuda")
+        else:
+            self.model = Inference(model,
+                                   window="sliding",
+                                   duration=self.config['sliding_window_duration'],
+                                   step=self.config['sliding_window_step'])
 
     def process(self, input_payload: ComponentPayload) -> ComponentPayload:
         if not self.model:

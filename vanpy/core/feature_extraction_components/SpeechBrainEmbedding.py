@@ -3,6 +3,7 @@ import time
 from yaml import YAMLObject
 import torchaudio
 from speechbrain.pretrained import EncoderClassifier
+import torch
 import pandas as pd
 from vanpy.core.ComponentPayload import ComponentPayload
 from vanpy.core.PiplineComponent import PipelineComponent
@@ -17,10 +18,14 @@ class SpeechBrainEmbedding(PipelineComponent):
                          yaml_config=yaml_config)
 
     def load_model(self):
-        mdl = 'spkrec-ecapa-voxceleb'  #default model
+        mdl = 'spkrec-ecapa-voxceleb'  # default model
         if self.config['model']:
             mdl = self.config['model']
-        self.model = EncoderClassifier.from_hparams(source=f"speechbrain/{mdl}", savedir=f"pretrained_models/{mdl}")
+        if torch.cuda.is_available():
+            self.model = EncoderClassifier.from_hparams(source=f"speechbrain/{mdl}", savedir=f"pretrained_models/{mdl}",
+                                                        run_opts={"device": "cuda"})
+        else:
+            self.model = EncoderClassifier.from_hparams(source=f"speechbrain/{mdl}", savedir=f"pretrained_models/{mdl}")
 
     def process(self, input_payload: ComponentPayload) -> ComponentPayload:
         if not self.model:
@@ -55,7 +60,7 @@ class SpeechBrainEmbedding(PipelineComponent):
                 t_start_feature_extraction = time.time()
                 signal, fs = torchaudio.load(f)
                 embedding = self.model.encode_batch(signal)
-                f_df = pd.DataFrame(embedding.to(self.config['device']).numpy().ravel()).T
+                f_df = pd.DataFrame(embedding.to('cpu').numpy().ravel()).T
                 f_df[input_column] = f
                 t_end_feature_extraction = time.time()
                 if self.config['performance_measurement']:

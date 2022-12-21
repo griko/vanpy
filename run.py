@@ -10,7 +10,7 @@ from vanpy.utils.utils import yaml_placeholder_replacement
 
 # async def main():
 def main():
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s:%(name)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
 
     with open('pipeline.yaml', 'r') as f:
         config = yaml.load(f, Loader=yaml.FullLoader)
