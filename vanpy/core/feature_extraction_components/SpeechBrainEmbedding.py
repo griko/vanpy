@@ -45,15 +45,7 @@ class SpeechBrainEmbedding(PipelineComponent):
                 df = df.drop([file_performance_column_name], axis=1)
             df.insert(0, file_performance_column_name, None)
 
-        # replace the feature columns
-        signal, fs = torchaudio.load(get_null_wav_path())
-        embedding = self.model.encode_batch(signal)
-        f_df = pd.DataFrame(embedding.to(self.config['device']).numpy().ravel()).T
-        for c in f_df.columns[::-1]:
-            c = f'{c}_{self.get_name()}'
-            if c in df.columns:
-                df = df.drop([c], axis=1)
-            df.insert(0, c, None)
+        df, feature_columns = self.create_and_get_feature_columns(df)
 
         for j, f in enumerate(paths_list):
             try:
@@ -72,6 +64,17 @@ class SpeechBrainEmbedding(PipelineComponent):
                 self.logger.error(f'An error occurred in {f}, {j + 1}/{len(paths_list)}: {e}')
             self.save_intermediate_payload(j, ComponentPayload(metadata=metadata, df=df))
 
-        feature_columns = [str(x) for x in range(512)]
         metadata['feature_columns'].extend(feature_columns)
         return ComponentPayload(metadata=metadata, df=df)
+
+    def create_and_get_feature_columns(self, df: pd.DataFrame):
+        feature_columns = []
+        signal, fs = torchaudio.load(get_null_wav_path())
+        embedding = self.model.encode_batch(signal)
+        f_df = pd.DataFrame(embedding.to('cpu').numpy().ravel()).T
+        for c in f_df.columns[::-1]:
+            c = f'{c}_{self.get_name()}'
+            feature_columns.append(c)
+            if c not in df.columns:
+                df.insert(0, c, None)
+        return df, feature_columns

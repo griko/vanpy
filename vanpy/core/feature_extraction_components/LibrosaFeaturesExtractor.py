@@ -34,13 +34,7 @@ class LibrosaFeaturesExtractor(PipelineComponent):
             file_performance_column_name = f'perf_{self.get_name()}_get_features'
             metadata['meta_columns'].extend([file_performance_column_name])
 
-        # replace the feature columns
-        cols = ['zero_crossing_rate', 'spectral_centroid', 'spectral_bandwidth', 'spectral_contrast', 'spectral_flatness']
-        cols.extend([f'mfcc_{i}' for i in range(self.n_mfcc)])
-        cols.extend([f'd_mfcc_{i}' for i in range(self.n_mfcc)])
-        feature_columns = ''
-        df = df.drop(cols, axis=1, errors='ignore')
-
+        df, feature_columns = self.create_and_get_feature_columns(df)
 
         for j, f in enumerate(paths_list):
             try:
@@ -71,7 +65,6 @@ class LibrosaFeaturesExtractor(PipelineComponent):
                 if self.config['performance_measurement']:
                     f_df[file_performance_column_name] = t_end_feature_extraction - t_start_feature_extraction
 
-                feature_columns = f_df.columns
                 for c in f_df.columns:
                     df.at[j, c] = f_df.iloc[0, f_df.columns.get_loc(c)]
                 self.latent_info_log(f'done with {f}, {j + 1}/{len(paths_list)}', iteration=j)
@@ -81,3 +74,21 @@ class LibrosaFeaturesExtractor(PipelineComponent):
 
         metadata['feature_columns'].extend(feature_columns)
         return ComponentPayload(metadata=metadata, df=df)
+
+    def create_and_get_feature_columns(self, df: pd.DataFrame):
+        feature_columns = []
+        cols = ['zero_crossing_rate', 'spectral_centroid', 'spectral_bandwidth', 'spectral_contrast',
+                'spectral_flatness']
+        for col in cols:
+            if self.config['features'] and col in self.config['features']:
+                feature_columns.append(col)
+        if self.config['features'] and 'mfcc' in self.config['features']:
+            feature_columns.extend([f'mfcc_{i}' for i in range(self.n_mfcc)])
+        if self.config['features'] and 'delta_mfcc' in self.config['features']:
+            feature_columns.extend([f'd_mfcc_{i}' for i in range(self.n_mfcc)])
+
+        for c in feature_columns[::-1]:
+            if c not in df.columns:
+                df.insert(0, c, None)
+
+        return df, feature_columns
