@@ -14,6 +14,8 @@ class FilelistDataFrameCreator(PipelineComponent):
 
     def process(self, input_payload: ComponentPayload) -> ComponentPayload:
         metadata, df = input_payload.unpack()
+        if 'input_path' not in metadata:
+            raise AttributeError("The supplied ComponentPayload does not contain 'input_path', file_mapper can not be used without it")
         input_folder = metadata['input_path']
         if 'load_payload' in self.config and self.config['load_payload']:
             p_df = pd.read_csv(self.config['load_df_path'])

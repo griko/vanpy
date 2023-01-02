@@ -69,4 +69,7 @@ class SegmenterComponent(PipelineComponent, ABC):
                 p_df = p_df.explode(processed_path).reset_index().drop(['index'], axis=1)
         else:
             unprocessed_paths_list = paths_list
+        for col in [processed_path, input_column]:  # add required columns to pass merge
+            if col not in p_df:
+                p_df[col] = None
         return p_df, unprocessed_paths_list

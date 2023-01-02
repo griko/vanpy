@@ -5,6 +5,8 @@ from vanpy.core.CombinedPipeline import CombinedPipeline
 import yaml
 import logging
 from vanpy.utils.utils import yaml_placeholder_replacement
+from vanpy.core.ComponentPayload import ComponentPayload
+import pandas as pd
 # import asyncio
 
 
@@ -17,7 +19,7 @@ def main():
         config = yaml_placeholder_replacement(config)
 
     preprocessing_pipeline = PreprocessPipeline(
-        ['file_mapper', 'wav_converter'], config=config)  #, 'silero_vad', 'pyannote_vad'], config=config)  # 'wav_converter', 'espnet-se', 'silero_vad', 'pyannote_vad'], config=config)
+        ['wav_converter'], config=config)  #'file_mapper', 'silero_vad', 'pyannote_vad'], config=config)  # 'wav_converter', 'espnet-se', 'silero_vad', 'pyannote_vad'], config=config)
     feature_extraction_pipeline = FeatureExtractionPipeline(
         ['librosa_features_extractor', 'speechbrain_embedding', 'pyannote_embedding'], config=config)  # 'librosa_features_extractor', 'speechbrain_embedding', 'pyannote_embedding'
     # speaker_clf_pipeline = ClassificationPipeline(['wav2vec2stt'], config=config)  # speech_brain_iemocap_emotion
@@ -26,7 +28,8 @@ def main():
     pipline = CombinedPipeline(
             [preprocessing_pipeline, feature_extraction_pipeline], config=config)
     # processed_payload = await pipline.process()
-    processed_payload = pipline.process()
+    cp = ComponentPayload(metadata={'paths_column': 'paths'}, df=pd.DataFrame(columns=['paths']))
+    processed_payload = pipline.process(cp)
 
     print(processed_payload.get_classification_df(all_paths_columns=True, meta_columns=True))
 

@@ -9,14 +9,22 @@ class ComponentPayload:
     df: pd.DataFrame
 
     def __init__(self, input_path: str = '', metadata: Dict = None, df: pd.DataFrame = None):
-        if input_path:
-            self.metadata = {'input_path': input_path, 'paths_column': '', 'all_paths_columns': [],
+        self.metadata = metadata
+        self.df = df
+        if not self.metadata:
+            self.metadata = {'input_path': '', 'paths_column': '', 'all_paths_columns': [],
                              'meta_columns': [], 'feature_columns': [], 'classification_columns': []}
+        if input_path:
+            self.metadata['input_path'] = input_path
+        if ('input_path' not in self.metadata or self.metadata['input_path'] == '') and \
+            ('paths_column' not in self.metadata or self.metadata['paths_column'] == ''):
+            raise AttributeError(
+                "You must supply at least input_path or metadata['paths_column'] when initializing ComponentPayload")
+        for col in ['all_paths_columns', 'meta_columns', 'feature_columns', 'classification_columns']:
+            if col not in self.metadata:
+                self.metadata[col] = []
+        if self.df is None:
             self.df = pd.DataFrame()
-        if metadata:
-            self.metadata = metadata
-        if df is not None:
-            self.df = df
 
     def unpack(self) -> Tuple[Dict, pd.DataFrame]:
         return self.metadata, self.df
