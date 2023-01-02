@@ -23,9 +23,11 @@ class CombinedPipeline:
         self.pipelines = pipelines
         self.logger = logging.getLogger('Combined Pipeline')
 
-    def process(self) -> ComponentPayload:
+    def process(self, initial_payload: ComponentPayload = None) -> ComponentPayload:
         process_dir = self.input_dir
         cp: ComponentPayload = ComponentPayload(input_path=process_dir)
+        if initial_payload:
+            cp = initial_payload
 
         for pipeline in self.pipelines:
             if pipeline is not None:
