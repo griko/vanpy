@@ -23,6 +23,8 @@ class ComponentPayload:
         for col in ['all_paths_columns', 'meta_columns', 'feature_columns', 'classification_columns']:
             if col not in self.metadata:
                 self.metadata[col] = []
+        if 'paths_column' in self.metadata and not self.metadata['all_paths_columns']:
+            self.metadata['all_paths_columns'].append(self.metadata['paths_column'])
         if self.df is None:
             self.df = pd.DataFrame()
 
