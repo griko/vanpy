@@ -15,7 +15,7 @@ class ComponentPayload:
             self.df = pd.DataFrame()
         if metadata:
             self.metadata = metadata
-        if df:
+        if df is not None:
             self.df = df
 
     def unpack(self) -> Tuple[Dict, pd.DataFrame]:
