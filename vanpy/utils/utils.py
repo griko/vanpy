@@ -3,6 +3,7 @@ import subprocess
 from typing import List, Tuple
 import gdown
 import logging
+import yaml
 
 logger = logging.getLogger(f'vanpy utils')
 
@@ -52,6 +53,13 @@ def yaml_placeholder_replacement(full, val=None, initial=True):
             val = full[val.split("}}")[0].split("{{")[1]] + ''.join(val.split("}}")[1:])
 
     return val
+
+
+def load_config(config_yaml_path:str = 'pipeline.yaml'):
+    with open(config_yaml_path, 'r') as f:
+        config = yaml.load(f, Loader=yaml.FullLoader)
+        config = yaml_placeholder_replacement(config)
+    return config
 
 
 def get_null_wav_path():

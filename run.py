@@ -2,9 +2,8 @@ from vanpy.core.ClassificationPipline import ClassificationPipeline
 from vanpy.core.FeatureExtractionPipline import FeatureExtractionPipeline
 from vanpy.core.PreprocessPipline import PreprocessPipeline
 from vanpy.core.CombinedPipeline import CombinedPipeline
-import yaml
 import logging
-from vanpy.utils.utils import yaml_placeholder_replacement
+from vanpy.utils.utils import load_config
 from vanpy.core.ComponentPayload import ComponentPayload
 import pandas as pd
 # import asyncio
@@ -13,10 +12,7 @@ import pandas as pd
 # async def main():
 def main():
     logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s:%(name)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
-
-    with open('pipeline.yaml', 'r') as f:
-        config = yaml.load(f, Loader=yaml.FullLoader)
-        config = yaml_placeholder_replacement(config)
+    config = load_config('pipeline.yaml')
 
     preprocessing_pipeline = PreprocessPipeline(
         ['wav_converter'], config=config)  #'file_mapper', 'silero_vad', 'pyannote_vad'], config=config)  # 'wav_converter', 'espnet-se', 'silero_vad', 'pyannote_vad'], config=config)
