@@ -15,6 +15,8 @@ preprocessing:
     ab: '256k'  # bitrate
     ac: 1       # number of channels
     ar: '16k'   # sample frequency
+    use_dir_name_as_prefix: true  # will name converted file with parent_dir prefix:
+                                  # '<path>/<parent_dir>/<filename>' -> '<ouput_dir>/<parent_dir>_<filename>'
     overwrite: false
     save_payload: true
   ina_speech_segmenter:

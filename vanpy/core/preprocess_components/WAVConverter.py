@@ -20,6 +20,8 @@ class WAVConverter(SegmenterComponent):
     def process(self, input_payload: ComponentPayload) -> ComponentPayload:
         metadata, df = input_payload.unpack()
         input_column = metadata['paths_column']
+        if input_column == '':
+            raise KeyError("WAV converter can not run without specifying a paths column in the payload. Maybe you should run the file_maper before.")
         paths_list = df[input_column].tolist()
         output_dir = self.config['output_dir']
         create_dirs_if_not_exist(output_dir)
@@ -41,10 +43,13 @@ class WAVConverter(SegmenterComponent):
 
         for j, f in enumerate(paths_list):
             filename = ''.join(f.split("/")[-1].split(".")[:-1])
+            dir_prefix = ''
+            if 'use_dir_name_as_prefix' in self.config and self.config['use_dir_name_as_prefix']:
+                dir_prefix = f.split("/")[-2] + '_'
             if not output_dir:
                 input_path = ''.join(f.split("/")[:-1])
                 output_dir = input_path
-            output_filename = f'{filename}.wav'
+            output_filename = f'{dir_prefix}{filename}.wav'
             self.run_ffmpeg(f, ab, ac, ar, output_dir, output_filename)
 
             f_df = pd.DataFrame.from_dict({processed_path: [f'{output_dir}/{output_filename}'],
