@@ -40,7 +40,7 @@ class SegmenterComponent(PipelineComponent, ABC):
             f_d[self.file_performance_column_name] = t_end - t_start
 
     def get_file_paths_and_processed_df_if_not_overwriting(self, p_df, paths_list, processed_path, input_column,
-                                                           output_dir):
+                                                           output_dir, use_dir_prefix=False):
         unprocessed_paths_list = []
         if not self.config['overwrite']:
             existing_file_list = get_audio_files_paths(output_dir)
@@ -53,8 +53,11 @@ class SegmenterComponent(PipelineComponent, ABC):
                     existing_file_set[short_name].append(p)
                 else:
                     existing_file_set[short_name] = [p]
+
             for f in paths_list:
                 file_name_without_extension = f.split("/")[-1].split(".")[0]
+                if use_dir_prefix:
+                    file_name_without_extension = f.split("/")[-2] + '_' + file_name_without_extension
                 if file_name_without_extension in existing_file_set:
                     f_df = pd.DataFrame.from_dict(
                         {processed_path: [existing_file_set[file_name_without_extension]], input_column: [f]})
