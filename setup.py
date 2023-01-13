@@ -10,7 +10,7 @@ setup(
     description='Voice ANalysis framework',
     author='Gregory Koushnir',
     author_email='koushgre@post.bgu.ac.il',
-    packages=find_packages(include=['vanpy.core', 'vanpy.core.*', 'vanpy.utils', 'vanpy.utils.*']),
+    # packages=find_packages(include=['vanpy.core', 'vanpy.core.*', 'vanpy.utils', 'vanpy.utils.*']),
     install_requires=[
         'gdown>=4.4.0',
         'huggingface-hub>=0.5.1',

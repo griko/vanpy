@@ -69,7 +69,7 @@ class ComponentPayload:
             columns.extend(self.metadata['meta_columns'])
         return columns
 
-    def get_declared_columns(self, ext_columns: List[str], all_paths_columns=False, meta_columns=False):
+    def get_declared_columns(self, ext_columns: List[str], all_paths_columns=False, meta_columns=False) -> pd.DataFrame:
         """
         Returns a payload's dataframe containing the specified columns.
 
@@ -85,7 +85,7 @@ class ComponentPayload:
         columns = self.get_columns(all_paths_columns, meta_columns)
         for cols in ext_columns:
             columns.extend(self.metadata[cols])
-        columns = list(set(columns) & set(self.df.columns))
+        # columns = list(set(columns) & set(self.df.columns))
         return self.df[columns]
 
     def get_features_df(self, all_paths_columns=False, meta_columns=False):

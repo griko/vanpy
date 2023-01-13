@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 
 from src.vanpy.core.ComponentPayload import ComponentPayload
-from src.vanpy.core.PiplineComponent import PipelineComponent
+from src.vanpy.core.PipelineComponent import PipelineComponent
 from typing import List
 
 

@@ -5,7 +5,7 @@ import logging
 from typing import List
 
 from src.vanpy.core.BasePipline import BasePipeline
-from src.vanpy.core.PiplineComponent import ComponentPayload
+from src.vanpy.core.PipelineComponent import ComponentPayload
 from yaml import YAMLObject
 
 

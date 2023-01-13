@@ -6,7 +6,7 @@ from speechbrain.pretrained import EncoderClassifier
 import torch
 import pandas as pd
 from src.vanpy.core.ComponentPayload import ComponentPayload
-from src.vanpy.core.PiplineComponent import PipelineComponent
+from src.vanpy.core.PipelineComponent import PipelineComponent
 from src.vanpy.utils.utils import get_null_wav_path
 
 

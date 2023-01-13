@@ -32,6 +32,7 @@ preprocessing:
     output_dir: 'pyannote_vad_preprocessed'
     add_segment_metadata: true
     performance_measurement: true
+    keep_only_first_segment: true
     onset: 0.85             # onset activation threshold
     offset: 0.8             # offset activation threshold
     min_duration_on: 0.1    # remove speech regions shorter than that many seconds

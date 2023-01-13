@@ -126,5 +126,13 @@ class PipelineComponent(ABC):
             self.get_logger().info(f'Saved payload in {self.config["intermediate_payload_path"]}')
 
     def save_intermediate_payload(self, i: int, input_payload: ComponentPayload):
+        """
+        Save intermediate payload based on the save_payload_periodicity configuration.
+
+        :param i: current iteration count
+        :type i: int
+        :param input_payload: the payload to be saved
+        :type input_payload: ComponentPayload
+        """
         if 'save_payload_periodicity' in self.config and i % self.config['save_payload_periodicity'] == 0 and i > 0:
             self.save_component_payload(input_payload, intermediate=True)

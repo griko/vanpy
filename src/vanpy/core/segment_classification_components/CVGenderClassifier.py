@@ -2,7 +2,7 @@ import pickle
 from yaml import YAMLObject
 
 from src.vanpy.core.ComponentPayload import ComponentPayload
-from src.vanpy.core.PiplineComponent import PipelineComponent
+from src.vanpy.core.PipelineComponent import PipelineComponent
 from src.vanpy.utils.utils import cached_download
 
 
