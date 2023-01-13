@@ -15,7 +15,7 @@ def main():
     config = load_config('pipeline.yaml')
 
     preprocessing_pipeline = PreprocessPipeline(
-        ['wav_converter'], config=config)  #'file_mapper', 'silero_vad', 'pyannote_vad'], config=config)  # 'wav_converter', 'espnet-se', 'silero_vad', 'pyannote_vad'], config=config)
+        ['file_mapper', 'wav_converter', 'silero_vad', 'pyannote_vad'], config=config)  #'file_mapper', 'silero_vad', 'pyannote_vad'], config=config)  # 'wav_converter', 'espnet-se', 'silero_vad', 'pyannote_vad'], config=config)
     feature_extraction_pipeline = FeatureExtractionPipeline(
         ['librosa_features_extractor', 'speechbrain_embedding', 'pyannote_embedding'], config=config)  # 'librosa_features_extractor', 'speechbrain_embedding', 'pyannote_embedding'
     # speaker_clf_pipeline = ClassificationPipeline(['wav2vec2stt'], config=config)  # speech_brain_iemocap_emotion
@@ -25,10 +25,10 @@ def main():
             [preprocessing_pipeline, feature_extraction_pipeline], config=config)
     # processed_payload = await pipline.process()
     # cp = ComponentPayload(metadata={'paths_column': 'paths'}, df=pd.DataFrame(columns=['paths']))
-    df = pd.DataFrame({'sample_path': ['speech_examples_small/stream_1nwjWQJB_20220104_16_28_02_40.wav']})
-    metadata = {'paths_column': 'sample_path'}
-    cp = ComponentPayload(metadata=metadata, df=df)
-    processed_payload = pipline.process(cp)  # (cp)
+    # df = pd.DataFrame({'sample_path': ['speech_examples_small/stream_1nwjWQJB_20220104_16_28_02_40.wav']})
+    # metadata = {'paths_column': 'sample_path'}
+    # cp = ComponentPayload(metadata=metadata, df=df)
+    processed_payload = pipline.process()  # (cp)
 
     print(processed_payload.get_classification_df(all_paths_columns=True, meta_columns=True))
 

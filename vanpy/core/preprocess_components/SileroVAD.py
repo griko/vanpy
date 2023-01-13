@@ -64,6 +64,8 @@ class SileroVAD(SegmenterComponent):
                     self.add_performance_metadata(f_d, t_start_segmentation, t_end_segmentation)
                     f_df = pd.DataFrame.from_dict(f_d)
                     p_df = pd.concat([p_df, f_df], ignore_index=True)
+                    if 'keep_only_first_segment' in self.config and self.config['keep_only_first_segment']:
+                        break
                 self.latent_info_log(
                     f'Extracted {len(v_segments)} from {f} in {t_end_segmentation - t_start_segmentation} seconds, {j + 1}/{len(paths_list)}', iteration=j)
 

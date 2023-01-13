@@ -12,7 +12,7 @@ class WAVConverter(SegmenterComponent):
         super().__init__(component_type='preprocessing', component_name='wav_converter',
                          yaml_config=yaml_config)
         self.ffmpeg_config = ["ffmpeg", "-y", "-hide_banner", "-loglevel", "error", "-i",
-                              "input_file", "output_file", '-dn', '-ignore_unknown', '-sn']
+                              "input_file", "-vn", "output_file", '-dn', '-ignore_unknown', '-sn']
 
     def update_ffmpeg_config(self):
         available_parameters = ['ab', 'ac', 'ar', 'acodec']

@@ -29,16 +29,13 @@ class PyannoteVAD(SegmenterComponent):
         self.model = VoiceActivityDetection(segmentation=model)
         self.model.instantiate(self.params)
 
-    @staticmethod
-    def get_voice_segments(segmentation):
-        sections = []
-        for i, v in enumerate(segmentation.itersegments()):
-            start, stop = v
-            sections.append((start, stop))
-        return sections
-
     def get_voice_segments(self, f):
-        return PyannoteVAD.get_voice_segments(self.model(f))
+        annotation = self.model(f)
+        segments = []
+        for i, v in enumerate(annotation.itersegments()):
+            start, stop = v
+            segments.append((start, stop))
+        return segments
 
     def process(self, input_payload: ComponentPayload) -> ComponentPayload:
         if not self.model:
@@ -73,6 +70,8 @@ class PyannoteVAD(SegmenterComponent):
                     self.add_performance_metadata(f_d, t_start_segmentation, t_end_segmentation)
                     f_df = pd.DataFrame.from_dict(f_d)
                     p_df = pd.concat([p_df, f_df], ignore_index=True)
+                    if 'keep_only_first_segment' in self.config and self.config['keep_only_first_segment']:
+                        break
                 end = time.time()
                 self.latent_info_log(f'Extracted {len(v_segments)} from {f} in {end - t_start_segmentation} seconds, {j + 1}/{len(paths_list)}', iteration=j)
             except RuntimeError as e:
