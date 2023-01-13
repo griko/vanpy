@@ -7,9 +7,9 @@ import numpy as np
 import pandas as pd
 import torch
 
-from vanpy.core.ComponentPayload import ComponentPayload
-from vanpy.core.PiplineComponent import PipelineComponent
-from vanpy.utils.utils import get_null_wav_path
+from src.vanpy.core.ComponentPayload import ComponentPayload
+from src.vanpy.core.PiplineComponent import PipelineComponent
+from src.vanpy.utils.utils import get_null_wav_path
 
 
 class PyannoteEmbedding(PipelineComponent):

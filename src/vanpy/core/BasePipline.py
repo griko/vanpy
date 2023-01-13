@@ -4,10 +4,9 @@ from dataclasses import dataclass
 from logging import Logger
 from typing import Dict, List
 from yaml import YAMLObject
-import inspect
 
-from vanpy.core.ComponentPayload import ComponentPayload
-from vanpy.core.PiplineComponent import PipelineComponent
+from src.vanpy.core.ComponentPayload import ComponentPayload
+from src.vanpy.core.PiplineComponent import PipelineComponent
 
 
 @dataclass

@@ -1,33 +1,26 @@
-from yaml import YAMLObject
-
-from vanpy.core.ComponentPayload import ComponentPayload
-from vanpy.core.preprocess_components.SegmenterComponent import SegmenterComponent
-from vanpy.utils.utils import create_dirs_if_not_exist, cut_segment
-from inaSpeechSegmenter import Segmenter
-import pandas as pd
 import time
+from yaml import YAMLObject
+import torch
+import pandas as pd
+
+from src.vanpy.core.ComponentPayload import ComponentPayload
+from src.vanpy.core.preprocess_components.SegmenterComponent import SegmenterComponent
+from src.vanpy.utils.utils import cut_segment, create_dirs_if_not_exist
 
 
-class INAVoiceSeparator(SegmenterComponent):
+class SileroVAD(SegmenterComponent):
     model = None
+    utils = None
+    sampling_rate: int
 
     def __init__(self, yaml_config: YAMLObject):
-        super().__init__(component_type='preprocessing', component_name='ina_speech_segmenter',
+        super().__init__(component_type='preprocessing', component_name='silero_vad',
                          yaml_config=yaml_config)
+        self.sampling_rate = self.config['sampling_rate']
 
     def load_model(self):
-        self.model = Segmenter(vad_engine=self.config['vad_engine'])
-
-    @staticmethod
-    def get_voice_segments(segmentation):
-        voice_sections, filtered_sections = [], []
-        for s in segmentation:
-            kind, start, stop = s
-            if kind == 'female' or kind == 'male':
-                voice_sections.append((start, stop))
-            else:
-                filtered_sections.append((start, stop))
-        return voice_sections, filtered_sections
+        self.model, self.utils = torch.hub.load(repo_or_dir='snakers4/silero-vad', model='silero_vad',
+                                                force_reload=False)
 
     def process(self, input_payload: ComponentPayload) -> ComponentPayload:
         if not self.model:
@@ -37,8 +30,7 @@ class INAVoiceSeparator(SegmenterComponent):
         input_column = metadata['paths_column']
         paths_list = df[input_column].tolist()
         output_dir = self.config['output_dir']
-        filtered_dir = self.config['filtered_dir']
-        create_dirs_if_not_exist(output_dir, filtered_dir)
+        create_dirs_if_not_exist(output_dir)
 
         p_df = pd.DataFrame()
         processed_path, metadata = self.segmenter_create_columns(metadata)
@@ -51,11 +43,19 @@ class INAVoiceSeparator(SegmenterComponent):
             return ComponentPayload(metadata=metadata, df=df)
         self.config['items_in_paths_list'] = len(paths_list) - 1
 
+        (get_speech_timestamps,
+         save_audio,
+         read_audio,
+         VADIterator,
+         collect_chunks) = self.utils
+
         for j, f in enumerate(paths_list):
             try:
                 t_start_segmentation = time.time()
-                segmentation = self.model(f)
-                v_segments, f_segments = INAVoiceSeparator.get_voice_segments(segmentation)
+                wav = read_audio(f, sampling_rate=self.sampling_rate)
+                # get speech timestamps from full audio file
+                v_segments = [(x['start'] / self.sampling_rate, x['end'] / self.sampling_rate) for x in
+                              get_speech_timestamps(wav, self.model, sampling_rate=self.sampling_rate)]
                 t_end_segmentation = time.time()
                 for i, segment in enumerate(v_segments):
                     output_path = cut_segment(f, output_dir=output_dir, segment=segment, segment_id=i, separator=self.segment_name_separator)
@@ -64,9 +64,14 @@ class INAVoiceSeparator(SegmenterComponent):
                     self.add_performance_metadata(f_d, t_start_segmentation, t_end_segmentation)
                     f_df = pd.DataFrame.from_dict(f_d)
                     p_df = pd.concat([p_df, f_df], ignore_index=True)
-                self.latent_info_log(f'Extracted {len(v_segments)} from {f} in {t_end_segmentation - t_start_segmentation} seconds, {j + 1}/{len(paths_list)}', iteration=j)
-            except AssertionError as e:
+                    if 'keep_only_first_segment' in self.config and self.config['keep_only_first_segment']:
+                        break
+                self.latent_info_log(
+                    f'Extracted {len(v_segments)} from {f} in {t_end_segmentation - t_start_segmentation} seconds, {j + 1}/{len(paths_list)}', iteration=j)
+
+            except RuntimeError as e:
                 self.logger.error(f"An error occurred in {f}, {j + 1}/{len(paths_list)}: {e}")
+            self.save_intermediate_payload(j, ComponentPayload(metadata=metadata, df=p_df))
 
         df = pd.merge(left=df, right=p_df, how='outer', left_on=input_column, right_on=input_column)
         return ComponentPayload(metadata=metadata, df=df)

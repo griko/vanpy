@@ -1,8 +1,8 @@
 import subprocess
 
-from vanpy.core.ComponentPayload import ComponentPayload
-from vanpy.core.preprocess_components.SegmenterComponent import SegmenterComponent
-from vanpy.utils.utils import create_dirs_if_not_exist
+from src.vanpy.core.ComponentPayload import ComponentPayload
+from src.vanpy.core.preprocess_components.SegmenterComponent import SegmenterComponent
+from src.vanpy.utils.utils import create_dirs_if_not_exist
 from yaml import YAMLObject
 import pandas as pd
 

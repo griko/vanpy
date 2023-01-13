@@ -1,12 +1,12 @@
 from typing import List
 from yaml import YAMLObject
-from vanpy.core.BasePipline import BasePipeline
+from src.vanpy.core.BasePipline import BasePipeline
 # from vanpy.core.preprocess_components.ESPnetSpeechEnhancement import ESPnetSpeechEnhancement
-from vanpy.core.preprocess_components.PyannoteVAD import PyannoteVAD
-from vanpy.core.preprocess_components.SileroVAD import SileroVAD
-from vanpy.core.preprocess_components.WAVConverter import WAVConverter
-from vanpy.core.preprocess_components.INAVoiceSeparator import INAVoiceSeparator
-from vanpy.core.preprocess_components.FilelistDataFrameCreator import FilelistDataFrameCreator
+from src.vanpy.core.preprocess_components.PyannoteVAD import PyannoteVAD
+from src.vanpy.core.preprocess_components.SileroVAD import SileroVAD
+from src.vanpy.core.preprocess_components.WAVConverter import WAVConverter
+from src.vanpy.core.preprocess_components.INAVoiceSeparator import INAVoiceSeparator
+from src.vanpy.core.preprocess_components.FilelistDataFrameCreator import FilelistDataFrameCreator
 
 
 class PreprocessPipeline(BasePipeline):

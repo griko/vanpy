@@ -1,5 +1,5 @@
 from setuptools import setup, find_packages
-import vanpy
+from src import vanpy
 
 # with open('requirements.txt') as f:
 #     required = f.read().splitlines()

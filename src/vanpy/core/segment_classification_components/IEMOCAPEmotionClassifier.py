@@ -1,8 +1,8 @@
 import os
 from yaml import YAMLObject
 
-from vanpy.core.ComponentPayload import ComponentPayload
-from vanpy.core.PiplineComponent import PipelineComponent
+from src.vanpy.core.ComponentPayload import ComponentPayload
+from src.vanpy.core.PiplineComponent import PipelineComponent
 from speechbrain.pretrained.interfaces import foreign_class
 
 

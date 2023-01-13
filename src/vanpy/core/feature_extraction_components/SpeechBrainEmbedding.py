@@ -5,9 +5,9 @@ import torchaudio
 from speechbrain.pretrained import EncoderClassifier
 import torch
 import pandas as pd
-from vanpy.core.ComponentPayload import ComponentPayload
-from vanpy.core.PiplineComponent import PipelineComponent
-from vanpy.utils.utils import get_null_wav_path
+from src.vanpy.core.ComponentPayload import ComponentPayload
+from src.vanpy.core.PiplineComponent import PipelineComponent
+from src.vanpy.utils.utils import get_null_wav_path
 
 
 class SpeechBrainEmbedding(PipelineComponent):

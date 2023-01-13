@@ -1,13 +1,13 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Dict, Tuple
+from typing import Dict
 from yaml import YAMLObject
 from logging import Logger
 import logging
 import pickle
 from datetime import datetime
-from vanpy.core.ComponentPayload import ComponentPayload
-from vanpy.utils.utils import create_dirs_if_not_exist
+from src.vanpy.core.ComponentPayload import ComponentPayload
+from src.vanpy.utils.utils import create_dirs_if_not_exist
 
 
 @dataclass
@@ -18,12 +18,32 @@ class PipelineComponent(ABC):
     logger: Logger
 
     def __init__(self, component_type: str, component_name: str, yaml_config: YAMLObject):
+        """
+        Initializes the PipelineComponent object with the given component type, component name, and YAML configuration.
+
+        :param component_type: the type of component (e.g. "preprocessing", "feature_extraction", etc.)
+        :type component_type: str
+        :param component_name: the name of the component (e.g. "pyannote_vad", "speechbrain_embedding", etc.)
+        :type component_name: str
+        :param yaml_config: the YAML configuration for the component
+        :type yaml_config: YAMLObject
+        """
         self.component_type = component_type
         self.component_name = component_name
         self.config = self.import_config(yaml_config)
         self.logger = self.get_logger()
 
     def latent_info_log(self, message: str, iteration: int, last_item: bool = False) -> None:
+        """
+        Logs the given message if the current iteration is a multiple of the log_each_x_records configuration or if it is the last item in the paths list.
+
+        :param message: the message to log
+        :type message: str
+        :param iteration: the current iteration
+        :type iteration: int
+        :param last_item: whether this is the last item in the paths list
+        :type last_item: bool
+        """
         log_each_x_records = 1
         if self.config['log_each_x_records']:
             log_each_x_records = self.config['log_each_x_records']
@@ -34,6 +54,14 @@ class PipelineComponent(ABC):
             self.logger.info(message)
 
     def import_config(self, yaml_config: YAMLObject) -> Dict:
+        """
+        Imports the YAML configuration for the component and returns it as a dictionary.
+
+        :param yaml_config: the YAML configuration for the component
+        :type yaml_config: YAMLObject
+        :return: the imported configuration as a dictionary
+        :rtype: Dict
+        """
         config = yaml_config[self.component_type][self.component_name]
         config = {} if config is None else config
         for item in yaml_config:  # pass through all root level configs
@@ -42,17 +70,45 @@ class PipelineComponent(ABC):
         return config
 
     def get_logger(self) -> Logger:
+        """
+        Returns the logger for the component.
+
+        :return: the logger for the component
+        :rtype: Logger
+        """
         return logging.getLogger(f'{self.component_type} - {self.component_name}')
 
     def get_name(self) -> str:
+        """
+        Returns the name of the component.
+
+        :return: the name of the component
+        :rtype: str
+        """
         return self.component_name
 
     @abstractmethod
     def process(self, input_payload: ComponentPayload) -> ComponentPayload:
+        """
+        Processes the input payload and returns the output.
+
+        :param input_payload: the input payload to process
+        :type input_payload: ComponentPayload
+        :return: the output payload after processing
+        :rtype: ComponentPayload
+        """
         pass
 
     # @staticmethod
     def save_component_payload(self, input_payload: ComponentPayload, intermediate=False) -> None:
+        """
+        Saves the input payload to disk, if specified in the configuration.
+
+        :param input_payload: the input payload to save
+        :type input_payload: ComponentPayload
+        :param intermediate: whether this is an intermediate payload or the final payload
+        :type intermediate: bool
+        """
         subscript = 'intermediate' if intermediate else 'final'
         self.get_logger().info(
             f'Called Saved payload {self.get_name(), "save_payload" in self.config and self.config["save_payload"]}, intermediate {intermediate}')

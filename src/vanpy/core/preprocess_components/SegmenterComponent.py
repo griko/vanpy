@@ -2,8 +2,8 @@ from abc import ABC
 
 from yaml import YAMLObject
 
-from vanpy.core.PiplineComponent import PipelineComponent
-from vanpy.utils.utils import get_audio_files_paths
+from src.vanpy.core.PiplineComponent import PipelineComponent
+from src.vanpy.utils.utils import get_audio_files_paths
 import pandas as pd
 
 
