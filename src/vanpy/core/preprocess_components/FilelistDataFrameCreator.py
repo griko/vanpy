@@ -1,8 +1,8 @@
 import pandas as pd
 
-from src.vanpy.core.ComponentPayload import ComponentPayload
-from src.vanpy.core.PipelineComponent import PipelineComponent
-from src.vanpy.utils.utils import get_audio_files_paths
+from vanpy.core.ComponentPayload import ComponentPayload
+from vanpy.core.PipelineComponent import PipelineComponent
+from vanpy.utils.utils import get_audio_files_paths
 from yaml import YAMLObject
 import pickle
 

@@ -4,8 +4,8 @@ import pandas as pd
 import logging
 from typing import List
 
-from src.vanpy.core.BasePipline import BasePipeline
-from src.vanpy.core.PipelineComponent import ComponentPayload
+from vanpy.core.BasePipline import BasePipeline
+from vanpy.core.ComponentPayload import ComponentPayload
 from yaml import YAMLObject
 
 

@@ -1,8 +1,8 @@
 from yaml import YAMLObject
 
-from src.vanpy.core.ComponentPayload import ComponentPayload
-from src.vanpy.core.preprocess_components.SegmenterComponent import SegmenterComponent
-from src.vanpy.utils.utils import create_dirs_if_not_exist, cut_segment
+from vanpy.core.ComponentPayload import ComponentPayload
+from vanpy.core.preprocess_components.SegmenterComponent import SegmenterComponent
+from vanpy.utils.utils import create_dirs_if_not_exist, cut_segment
 from pyannote.audio.pipelines import VoiceActivityDetection
 import pandas as pd
 import time

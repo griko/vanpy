@@ -1,8 +1,8 @@
-from src.vanpy.core.FeatureExtractionPipline import FeatureExtractionPipeline
-from src.vanpy.core.PreprocessPipline import PreprocessPipeline
-from src.vanpy.core.CombinedPipeline import CombinedPipeline
+from vanpy.core.FeatureExtractionPipline import FeatureExtractionPipeline
+from vanpy.core.PreprocessPipline import PreprocessPipeline
+from vanpy.core.CombinedPipeline import CombinedPipeline
 import logging
-from src.vanpy.utils.utils import load_config
+from vanpy.utils.utils import load_config
 
 
 # import asyncio

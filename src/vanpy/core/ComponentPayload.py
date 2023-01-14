@@ -85,7 +85,7 @@ class ComponentPayload:
         columns = self.get_columns(all_paths_columns, meta_columns)
         for cols in ext_columns:
             columns.extend(self.metadata[cols])
-        # columns = list(set(columns) & set(self.df.columns))
+        columns = [c for c in columns if c in self.df.columns]
         return self.df[columns]
 
     def get_features_df(self, all_paths_columns=False, meta_columns=False):

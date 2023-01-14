@@ -6,8 +6,8 @@ from logging import Logger
 import logging
 import pickle
 from datetime import datetime
-from src.vanpy.core.ComponentPayload import ComponentPayload
-from src.vanpy.utils.utils import create_dirs_if_not_exist
+from vanpy.core.ComponentPayload import ComponentPayload
+from vanpy.utils.utils import create_dirs_if_not_exist
 
 
 @dataclass

@@ -6,8 +6,8 @@ from yaml import YAMLObject
 import numpy as np
 import pandas as pd
 
-from src.vanpy.core.ComponentPayload import ComponentPayload
-from src.vanpy.core.PipelineComponent import PipelineComponent
+from vanpy.core.ComponentPayload import ComponentPayload
+from vanpy.core.PipelineComponent import PipelineComponent
 from typing import List
 
 

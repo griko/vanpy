@@ -5,8 +5,8 @@ from logging import Logger
 from typing import Dict, List
 from yaml import YAMLObject
 
-from src.vanpy.core.ComponentPayload import ComponentPayload
-from src.vanpy.core.PipelineComponent import PipelineComponent
+from vanpy.core.ComponentPayload import ComponentPayload
+from vanpy.core.PipelineComponent import PipelineComponent
 
 
 @dataclass

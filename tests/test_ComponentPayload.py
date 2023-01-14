@@ -1,7 +1,7 @@
 import unittest
 import pandas as pd
 
-from src.vanpy.core.ComponentPayload import ComponentPayload
+from vanpy.core.ComponentPayload import ComponentPayload
 
 
 class TestComponentPayload(unittest.TestCase):

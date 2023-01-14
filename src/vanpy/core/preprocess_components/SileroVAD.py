@@ -3,9 +3,9 @@ from yaml import YAMLObject
 import torch
 import pandas as pd
 
-from src.vanpy.core.ComponentPayload import ComponentPayload
-from src.vanpy.core.preprocess_components.SegmenterComponent import SegmenterComponent
-from src.vanpy.utils.utils import cut_segment, create_dirs_if_not_exist
+from vanpy.core.ComponentPayload import ComponentPayload
+from vanpy.core.preprocess_components.SegmenterComponent import SegmenterComponent
+from vanpy.utils.utils import cut_segment, create_dirs_if_not_exist
 
 
 class SileroVAD(SegmenterComponent):

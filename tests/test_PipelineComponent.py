@@ -4,8 +4,8 @@ import unittest
 import unittest.mock
 import io
 import pandas as pd
-from src.vanpy.core.PipelineComponent import PipelineComponent
-from src.vanpy.core.ComponentPayload import ComponentPayload
+from vanpy.core.PipelineComponent import PipelineComponent
+from vanpy.core.ComponentPayload import ComponentPayload
 
 class TestPipelineComponent(TestCase):
     def setUp(self):

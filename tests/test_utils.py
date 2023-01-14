@@ -7,7 +7,7 @@ import unittest
 
 from yaml import YAMLError
 
-from src.vanpy.utils.utils import *
+from vanpy.utils.utils import *
 
 
 class UtilsTest(unittest.TestCase):
