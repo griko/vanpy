@@ -1,5 +1,5 @@
-from vanpy.core.FeatureExtractionPipline import FeatureExtractionPipeline
-from vanpy.core.PreprocessPipline import PreprocessPipeline
+from vanpy.core.FeatureExtractionPipeline import FeatureExtractionPipeline
+from vanpy.core.PreprocessPipeline import PreprocessPipeline
 from vanpy.core.CombinedPipeline import CombinedPipeline
 import logging
 from vanpy.utils.utils import load_config

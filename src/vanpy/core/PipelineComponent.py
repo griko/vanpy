@@ -62,8 +62,10 @@ class PipelineComponent(ABC):
         :return: the imported configuration as a dictionary
         :rtype: Dict
         """
-        config = yaml_config[self.component_type][self.component_name]
-        config = {} if config is None else config
+        if self.component_type in yaml_config and self.component_name in yaml_config[self.component_type]:
+            config = yaml_config[self.component_type][self.component_name]
+        else:
+            config = {}
         for item in yaml_config:  # pass through all root level configs
             if isinstance(item, str) and item not in config:
                 config[item] = yaml_config[item]
