@@ -32,7 +32,7 @@ class ComponentPayload:
         if ('input_path' not in self.metadata or self.metadata['input_path'] == '') and \
             ('paths_column' not in self.metadata or self.metadata['paths_column'] == ''):
             raise AttributeError(
-                "You must supply at least input_path or metadata['paths_column'] when initializing ComponentPayload")
+                "You must supply at least input_path or not empty metadata['paths_column'] when initializing ComponentPayload")
         for col in ['all_paths_columns', 'meta_columns', 'feature_columns', 'classification_columns']:
             if col not in self.metadata:
                 self.metadata[col] = []

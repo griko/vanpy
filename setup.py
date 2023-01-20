@@ -19,8 +19,8 @@ setup(
         'pyannote.audio>=2.0.1',  # pyannote.audio @ https://github.com/pyannote/pyannote-audio/archive/develop.zip'
         'PyYAML>=6.0',
         'speechbrain>=0.5.11',
-        'transformers==4.19.2',
-        'xgboost==1.5.0'
+        'transformers>=4.19.2',
+        'xgboost>=1.5.0'
     ],
     #install_requires=required,
     setup_requires=['flake8'],
