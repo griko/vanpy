@@ -1,6 +1,6 @@
 from typing import List
 from yaml import YAMLObject
-from vanpy.core.BasePipline import BasePipeline
+from vanpy.core.BasePipeline import BasePipeline
 from vanpy.core.feature_extraction_components.LibrosaFeaturesExtractor import LibrosaFeaturesExtractor
 from vanpy.core.feature_extraction_components.PyannoteEmbedding import PyannoteEmbedding
 from vanpy.core.feature_extraction_components.SpeechBrainEmbedding import SpeechBrainEmbedding

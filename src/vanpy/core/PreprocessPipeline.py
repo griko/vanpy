@@ -1,6 +1,6 @@
 from typing import List
 from yaml import YAMLObject
-from vanpy.core.BasePipline import BasePipeline
+from vanpy.core.BasePipeline import BasePipeline
 # from vanpy.core.preprocess_components.ESPnetSpeechEnhancement import ESPnetSpeechEnhancement
 from vanpy.core.preprocess_components.PyannoteVAD import PyannoteVAD
 from vanpy.core.preprocess_components.SileroVAD import SileroVAD

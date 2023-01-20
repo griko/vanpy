@@ -65,7 +65,9 @@ feature_extraction:
       - spectral_centroid
       - spectral_bandwidth
       - spectral_contrast
-      - spectral_flatness
+#      - spectral_flatness
+#      - f0
+      - tonnetz
     save_payload: true
     save_payload_periodicity: 50000  # save intermediate payload results every X processed files
   pyannote_embedding:
