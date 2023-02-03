@@ -7,6 +7,9 @@
 /results
 /silero_vad_preprocessed
 /src/speech_examples
+#/src/speech_examples_small
+/src/silero_vad_preprocessed
+/src/pyannote_vad_preprocessed
 
 
 ### JetBrains template

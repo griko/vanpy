@@ -40,7 +40,7 @@ preprocessing:
     overwrite: false
     save_payload: true
   silero_vad:
-    output_dir: '{{input_dir}}/silero_vad_preprocessed'
+    output_dir: 'silero_vad_preprocessed'
     add_segment_metadata: true
     performance_measurement: true
     keep_only_first_segment: true

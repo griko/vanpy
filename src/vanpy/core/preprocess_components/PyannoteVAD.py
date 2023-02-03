@@ -57,6 +57,7 @@ class PyannoteVAD(SegmenterComponent):
             df = pd.merge(left=df, right=p_df, how='outer', left_on=input_column, right_on=input_column)
             return ComponentPayload(metadata=metadata, df=df)
         self.config['items_in_paths_list'] = len(paths_list) - 1
+        keep_only_first_segment = 'keep_only_first_segment' in self.config and self.config['keep_only_first_segment']
 
         for j, f in enumerate(paths_list):
             try:
@@ -64,13 +65,15 @@ class PyannoteVAD(SegmenterComponent):
                 v_segments = self.get_voice_segments(f)
                 t_end_segmentation = time.time()
                 for i, segment in enumerate(v_segments):
-                    output_path = cut_segment(f, output_dir=output_dir, segment=segment, segment_id=i, separator=self.segment_name_separator)
+                    output_path = cut_segment(f, output_dir=output_dir, segment=segment, segment_id=i,
+                                              separator=self.segment_name_separator,
+                                              keep_only_first_segment=keep_only_first_segment)
                     f_d = {processed_path: [output_path], input_column: [f]}
                     self.add_segment_metadata(f_d, segment[0], segment[1])
                     self.add_performance_metadata(f_d, t_start_segmentation, t_end_segmentation)
                     f_df = pd.DataFrame.from_dict(f_d)
                     p_df = pd.concat([p_df, f_df], ignore_index=True)
-                    if 'keep_only_first_segment' in self.config and self.config['keep_only_first_segment']:
+                    if keep_only_first_segment:
                         break
                 end = time.time()
                 self.latent_info_log(f'Extracted {len(v_segments)} from {f} in {end - t_start_segmentation} seconds, {j + 1}/{len(paths_list)}', iteration=j)

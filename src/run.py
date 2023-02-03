@@ -10,7 +10,7 @@ from vanpy.utils.utils import load_config
 
 # async def main():
 def main():
-    logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s:%(name)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s:%(name)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
     config = load_config('pipeline.yaml')
 
     preprocessing_pipeline = PreprocessPipeline(
