@@ -14,9 +14,9 @@ def main():
     config = load_config('pipeline.yaml')
 
     preprocessing_pipeline = PreprocessPipeline(
-        ['file_mapper', 'wav_converter', 'silero_vad', 'pyannote_vad'], config=config)  #'file_mapper', 'silero_vad', 'pyannote_vad'], config=config)  # 'wav_converter', 'espnet-se', 'silero_vad', 'pyannote_vad'], config=config)
+        ['file_mapper'], config=config)  #, 'wav_converter', 'silero_vad', 'pyannote_vad'], config=config)  # 'wav_converter', 'espnet-se', 'silero_vad', 'pyannote_vad'], config=config)
     feature_extraction_pipeline = FeatureExtractionPipeline(
-        ['librosa_features_extractor', 'speechbrain_embedding', 'pyannote_embedding'], config=config)  # 'librosa_features_extractor', 'speechbrain_embedding', 'pyannote_embedding'
+        ['librosa_features_extractor'], config=config)  # 'librosa_features_extractor', 'speechbrain_embedding', 'pyannote_embedding'
     # speaker_clf_pipeline = ClassificationPipeline(['wav2vec2stt'], config=config)  # speech_brain_iemocap_emotion
     # pipline = CombinedPipeline(
     #     [preprocessing_pipeline, feature_extraction_pipeline, speaker_clf_pipeline], config=config)
