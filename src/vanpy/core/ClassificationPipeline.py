@@ -9,7 +9,8 @@ class ClassificationPipeline(BasePipeline):
         'common_voices_age': None,
         'speech_brain_iemocap_emotion': None,
         'wav2vec2stt': None,
-        'openai_whisper_stt': None
+        'openai_whisper_stt': None,
+        'cosine_distance_diarization': None
     }
 
     def __init__(self, components: List[str], config: YAMLObject):
@@ -29,5 +30,9 @@ class ClassificationPipeline(BasePipeline):
             elif component == 'openai_whisper_stt':
                 from vanpy.core.segment_classification_components.WhisperSTT import WhisperSTT
                 self.components_mapper[component] = WhisperSTT
+            elif component == 'cosine_distance_diarization':
+                from vanpy.core.segment_classification_components.CosineDiarizationClassifier import CosineDiarizationClassifier
+                self.components_mapper[component] = CosineDiarizationClassifier
+
         super().__init__(components, config)
         self.logger.info(f'Created Classification Pipeline with {len(self.components)} components')

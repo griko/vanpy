@@ -51,7 +51,7 @@ class WAVConverter(SegmenterComponent):
             self.logger.warning('You\'ve supplied an empty list to process')
             df = pd.merge(left=df, right=p_df, how='outer', left_on=input_column, right_on=input_column)
             return ComponentPayload(metadata=metadata, df=df)
-        self.config['items_in_paths_list'] = len(paths_list) - 1
+        self.config['records_count'] = len(paths_list) - 1
 
         self.update_ffmpeg_config()
 

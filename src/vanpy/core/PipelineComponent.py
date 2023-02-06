@@ -47,8 +47,8 @@ class PipelineComponent(ABC):
         log_each_x_records = self.config['log_each_x_records'] \
             if 'log_each_x_records' in self.config and self.config['log_each_x_records'] else 10
         last_item = False
-        if self.config['items_in_paths_list']:
-            last_item = iteration == self.config['items_in_paths_list']
+        if self.config['records_count']:
+            last_item = iteration == self.config['records_count']
         if iteration % log_each_x_records == 0 or last_item:
             self.logger.info(message)
 

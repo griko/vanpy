@@ -32,7 +32,7 @@ class Wav2Vec2STT(PipelineComponent):
         payload_metadata, payload_df = input_payload.unpack()
         input_column = payload_metadata['paths_column']
         paths_list = payload_df[input_column].tolist()
-        self.config['items_in_paths_list'] = len(paths_list) - 1
+        self.config['records_count'] = len(paths_list) - 1
 
         if not paths_list:
             self.logger.warning('You\'ve supplied an empty list to process')

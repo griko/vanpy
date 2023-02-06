@@ -17,7 +17,7 @@ class TestPipelineComponent(TestCase):
         self.component_name = "example"
         temp_dir = tempfile.mkdtemp()
         self.config = {'example_component': {
-                           'example': {"log_each_x_records": 1, "items_in_paths_list": 10, "save_payload": True, "intermediate_payload_path": temp_dir}
+                           'example': {"log_each_x_records": 1, "records_count": 10, "save_payload": True, "intermediate_payload_path": temp_dir}
                         }
                     }
         self.pipeline_component = self.ImpPipelineComponent(self.component_type, self.component_name, self.config)

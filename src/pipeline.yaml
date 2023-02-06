@@ -118,3 +118,15 @@ segment_classifier:
     sampling_rate: 16000
     performance_measurement: true
     save_payload: true
+
+  cosine_distance_diarization:
+    classification_column_name: 'diarization_classification'
+    threshold: 0.25  # cosine similarity threshold of the embeddings
+    features_list:  # assumes multiple column features are labeled 'i_<component_name>' where i is between
+                    # start_index (inclusive) and stop_index (exclusive)
+      - speechbrain_embedding:
+          start_index: 0
+          stop_index: 192
+
+
+

@@ -23,14 +23,14 @@ def main():
     # #     [preprocessing_pipeline, feature_extraction_pipeline, speaker_clf_pipeline], config=config)
     # pipline = CombinedPipeline(
     #         [preprocessing_pipeline, speaker_clf_pipeline], config=config)
-    pipline = CombinedPipeline(['file_mapper', 'librosa_features_extractor', 'openai_whisper_stt'], config=config)
+    pipline = CombinedPipeline(['file_mapper', 'silero_vad', 'speechbrain_embedding', 'cosine_distance_diarization'], config=config)
+    # openai_whisper_stt, wav2vec2stt
     # processed_payload = await pipline.process()
     # cp = ComponentPayload(metadata={'paths_column': 'paths'}, df=pd.DataFrame(columns=['paths']))
     # df = pd.DataFrame({'sample_path': ['speech_examples_small/stream_1nwjWQJB_20220104_16_28_02_40.wav']})
     # metadata = {'paths_column': 'sample_path'}
     # cp = ComponentPayload(metadata=metadata, df=df)
     processed_payload = pipline.process()  # (cp)
-
     print(processed_payload.get_classification_df(all_paths_columns=True, meta_columns=True))
 
 

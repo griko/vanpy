@@ -42,7 +42,7 @@ class PyannoteEmbedding(PipelineComponent):
         df = df.reset_index().drop(['index'], axis=1, errors='ignore')
         input_column = metadata['paths_column']
         paths_list = df[input_column].tolist()
-        self.config['items_in_paths_list'] = len(paths_list) - 1
+        self.config['records_count'] = len(paths_list) - 1
 
         file_performance_column_name = ''
         if self.config['performance_measurement']:
