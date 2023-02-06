@@ -35,7 +35,7 @@ class WhisperSTT(PipelineComponent):
         payload_metadata, payload_df = input_payload.unpack()
         input_column = payload_metadata['paths_column']
         paths_list = payload_df[input_column].tolist()
-        self.config['records_count'] = len(paths_list) - 1
+        self.config['records_count'] = len(paths_list)
 
         if not paths_list:
             self.logger.warning('You\'ve supplied an empty list to process')
@@ -72,7 +72,7 @@ class WhisperSTT(PipelineComponent):
         if 'detect_language' in self.config and self.config['detect_language']:
             payload_df[self.language_classification_column_name] = languages
             payload_metadata['classification_columns'].extend([self.language_classification_column_name])
-        if self.config['performance_measurement']:
+        if 'performance_measurement' in self. config and self.config['performance_measurement']:
             file_performance_column_name = f'perf_{self.get_name()}_get_transcription'
             payload_df[file_performance_column_name] = performance_metric
             payload_metadata['meta_columns'].extend([file_performance_column_name])

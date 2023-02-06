@@ -41,7 +41,7 @@ class SileroVAD(SegmenterComponent):
             self.logger.warning('You\'ve supplied an empty list to process')
             df = pd.merge(left=df, right=p_df, how='outer', left_on=input_column, right_on=input_column)
             return ComponentPayload(metadata=metadata, df=df)
-        self.config['records_count'] = len(paths_list) - 1
+        self.config['records_count'] = len(paths_list)
         keep_only_first_segment = 'keep_only_first_segment' in self.config and self.config['keep_only_first_segment']
 
         (get_speech_timestamps,

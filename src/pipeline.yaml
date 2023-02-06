@@ -127,6 +127,5 @@ segment_classifier:
       - speechbrain_embedding:
           start_index: 0
           stop_index: 192
-
-
+    performance_measurement: true
 
