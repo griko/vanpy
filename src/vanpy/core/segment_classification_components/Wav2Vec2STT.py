@@ -32,6 +32,7 @@ class Wav2Vec2STT(PipelineComponent):
         payload_metadata, payload_df = input_payload.unpack()
         input_column = payload_metadata['paths_column']
         paths_list = payload_df[input_column].tolist()
+        self.config['items_in_paths_list'] = len(paths_list) - 1
 
         if not paths_list:
             self.logger.warning('You\'ve supplied an empty list to process')
@@ -39,21 +40,30 @@ class Wav2Vec2STT(PipelineComponent):
         
         stts = []
         performance_metric = []
-        for f in paths_list:
-            t_start_transcribing = time.time()
-            # Loading the audio file
-            audio, rate = librosa.load(f, sr=16000)
-            # Taking an input value
-            input_values = self.tokenizer(audio, return_tensors="pt").input_values
-            # Storing logits (non-normalized prediction values)
-            logits = self.model(input_values).logits
-            # Storing predicted ids
-            prediction = torch.argmax(logits, dim=-1)
-            # Passing the prediction to the tokenizer decode to get the transcription
-            transcription = self.tokenizer.batch_decode(prediction)[0]
-            stts.append(transcription)
-            t_end_transcribing = time.time()
-            performance_metric.append(t_end_transcribing - t_start_transcribing)
+        sr = self.config['sampling_rate'] if 'sampling_rate' in self.config else 16000
+        for j, f in enumerate(paths_list):
+            try:
+                t_start_transcribing = time.time()
+                # Loading the audio file
+                audio, rate = librosa.load(f, sr=sr)
+                # Taking an input value
+                input_values = self.tokenizer(audio, return_tensors="pt").input_values
+                # Storing logits (non-normalized prediction values)
+                logits = self.model(input_values).logits
+                # Storing predicted ids
+                prediction = torch.argmax(logits, dim=-1)
+                # Passing the prediction to the tokenizer decode to get the transcription
+                transcription = self.tokenizer.batch_decode(prediction)[0]
+                stts.append(transcription)
+                t_end_transcribing = time.time()
+                performance_metric.append(t_end_transcribing - t_start_transcribing)
+                self.latent_info_log(
+                    f'Transcribed {f} in {t_end_transcribing - t_start_transcribing} seconds, {j + 1}/{len(paths_list)}',
+                    iteration=j)
+            except RuntimeError as e:
+                stts.append(None)
+                performance_metric.append(float('inf'))
+                self.logger.error(f'An error occurred in {f}, {j + 1}/{len(paths_list)}: {e}')
 
         payload_df[self.classification_column_name] = stts
         payload_metadata['classification_columns'].extend([self.classification_column_name])

@@ -1,3 +1,4 @@
+from vanpy.core.ClassificationPipeline import ClassificationPipeline
 from vanpy.core.FeatureExtractionPipeline import FeatureExtractionPipeline
 from vanpy.core.PreprocessPipeline import PreprocessPipeline
 from vanpy.core.CombinedPipeline import CombinedPipeline
@@ -15,13 +16,13 @@ def main():
 
     preprocessing_pipeline = PreprocessPipeline(
         ['file_mapper'], config=config)  #, 'wav_converter', 'silero_vad', 'pyannote_vad'], config=config)  # 'wav_converter', 'espnet-se', 'silero_vad', 'pyannote_vad'], config=config)
-    feature_extraction_pipeline = FeatureExtractionPipeline(
-        ['librosa_features_extractor'], config=config)  # 'librosa_features_extractor', 'speechbrain_embedding', 'pyannote_embedding'
-    # speaker_clf_pipeline = ClassificationPipeline(['wav2vec2stt'], config=config)  # speech_brain_iemocap_emotion
+    # feature_extraction_pipeline = FeatureExtractionPipeline(
+    #     ['librosa_features_extractor'], config=config)  # 'librosa_features_extractor', 'speechbrain_embedding', 'pyannote_embedding'
+    speaker_clf_pipeline = ClassificationPipeline(['openai_whisper_stt', 'wav2vec2stt'], config=config)  # speech_brain_iemocap_emotion
     # pipline = CombinedPipeline(
     #     [preprocessing_pipeline, feature_extraction_pipeline, speaker_clf_pipeline], config=config)
     pipline = CombinedPipeline(
-            [preprocessing_pipeline, feature_extraction_pipeline], config=config)
+            [preprocessing_pipeline, speaker_clf_pipeline], config=config)
     # processed_payload = await pipline.process()
     # cp = ComponentPayload(metadata={'paths_column': 'paths'}, df=pd.DataFrame(columns=['paths']))
     # df = pd.DataFrame({'sample_path': ['speech_examples_small/stream_1nwjWQJB_20220104_16_28_02_40.wav']})

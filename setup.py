@@ -14,7 +14,6 @@ setup(
     install_requires=[
         'gdown>=4.4.0',
         'huggingface-hub>=0.5.1',
-        'inaSpeechSegmenter>=0.7.3',
         'pandas>=1.3.2',
         'pyannote.audio>=2.0.1',  # pyannote.audio @ https://github.com/pyannote/pyannote-audio/archive/develop.zip'
         'PyYAML>=6.0',
@@ -25,6 +24,8 @@ setup(
     #install_requires=required,
     setup_requires=['flake8'],
     extras_require={
-        'espnet': ['espnet', 'espnet_model_zoo'],
+        # 'espnet': ['espnet', 'espnet_model_zoo'],
+        'whisper': ['openai-whisper'],
+        'ina': ['inaSpeechSegmenter>=0.7.3']
     }
 )

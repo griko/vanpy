@@ -103,6 +103,18 @@ segment_classifier:
 
   wav2vec2stt:
     pretrained_models_dir: 'pretrained_models/wav2vec2'
-    classification_column_name: 'wav2vec2_trainscript'
+    classification_column_name: 'wav2vec2_transcript'
+    sampling_rate: 16000
+    performance_measurement: true
+    save_payload: true
+
+  openai_whisper_stt:
+    # Pay attention: "Inference is currently only implemented for short-form i.e. audio is pre-segmented into <=30s segments"
+    model_size: 'tiny'  # 'tiny', 'base', 'small', 'medium', 'large'
+    pretrained_models_dir: 'pretrained_models/whisper'
+    stt_column_name: 'whisper_transcript'
+    detect_language: true
+    language_classification_column_name: 'whisper_language'
+    sampling_rate: 16000
     performance_measurement: true
     save_payload: true

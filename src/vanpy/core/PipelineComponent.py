@@ -44,9 +44,8 @@ class PipelineComponent(ABC):
         :param last_item: whether this is the last item in the paths list
         :type last_item: bool
         """
-        log_each_x_records = 1
-        if self.config['log_each_x_records']:
-            log_each_x_records = self.config['log_each_x_records']
+        log_each_x_records = self.config['log_each_x_records'] \
+            if 'log_each_x_records' in self.config and self.config['log_each_x_records'] else 10
         last_item = False
         if self.config['items_in_paths_list']:
             last_item = iteration == self.config['items_in_paths_list']
