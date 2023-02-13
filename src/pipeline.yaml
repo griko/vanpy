@@ -4,6 +4,7 @@ intermediate_payload_path: 'results'
 # device: 'cpu'  # 'cpu'/'cuda'
 log_each_x_records: 1000
 huggingface_ACCESS_TOKEN: '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'
+sampling_rate: 16000
 
 preprocessing:
   file_mapper:
@@ -15,7 +16,7 @@ preprocessing:
     output_dir: 'convert_preprocessed'
     ab: '256k'  # bitrate, may not be considered depending on a chosen codec
     ac: 1       # number of channels
-    ar: '16k'   # sample frequency
+    ar: '{{sampling_rate}}'   # sample frequency
     acodec: 'pcm_s16le'  # specify codec
     use_dir_name_as_prefix: true  # will name converted file with parent_dir prefix:
                                   # '<path>/<parent_dir>/<filename>' -> '<ouput_dir>/<parent_dir>_<filename>'
@@ -52,19 +53,17 @@ preprocessing:
     add_segment_metadata: true
     performance_measurement: true
     keep_only_first_segment: true
-    sampling_rate: 16000
     overwrite: false
     save_payload: true
     save_payload_periodicity: 50000  # save intermediate payload results every X processed files
 #  espnet_se:
 #    output_dir: 'espnet_se_preprocessed'
 #    performance_measurement: true
-#    sampling_rate: 16000
+#
 
 feature_extraction:
   librosa_features_extractor:
     performance_measurement: true
-    sampling_rate: 16000
     n_mfcc: 13
     features:
       - mfcc
@@ -112,7 +111,6 @@ segment_classifier:
   wav2vec2stt:
     pretrained_models_dir: 'pretrained_models/wav2vec2'
     classification_column_name: 'wav2vec2_transcript'
-    sampling_rate: 16000
     performance_measurement: true
     save_payload: true
 
@@ -123,7 +121,6 @@ segment_classifier:
     stt_column_name: 'whisper_transcript'
     detect_language: true
     language_classification_column_name: 'whisper_language'
-    sampling_rate: 16000
     performance_measurement: true
     save_payload: true
 

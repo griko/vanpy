@@ -42,23 +42,12 @@ class WhisperSTT(PipelineComponent):
         stts = []
         languages = []
         performance_metric = []
-        sr = self.config['sampling_rate'] if 'sampling_rate' in self.config else 16000
         for j, f in enumerate(paths_list):
             t_start_transcribing = time.time()
-            # Loading the audio file
-            # audio, rate = librosa.load(f, sr=sr)
-            audio = whisper.load_audio(f, sr=sr)
-            audio = whisper.pad_or_trim(audio)
-
-            mel = whisper.log_mel_spectrogram(audio).to(self.model.device)
-
-            _, probs = self.model.detect_language(mel)
-
-            options = whisper.DecodingOptions(fp16=False)
-            transcription = whisper.decode(self.model, mel, options)
-            stts.append(transcription.text)
+            transcription = self.model.transcribe(f)
+            stts.append(transcription['text'])
             if 'detect_language' in self.config and self.config['detect_language']:
-                languages.append(transcription.language)
+                languages.append(transcription['language'])
             t_end_transcribing = time.time()
             performance_metric.append(t_end_transcribing - t_start_transcribing)
             self.latent_info_log(

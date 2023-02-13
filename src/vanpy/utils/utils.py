@@ -85,7 +85,7 @@ def yaml_placeholder_replacement(full, val=None, initial=True) -> yaml.YAMLObjec
             val[idx] = yaml_placeholder_replacement(full, i, False)
     elif isinstance(val, str):
         while "{{" in val and "}}" in val:
-            val = full[val.split("}}")[0].split("{{")[1]] + ''.join(val.split("}}")[1:])
+            val = str(full[val.split("}}")[0].split("{{")[1]]) + ''.join(val.split("}}")[1:])
 
     return val
 
