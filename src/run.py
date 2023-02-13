@@ -32,7 +32,7 @@ def main():
     # metadata = {'paths_column': 'sample_path'}
     # cp = ComponentPayload(metadata=metadata, df=df)
     processed_payload = pipline.process()  # (cp)
-    print(processed_payload.get_classification_df(all_paths_columns=True, meta_columns=True))
+    print(processed_payload.get_classification_df(all_paths_columns=False, meta_columns=False))
 
 
 if __name__ == '__main__':

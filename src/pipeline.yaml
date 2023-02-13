@@ -45,7 +45,7 @@ preprocessing:
     classification_column_name: 'pyannote_diarization_classification'
     add_segment_metadata: true
     performance_measurement: true
-    overwrite: false
+    overwrite: true
     save_payload: true
   silero_vad:
     output_dir: 'silero_vad_preprocessed'

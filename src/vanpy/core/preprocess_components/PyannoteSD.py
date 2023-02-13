@@ -27,10 +27,12 @@ class PyannoteSD(SegmenterComponent):
     def get_voice_segments(self, f):
         annotation = self.model(f)
         segments = []
-        for i, v in enumerate(annotation.itersegments()):
+        labels = []
+        for i, (v, _, lbl) in enumerate(annotation.itertracks(yield_label=True)):
             start, stop = v
             segments.append((start, stop))
-        return zip(segments, annotation.labels())
+            labels.append(lbl)
+        return zip(segments, labels)
 
     def process(self, input_payload: ComponentPayload) -> ComponentPayload:
         if not self.model:
@@ -39,6 +41,7 @@ class PyannoteSD(SegmenterComponent):
         payload_metadata, payload_df = input_payload.unpack()
         input_column = payload_metadata['paths_column']
         paths_list = payload_df[input_column].tolist()
+        processed_path = f'{self.get_name()}_processed_path'
         output_dir = self.config['output_dir']
         create_dirs_if_not_exist(output_dir)
 
@@ -48,10 +51,12 @@ class PyannoteSD(SegmenterComponent):
                                                                                    input_column, output_dir)
         # paths_list = list(p_df[input_column])
         p_df[self.classification_column_name] = None
-        if not paths_list:
-            self.logger.warning('You\'ve supplied an empty list to process')
-            df = pd.merge(left=payload_df, right=p_df, how='outer', left_on=input_column, right_on=input_column)
-            return ComponentPayload(metadata=payload_metadata, df=df)
+        if payload_df.empty:
+            ComponentPayload(metadata=payload_metadata, df=payload_df)
+        # if not paths_list:
+        #     self.logger.warning('You\'ve supplied an empty list to process')
+        #     df = pd.merge(left=payload_df, right=p_df, how='outer', left_on=input_column, right_on=input_column)
+        #     return ComponentPayload(metadata=payload_metadata, df=df)
         self.config['records_count'] = len(paths_list)
 
         for j, f in enumerate(paths_list):
