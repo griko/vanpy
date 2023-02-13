@@ -18,10 +18,11 @@ class PyannoteEmbedding(PipelineComponent):
     def __init__(self, yaml_config: YAMLObject):
         super().__init__(component_type='feature_extraction', component_name='pyannote_embedding',
                          yaml_config=yaml_config)
+        self.ACCESS_TOKEN = self.config['huggingface_ACCESS_TOKEN']
 
     def load_model(self):
         model = Model.from_pretrained("pyannote/embedding",  # pyannote%2Fembedding
-                                      use_auth_token="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")
+                                      use_auth_token=self.ACCESS_TOKEN)
         if torch.cuda.is_available():
             self.model = Inference(model,
                                    window="sliding",

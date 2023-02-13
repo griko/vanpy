@@ -9,6 +9,7 @@ class PreprocessPipeline(BasePipeline):
         'wav_converter': None,
         'ina_speech_segmenter': None,
         'pyannote_vad': None,
+        'pyannote_sd': None,
         'silero_vad': None,
         # 'espnet-se': ESPnetSpeechEnhancement
     }
@@ -30,6 +31,9 @@ class PreprocessPipeline(BasePipeline):
             elif component == 'silero_vad':
                 from vanpy.core.preprocess_components.SileroVAD import SileroVAD
                 self.components_mapper[component] = SileroVAD
+            elif component == 'pyannote_sd':
+                from vanpy.core.preprocess_components.PyannoteSD import PyannoteSD
+                self.components_mapper[component] = PyannoteSD
 
         super().__init__(components, config)
         self.logger.info(f'Created Preprocessing Pipeline with {len(self.components)} components')

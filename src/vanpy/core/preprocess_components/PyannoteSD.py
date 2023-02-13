@@ -7,29 +7,22 @@ import pandas as pd
 import time
 
 
-class PyannoteVAD(SegmenterComponent):
+class PyannoteSD(SegmenterComponent):
+    # Pyannote speaker diarization model
     model = None
 
     def __init__(self, yaml_config: YAMLObject):
-        super().__init__(component_type='preprocessing', component_name='pyannote_vad',
+        super().__init__(component_type='preprocessing', component_name='pyannote_sd',
                          yaml_config=yaml_config)
-        self.params = {   # onset/offset activation thresholds
-                          "onset": self.config['onset'], "offset": self.config['offset'],
-                          # remove speech regions shorter than that many seconds.
-                          "min_duration_on": self.config['min_duration_on'],
-                          # fill non-speech regions shorter than that many seconds.
-                          "min_duration_off": self.config['min_duration_off']
-                        }
         self.ACCESS_TOKEN = self.config['huggingface_ACCESS_TOKEN']
+        self.classification_column_name = self.config['classification_column_name'] \
+            if 'classification_column_name' in self.config else 'pyannote_diarization_classification'
 
     def load_model(self):
-        from pyannote.audio import Model
-        from pyannote.audio.pipelines import VoiceActivityDetection
-        model = Model.from_pretrained("pyannote/segmentation",
-                                      use_auth_token=self.ACCESS_TOKEN,
-                                      cache_dir='pretrained_models/pyannote_vad')
-        self.model = VoiceActivityDetection(segmentation=model)
-        self.model.instantiate(self.params)
+        from pyannote.audio import Pipeline
+        self.model = Pipeline.from_pretrained("pyannote/speaker-diarization@2.1",
+                                                use_auth_token=self.ACCESS_TOKEN,
+                                                cache_dir='pretrained_models/pyannote_sd')
 
     def get_voice_segments(self, f):
         annotation = self.model(f)
@@ -37,50 +30,49 @@ class PyannoteVAD(SegmenterComponent):
         for i, v in enumerate(annotation.itersegments()):
             start, stop = v
             segments.append((start, stop))
-        return segments
+        return zip(segments, annotation.labels())
 
     def process(self, input_payload: ComponentPayload) -> ComponentPayload:
         if not self.model:
             self.load_model()
 
-        metadata, df = input_payload.unpack()
-        input_column = metadata['paths_column']
-        paths_list = df[input_column].tolist()
+        payload_metadata, payload_df = input_payload.unpack()
+        input_column = payload_metadata['paths_column']
+        paths_list = payload_df[input_column].tolist()
         output_dir = self.config['output_dir']
         create_dirs_if_not_exist(output_dir)
 
         p_df = pd.DataFrame()
-        processed_path, metadata = self.segmenter_create_columns(metadata)
+        processed_path, payload_metadata = self.segmenter_create_columns(payload_metadata)
         p_df, paths_list = self.get_file_paths_and_processed_df_if_not_overwriting(p_df, paths_list, processed_path,
                                                                                    input_column, output_dir)
-
+        # paths_list = list(p_df[input_column])
+        p_df[self.classification_column_name] = None
         if not paths_list:
             self.logger.warning('You\'ve supplied an empty list to process')
-            df = pd.merge(left=df, right=p_df, how='outer', left_on=input_column, right_on=input_column)
-            return ComponentPayload(metadata=metadata, df=df)
+            df = pd.merge(left=payload_df, right=p_df, how='outer', left_on=input_column, right_on=input_column)
+            return ComponentPayload(metadata=payload_metadata, df=df)
         self.config['records_count'] = len(paths_list)
-        keep_only_first_segment = 'keep_only_first_segment' in self.config and self.config['keep_only_first_segment']
 
         for j, f in enumerate(paths_list):
             try:
                 t_start_segmentation = time.time()
                 v_segments = self.get_voice_segments(f)
                 t_end_segmentation = time.time()
-                for i, segment in enumerate(v_segments):
+                for i, (segment, label) in enumerate(v_segments):
                     output_path = cut_segment(f, output_dir=output_dir, segment=segment, segment_id=i,
                                               separator=self.segment_name_separator,
-                                              keep_only_first_segment=keep_only_first_segment)
-                    f_d = {processed_path: [output_path], input_column: [f]}
+                                              keep_only_first_segment=False)
+                    f_d = {processed_path: [output_path], input_column: [f], self.classification_column_name: [label]}
                     self.add_segment_metadata(f_d, segment[0], segment[1])
                     self.add_performance_metadata(f_d, t_start_segmentation, t_end_segmentation)
                     f_df = pd.DataFrame.from_dict(f_d)
                     p_df = pd.concat([p_df, f_df], ignore_index=True)
-                    if keep_only_first_segment:
-                        break
                 end = time.time()
-                self.latent_info_log(f'Extracted {len(v_segments)} from {f} in {end - t_start_segmentation} seconds, {j + 1}/{len(paths_list)}', iteration=j)
+                self.latent_info_log(f'Extracted {len(list(v_segments))} from {f} in {end - t_start_segmentation} seconds, {j + 1}/{len(paths_list)}', iteration=j)
             except RuntimeError as e:
                 self.logger.error(f"An error occurred in {f}, {j + 1}/{len(paths_list)}: {e}")
 
-        df = pd.merge(left=df, right=p_df, how='outer', left_on=input_column, right_on=input_column)
-        return ComponentPayload(metadata=metadata, df=df)
+        payload_metadata['classification_columns'].extend([self.classification_column_name])
+        df = pd.merge(left=payload_df, right=p_df, how='outer', left_on=input_column, right_on=input_column)
+        return ComponentPayload(metadata=payload_metadata, df=df)

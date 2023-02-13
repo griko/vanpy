@@ -1,11 +1,8 @@
 import time
-import whisper
 import torch
-import librosa
 from yaml import YAMLObject
 from vanpy.core.ComponentPayload import ComponentPayload
 from vanpy.core.PipelineComponent import PipelineComponent
-from vanpy.utils.utils import create_dirs_if_not_exist
 from vanpy.utils.DisjointSet import DisjointSet
 
 

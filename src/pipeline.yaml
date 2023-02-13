@@ -3,6 +3,7 @@ segment_name_separator: "_"
 intermediate_payload_path: 'results'
 # device: 'cpu'  # 'cpu'/'cuda'
 log_each_x_records: 1000
+huggingface_ACCESS_TOKEN: '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'
 
 preprocessing:
   file_mapper:
@@ -32,11 +33,18 @@ preprocessing:
     output_dir: 'pyannote_vad_preprocessed'
     add_segment_metadata: true
     performance_measurement: true
-    keep_only_first_segment: true
+    keep_only_first_segment: false
     onset: 0.85             # onset activation threshold
     offset: 0.8             # offset activation threshold
     min_duration_on: 0.1    # remove speech regions shorter than that many seconds
     min_duration_off: 0.0   # fill non-speech regions shorter than that many seconds
+    overwrite: false
+    save_payload: true
+  pyannote_sd:  # pyannote speaker diarization, applies VAD and Embedding
+    output_dir: 'pyannote_sd_preprocessed'
+    classification_column_name: 'pyannote_diarization_classification'
+    add_segment_metadata: true
+    performance_measurement: true
     overwrite: false
     save_payload: true
   silero_vad:
@@ -128,4 +136,5 @@ segment_classifier:
           start_index: 0
           stop_index: 192
     performance_measurement: true
+    save_payload: true
 

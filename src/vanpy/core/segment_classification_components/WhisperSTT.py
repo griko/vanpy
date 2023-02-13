@@ -1,7 +1,5 @@
 import time
 import whisper
-import torch
-import librosa
 from yaml import YAMLObject
 from vanpy.core.ComponentPayload import ComponentPayload
 from vanpy.core.PipelineComponent import PipelineComponent
