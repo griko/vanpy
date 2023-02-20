@@ -1,5 +1,4 @@
 from yaml import YAMLObject
-
 from vanpy.core.ComponentPayload import ComponentPayload
 from vanpy.core.preprocess_components.SegmenterComponent import SegmenterComponent
 from vanpy.utils.utils import create_dirs_if_not_exist, cut_segment
@@ -41,7 +40,7 @@ class PyannoteSD(SegmenterComponent):
         payload_metadata, payload_df = input_payload.unpack()
         input_column = payload_metadata['paths_column']
         paths_list = payload_df[input_column].tolist()
-        processed_path = f'{self.get_name()}_processed_path'
+        # processed_path = f'{self.get_name()}_processed_path'
         output_dir = self.config['output_dir']
         create_dirs_if_not_exist(output_dir)
 
@@ -49,14 +48,9 @@ class PyannoteSD(SegmenterComponent):
         processed_path, payload_metadata = self.segmenter_create_columns(payload_metadata)
         p_df, paths_list = self.get_file_paths_and_processed_df_if_not_overwriting(p_df, paths_list, processed_path,
                                                                                    input_column, output_dir)
-        # paths_list = list(p_df[input_column])
         p_df[self.classification_column_name] = None
         if payload_df.empty:
             ComponentPayload(metadata=payload_metadata, df=payload_df)
-        # if not paths_list:
-        #     self.logger.warning('You\'ve supplied an empty list to process')
-        #     df = pd.merge(left=payload_df, right=p_df, how='outer', left_on=input_column, right_on=input_column)
-        #     return ComponentPayload(metadata=payload_metadata, df=df)
         self.config['records_count'] = len(paths_list)
 
         for j, f in enumerate(paths_list):

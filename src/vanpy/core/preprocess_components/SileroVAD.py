@@ -1,8 +1,6 @@
 import time
 from yaml import YAMLObject
-import torch
 import pandas as pd
-
 from vanpy.core.ComponentPayload import ComponentPayload
 from vanpy.core.preprocess_components.SegmenterComponent import SegmenterComponent
 from vanpy.utils.utils import cut_segment, create_dirs_if_not_exist
@@ -19,7 +17,8 @@ class SileroVAD(SegmenterComponent):
         self.sampling_rate = self.config['sampling_rate']
 
     def load_model(self):
-        # torch.hub.set_dir('pretrained_models/')
+        import torch
+        torch.hub.set_dir('pretrained_models/')
         self.model, self.utils = torch.hub.load(repo_or_dir='snakers4/silero-vad', model='silero_vad',
                                                 force_reload=False)
 

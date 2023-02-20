@@ -15,7 +15,7 @@ from vanpy.core.ClassificationPipeline import ClassificationPipeline
 
 
 @dataclass
-class CombinedPipeline:
+class Pipeline:
     pipelines: List[BasePipeline]
     logger: Logger
     preprocessed_files_dir: str
@@ -48,15 +48,15 @@ class CombinedPipeline:
 
     @staticmethod
     def generate_pipelines_from_components(components: List[PipelineComponent], config: YAMLObject = None):
-        preprocessing_pipeline = CombinedPipeline.generate_pipeline_from_components(components=components,
-                                                                                    pipeline_class=PreprocessPipeline,
-                                                                                    config=config)
-        feature_extraction_pipeline = CombinedPipeline.generate_pipeline_from_components(components=components,
-                                                                                         pipeline_class=FeatureExtractionPipeline,
-                                                                                         config=config)
-        classification_and_stt_pipeline = CombinedPipeline.generate_pipeline_from_components(components=components,
-                                                                                             pipeline_class=ClassificationPipeline,
-                                                                                             config=config)
+        preprocessing_pipeline = Pipeline.generate_pipeline_from_components(components=components,
+                                                                            pipeline_class=PreprocessPipeline,
+                                                                            config=config)
+        feature_extraction_pipeline = Pipeline.generate_pipeline_from_components(components=components,
+                                                                                 pipeline_class=FeatureExtractionPipeline,
+                                                                                 config=config)
+        classification_and_stt_pipeline = Pipeline.generate_pipeline_from_components(components=components,
+                                                                                     pipeline_class=ClassificationPipeline,
+                                                                                     config=config)
         pipelines = []
         if preprocessing_pipeline:
             pipelines.append(preprocessing_pipeline)

@@ -1,7 +1,6 @@
 from typing import List
 from yaml import YAMLObject
 from vanpy.core.BasePipeline import BasePipeline
-# from vanpy.core.preprocess_components.ESPnetSpeechEnhancement import ESPnetSpeechEnhancement
 
 class PreprocessPipeline(BasePipeline):
     components_mapper = {
@@ -11,7 +10,7 @@ class PreprocessPipeline(BasePipeline):
         'pyannote_vad': None,
         'pyannote_sd': None,
         'silero_vad': None,
-        # 'espnet-se': ESPnetSpeechEnhancement
+        'metricgan_se': None,
     }
 
     def __init__(self, components: List[str], config: YAMLObject):
@@ -34,6 +33,9 @@ class PreprocessPipeline(BasePipeline):
             elif component == 'pyannote_sd':
                 from vanpy.core.preprocess_components.PyannoteSD import PyannoteSD
                 self.components_mapper[component] = PyannoteSD
+            elif component == 'metricgan_se':
+                from vanpy.core.preprocess_components.MetricGANSE import MetricGANSE
+                self.components_mapper[component] = MetricGANSE
 
         super().__init__(components, config)
         self.logger.info(f'Created Preprocessing Pipeline with {len(self.components)} components')

@@ -23,7 +23,6 @@ setup(
     #install_requires=required,
     setup_requires=['flake8'],
     extras_require={
-        # 'espnet': ['espnet', 'espnet_model_zoo'],
         'whisper': ['openai-whisper'],
         'ina': ['inaSpeechSegmenter>=0.7.3'],
         'pyannote': ['pyannote.audio>=2.1.1'], # pyannote.audio @ https://github.com/pyannote/pyannote-audio/archive/develop.zip'

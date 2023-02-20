@@ -56,10 +56,11 @@ preprocessing:
     overwrite: false
     save_payload: true
     save_payload_periodicity: 50000  # save intermediate payload results every X processed files
-#  espnet_se:
-#    output_dir: 'espnet_se_preprocessed'
-#    performance_measurement: true
-#
+  metricgan_se:  # MetricGAN+ speech enhancement component
+    output_dir: 'metricgan_se_preprocessed'
+    performance_measurement: true
+    overwrite: false
+    save_payload: true
 
 feature_extraction:
   librosa_features_extractor:

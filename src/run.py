@@ -1,11 +1,9 @@
 from vanpy.core.ClassificationPipeline import ClassificationPipeline
 from vanpy.core.FeatureExtractionPipeline import FeatureExtractionPipeline
 from vanpy.core.PreprocessPipeline import PreprocessPipeline
-from vanpy.core.CombinedPipeline import CombinedPipeline
+from vanpy.core.Pipeline import Pipeline
 import logging
 from vanpy.utils.utils import load_config
-
-
 # import asyncio
 
 
@@ -23,7 +21,7 @@ def main():
     # #     [preprocessing_pipeline, feature_extraction_pipeline, speaker_clf_pipeline], config=config)
     # pipline = CombinedPipeline(
     #         [preprocessing_pipeline, speaker_clf_pipeline], config=config)
-    pipline = CombinedPipeline(['file_mapper', 'wav_converter'], config=config)
+    pipline = Pipeline(['file_mapper', 'wav_converter', 'metricgan_se', 'silero_vad'], config=config)
     # 'silero_vad', 'speechbrain_embedding', 'cosine_distance_diarization' , 'pyannote_sd', 'openai_whisper_stt'
     # openai_whisper_stt, wav2vec2stt
     # processed_payload = await pipline.process()

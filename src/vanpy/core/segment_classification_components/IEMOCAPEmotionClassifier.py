@@ -3,7 +3,6 @@ from yaml import YAMLObject
 
 from vanpy.core.ComponentPayload import ComponentPayload
 from vanpy.core.PipelineComponent import PipelineComponent
-from speechbrain.pretrained.interfaces import foreign_class
 
 
 class IEMOCAPEmotionClassifier(PipelineComponent):
@@ -20,6 +19,7 @@ class IEMOCAPEmotionClassifier(PipelineComponent):
         self.pretrained_models_dir = self.config['pretrained_models_dir']
 
     def load_model(self):
+        from speechbrain.pretrained.interfaces import foreign_class
         self.logger.info("Loading emotion classification model, trained on IEMOCAP "
                          "dataset with Speech Brain")
         self.model = foreign_class(source="speechbrain/emotion-recognition-wav2vec2-IEMOCAP",
