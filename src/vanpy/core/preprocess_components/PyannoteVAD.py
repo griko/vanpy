@@ -12,13 +12,7 @@ class PyannoteVAD(SegmenterComponent):
     def __init__(self, yaml_config: YAMLObject):
         super().__init__(component_type='preprocessing', component_name='pyannote_vad',
                          yaml_config=yaml_config)
-        self.params = {   # onset/offset activation thresholds
-                          "onset": self.config['onset'], "offset": self.config['offset'],
-                          # remove speech regions shorter than that many seconds.
-                          "min_duration_on": self.config['min_duration_on'],
-                          # fill non-speech regions shorter than that many seconds.
-                          "min_duration_off": self.config['min_duration_off']
-                        }
+        self.params = self.config['model_params']
         self.ACCESS_TOKEN = self.config['huggingface_ACCESS_TOKEN']
 
     def load_model(self):

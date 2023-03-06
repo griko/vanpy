@@ -21,8 +21,8 @@ def main():
     # #     [preprocessing_pipeline, feature_extraction_pipeline, speaker_clf_pipeline], config=config)
     # pipline = CombinedPipeline(
     #         [preprocessing_pipeline, speaker_clf_pipeline], config=config)
-    pipline = Pipeline(['file_mapper', 'wav_converter', 'metricgan_se', 'silero_vad'], config=config)
-    # 'silero_vad', 'speechbrain_embedding', 'cosine_distance_diarization' , 'pyannote_sd', 'openai_whisper_stt'
+    pipline = Pipeline(['file_mapper', 'silero_vad'], config=config)
+    # 'wav_converter', 'metricgan_se',, 'silero_vad', 'speechbrain_embedding', 'cosine_distance_diarization' , 'pyannote_sd', 'openai_whisper_stt'
     # openai_whisper_stt, wav2vec2stt
     # processed_payload = await pipline.process()
     # cp = ComponentPayload(metadata={'paths_column': 'paths'}, df=pd.DataFrame(columns=['paths']))

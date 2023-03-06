@@ -14,6 +14,7 @@ class SileroVAD(SegmenterComponent):
     def __init__(self, yaml_config: YAMLObject):
         super().__init__(component_type='preprocessing', component_name='silero_vad',
                          yaml_config=yaml_config)
+        self.params = self.config['model_params']
         self.sampling_rate = self.config['sampling_rate']
 
     def load_model(self):
@@ -56,7 +57,7 @@ class SileroVAD(SegmenterComponent):
                 wav = read_audio(f, sampling_rate=self.sampling_rate)
                 # get speech timestamps from full audio file
                 v_segments = [(x['start'] / self.sampling_rate, x['end'] / self.sampling_rate) for x in
-                              get_speech_timestamps(wav, self.model, sampling_rate=self.sampling_rate)]
+                              get_speech_timestamps(wav, self.model, sampling_rate=self.sampling_rate, **self.params)]
                 t_end_segmentation = time.time()
                 for i, segment in enumerate(v_segments):
                     output_path = cut_segment(f, output_dir=output_dir, segment=segment, segment_id=i,

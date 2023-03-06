@@ -10,6 +10,11 @@
 #/src/speech_examples_small
 /src/silero_vad_preprocessed
 /src/pyannote_vad_preprocessed
+/src/pyannote_sd_preprocessed
+/src/convert_preprocessed
+/src/metricgan_se_preprocessed
+/src/pretrained_models
+
 
 
 ### JetBrains template

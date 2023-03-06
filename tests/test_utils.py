@@ -31,9 +31,9 @@ class UtilsTest(unittest.TestCase):
         input_path = gdown.download(
             'https://drive.google.com/uc?export=download&confirm=9iBg&id=1URDocYaa0tKe3KLiFJd5ct7tsczA3mX4',
             temp_dir + '/empty.wav', quiet=True)
-        output_path = cut_segment(input_path, temp_dir, (0, 0.01), 0, '_segment')
+        output_path = cut_segment(input_path, temp_dir, (0, 0.01), 0, '_segment', False)
         self.assertTrue(os.path.exists(output_path))
-        output_path2 = cut_segment(input_path, temp_dir, (0, 0.02), 1, '_segment')
+        output_path2 = cut_segment(input_path, temp_dir, (0, 0.02), 1, '_segment', False)
         self.assertTrue(os.path.exists(output_path2))
         self.assertNotEqual(output_path, output_path2)
         shutil.rmtree(temp_dir)

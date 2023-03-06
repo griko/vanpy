@@ -35,10 +35,11 @@ preprocessing:
     add_segment_metadata: true
     performance_measurement: true
     keep_only_first_segment: false
-    onset: 0.85             # onset activation threshold
-    offset: 0.8             # offset activation threshold
-    min_duration_on: 0.1    # remove speech regions shorter than that many seconds
-    min_duration_off: 0.0   # fill non-speech regions shorter than that many seconds
+    model_params:
+      onset: 0.85             # onset activation threshold
+      offset: 0.8             # offset activation threshold
+      min_duration_on: 0.1    # remove speech regions shorter than that many seconds
+      min_duration_off: 0.0   # fill non-speech regions shorter than that many seconds
     overwrite: false
     save_payload: true
   pyannote_sd:  # pyannote speaker diarization, applies VAD and Embedding
@@ -53,6 +54,15 @@ preprocessing:
     add_segment_metadata: true
     performance_measurement: true
     keep_only_first_segment: true
+    model_params:
+      threshold: 0.8  # default 0.5. larger - more segmentized
+#      sampling_rate: 16000,
+      min_speech_duration_ms: 100  # default 250
+#      max_speech_duration_s:
+      min_silence_duration_ms: 80  # default 100
+      window_size_samples: 512
+      speech_pad_ms: 30
+      return_seconds: False
     overwrite: false
     save_payload: true
     save_payload_periodicity: 50000  # save intermediate payload results every X processed files
