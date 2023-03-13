@@ -36,8 +36,8 @@ def cut_segment(input_path: str, output_dir: str, segment: Tuple[float, float], 
     segment_suffix = f'{separator}{segment_id}' if not keep_only_first_segment else ""
     output_path = f'{output_dir}/{f}{segment_suffix}.wav'
     subprocess.run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-ss", f"{start}", "-to", f"{stop}", "-y", "-i",
-                    f"{input_path}", "-ab", "256k", "-ac", "1", "-ar", "16k", output_path, '-dn',
-                    '-ignore_unknown', '-sn'])
+                    f"{input_path}", "-ab", "256k", "-ac", "1", "-ar", "16k", '-dn',
+                    '-ignore_unknown', '-sn',  output_path])
     return output_path
 
 
@@ -60,10 +60,11 @@ def cached_download(url, path) -> str:
     :param path: path to save the file
     :return: path of the downloaded file
     """
+    separator = "/"  # os.sep
     if os.path.exists(path):
         pass
     else:
-        create_dirs_if_not_exist(os.sep.join(path.split(os.sep)[:-1]))
+        create_dirs_if_not_exist(separator.join(path.split(separator)[:-1]))
         gdown.download(url, path, quiet=True)
     return path
 

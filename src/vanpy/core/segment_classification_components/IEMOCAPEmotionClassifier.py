@@ -39,9 +39,14 @@ class IEMOCAPEmotionClassifier(PipelineComponent):
             return input_payload
         
         emotion_prediction = []
-        for f in paths_list:
-            out_prob, score, index, text_lab = self.model.classify_file(f)
-            emotion_prediction.append(text_lab[0] if self.verbal_labels else index)
+
+        for j, f in enumerate(paths_list):
+            try:
+                out_prob, score, index, text_lab = self.model.classify_file(f)
+                emotion_prediction.append(text_lab[0] if self.verbal_labels else index)
+            except RuntimeError as e:
+                emotion_prediction.append(None)
+                self.logger.error(f"An error occurred in {f}, {j + 1}/{len(paths_list)}: {e}")
 
         payload_df[self.classification_column_name] = emotion_prediction
         payload_metadata['classification_columns'].extend([self.classification_column_name])

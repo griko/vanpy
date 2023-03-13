@@ -4,6 +4,7 @@ from src.vanpy.core.PipelineComponent import PipelineComponent
 from vanpy.core.ComponentPayload import ComponentPayload
 from vanpy.utils.utils import create_dirs_if_not_exist, cut_segment, get_audio_files_paths
 import time
+import torch
 
 
 class MetricGANSE(PipelineComponent):
@@ -16,8 +17,13 @@ class MetricGANSE(PipelineComponent):
 
     def load_model(self):
         from speechbrain.pretrained import SpectralMaskEnhancement
-        self.model = SpectralMaskEnhancement.from_hparams(source="speechbrain/metricgan-plus-voicebank",
-                                                          savedir="pretrained_models/metricgan-plus-voicebank",)
+        if torch.cuda.is_available():
+            self.model = SpectralMaskEnhancement.from_hparams(source="speechbrain/metricgan-plus-voicebank",
+                                                          savedir="pretrained_models/metricgan-plus-voicebank",
+                                                          run_opts={"device": "cuda"})
+        else:
+            self.model = SpectralMaskEnhancement.from_hparams(source="speechbrain/metricgan-plus-voicebank",
+                                                              savedir="pretrained_models/metricgan-plus-voicebank",)
 
     def process(self, input_payload: ComponentPayload) -> ComponentPayload:
         import torch

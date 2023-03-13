@@ -63,7 +63,7 @@ inaSpeechSegmenter==0.7.3
 inflect==6.0.0
 jaconv==0.3
 jamo==0.4.1
-joblib==1.1.0
+joblib==1.2.0
 julius==0.2.6
 kaldiio==2.17.2
 keras==2.8.0

@@ -16,6 +16,7 @@ setup(
         'huggingface-hub>=0.5.1',
         'pandas>=1.3.2',
         'PyYAML>=6.0',
+        'scikit-learn==1.0.2',
         'speechbrain>=0.5.11',
         'transformers>=4.19.2',
         'xgboost>=1.5.0'

@@ -8,6 +8,7 @@ class ClassificationPipeline(BasePipeline):
         'common_voices_gender': None,
         'common_voices_age': None,
         'speech_brain_iemocap_emotion': None,
+        'vanpy_ravdess_emotion': None,
         'wav2vec2stt': None,
         'openai_whisper_stt': None,
         'cosine_distance_diarization': None
@@ -24,6 +25,9 @@ class ClassificationPipeline(BasePipeline):
             elif component == 'speech_brain_iemocap_emotion':
                 from vanpy.core.segment_classification_components.IEMOCAPEmotionClassifier import IEMOCAPEmotionClassifier
                 self.components_mapper[component] = IEMOCAPEmotionClassifier
+            elif component == 'vanpy_ravdess_emotion':
+                from vanpy.core.segment_classification_components.RavdessEmotionClassifier import RavdessEmotionClassifier
+                self.components_mapper[component] = RavdessEmotionClassifier
             elif component == 'wav2vec2stt':
                 from vanpy.core.segment_classification_components.Wav2Vec2STT import Wav2Vec2STT
                 self.components_mapper[component] = Wav2Vec2STT

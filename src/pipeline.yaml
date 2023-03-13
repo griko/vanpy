@@ -119,6 +119,12 @@ segment_classifier:
     verbal_labels: true
     save_payload: true
 
+  vanpy_ravdess_emotion:
+    pretrained_models_dir: 'pretrained_models/vanpy_ravdess_emotion'
+    classification_column_name: 'vanpy_ravdess_emotion'
+    verbal_labels: true
+    save_payload: true
+
   wav2vec2stt:
     pretrained_models_dir: 'pretrained_models/wav2vec2'
     classification_column_name: 'wav2vec2_transcript'
