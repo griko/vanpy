@@ -115,6 +115,12 @@ segment_classifier:
     performance_measurement: true
     save_payload: true
 
+  vanpy_voxceleb_height:
+    pretrained_models_dir: 'pretrained_models/vanpy_voxceleb_height'
+    classification_column_name: 'vanpy_voxceleb_height_estimation'
+    performance_measurement: true
+    save_payload: true
+
   common_voices_gender:
     pretrained_models_dir: 'pretrained_models/common_voice'
     classification_column_name: 'common_voices_gender_classification'

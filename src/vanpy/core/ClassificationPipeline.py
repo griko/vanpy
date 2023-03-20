@@ -7,6 +7,7 @@ class ClassificationPipeline(BasePipeline):
     components_mapper = {
         'vanpy_voxceleb_gender': None,
         'vanpy_voxceleb_age': None,
+        'vanpy_voxceleb_height': None,
         'common_voices_gender': None,
         'common_voices_age': None,
         'speech_brain_iemocap_emotion': None,
@@ -24,6 +25,9 @@ class ClassificationPipeline(BasePipeline):
             if component == 'vanpy_voxceleb_age':
                 from vanpy.core.segment_classification_components.VoxcelebAgeRegressor import VoxcelebAgeRegressor
                 self.components_mapper[component] = VoxcelebAgeRegressor
+            if component == 'vanpy_voxceleb_height':
+                from vanpy.core.segment_classification_components.VoxcelebHeightRegressor import VoxcelebHeightRegressor
+                self.components_mapper[component] = VoxcelebHeightRegressor
             if component == 'common_voices_gender':
                 from vanpy.core.segment_classification_components.CVGenderClassifier import CVGenderClassifier
                 self.components_mapper[component] = CVGenderClassifier
