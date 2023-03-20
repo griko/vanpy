@@ -12,7 +12,7 @@ class PyannoteVAD(SegmenterComponent):
     def __init__(self, yaml_config: YAMLObject):
         super().__init__(component_type='preprocessing', component_name='pyannote_vad',
                          yaml_config=yaml_config)
-        self.params = self.config['model_params']
+        self.params = {} if 'model_params' not in self.config else self.config['model_params']
         self.ACCESS_TOKEN = self.config['huggingface_ACCESS_TOKEN']
 
     def load_model(self):

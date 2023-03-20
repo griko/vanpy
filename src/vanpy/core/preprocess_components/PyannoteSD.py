@@ -14,6 +14,7 @@ class PyannoteSD(SegmenterComponent):
         super().__init__(component_type='preprocessing', component_name='pyannote_sd',
                          yaml_config=yaml_config)
         self.ACCESS_TOKEN = self.config['huggingface_ACCESS_TOKEN']
+        self.skip_overlap = False if 'skip_overlap' not in self.config else self.config['skip_overlap']
         self.classification_column_name = self.config['classification_column_name'] \
             if 'classification_column_name' in self.config else 'pyannote_diarization_classification'
 
@@ -22,6 +23,7 @@ class PyannoteSD(SegmenterComponent):
         self.model = Pipeline.from_pretrained("pyannote/speaker-diarization@2.1",
                                                 use_auth_token=self.ACCESS_TOKEN,
                                                 cache_dir='pretrained_models/pyannote_sd')
+        self.model.der_variant['skip_overlap'] = self.skip_overlap
 
     def get_voice_segments(self, f):
         annotation = self.model(f)
@@ -57,6 +59,7 @@ class PyannoteSD(SegmenterComponent):
             try:
                 t_start_segmentation = time.time()
                 v_segments = self.get_voice_segments(f)
+                segments_count = len(list(v_segments))
                 t_end_segmentation = time.time()
                 for i, (segment, label) in enumerate(v_segments):
                     output_path = cut_segment(f, output_dir=output_dir, segment=segment, segment_id=i,
@@ -68,7 +71,7 @@ class PyannoteSD(SegmenterComponent):
                     f_df = pd.DataFrame.from_dict(f_d)
                     p_df = pd.concat([p_df, f_df], ignore_index=True)
                 end = time.time()
-                self.latent_info_log(f'Extracted {len(list(v_segments))} from {f} in {end - t_start_segmentation} seconds, {j + 1}/{len(paths_list)}', iteration=j)
+                self.latent_info_log(f'Extracted {segments_count} from {f} in {end - t_start_segmentation} seconds, {j + 1}/{len(paths_list)}', iteration=j)
             except RuntimeError as e:
                 self.logger.error(f"An error occurred in {f}, {j + 1}/{len(paths_list)}: {e}")
 

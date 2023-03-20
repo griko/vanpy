@@ -13,15 +13,15 @@ def main():
     config = load_config('pipeline.yaml')
 
     # preprocessing_pipeline = PreprocessPipeline(
-    #     ['file_mapper'], config=config)  #, 'wav_converter', 'silero_vad', 'pyannote_vad'], config=config)  # 'wav_converter', 'espnet-se', 'silero_vad', 'pyannote_vad'], config=config)
+    #     ['file_mapper'], config=config)  #, 'wav_converter', 'silero_vad', 'pyannote_vad'], config=config)  # 'wav_converter', 'espnet-se', 'silero_vad', 'pyannote_vad', 'pyannote_sd'], config=config)
     # # feature_extraction_pipeline = FeatureExtractionPipeline(
-    # #     ['librosa_features_extractor'], config=config)  # 'librosa_features_extractor', 'speechbrain_embedding', 'pyannote_embedding'
+    # #     ['librosa_features_extractor'], config=config)  # 'librosa_features_extractor', 'speechbrain_embedding', 'pyannote_embedding', 'speechbrain_embedding', 'vanpy_ravdess_emotion'
     # speaker_clf_pipeline = ClassificationPipeline(['openai_whisper_stt', 'wav2vec2stt'], config=config)  # speech_brain_iemocap_emotion
     # # pipline = CombinedPipeline(
     # #     [preprocessing_pipeline, feature_extraction_pipeline, speaker_clf_pipeline], config=config)
     # pipline = CombinedPipeline(
     #         [preprocessing_pipeline, speaker_clf_pipeline], config=config)
-    pipline = Pipeline(['file_mapper', 'speechbrain_embedding', 'vanpy_ravdess_emotion'], config=config)
+    pipline = Pipeline(['file_mapper', 'speechbrain_embedding', 'vanpy_voxceleb_gender'], config=config)
     # 'wav_converter', 'metricgan_se',, 'silero_vad', 'speechbrain_embedding', 'cosine_distance_diarization' , 'pyannote_sd', 'openai_whisper_stt'
     # openai_whisper_stt, wav2vec2stt
     # processed_payload = await pipline.process()

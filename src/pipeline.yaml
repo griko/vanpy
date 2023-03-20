@@ -47,6 +47,7 @@ preprocessing:
     classification_column_name: 'pyannote_diarization_classification'
     add_segment_metadata: true
     performance_measurement: true
+    skip_overlap: true
     overwrite: true
     save_payload: true
   silero_vad:
@@ -101,6 +102,13 @@ feature_extraction:
     model: spkrec-ecapa-voxceleb  # e.g. spkrec-ecapa-voxceleb, spkrec-xvect-voxceleb, ...
 
 segment_classifier:
+  vanpy_voxceleb_gender:
+    pretrained_models_dir: 'pretrained_models/vanpy_voxceleb_gender'
+    classification_column_name: 'vanpy_voxceleb_gender_classification'
+    verbal_labels: true
+    performance_measurement: true
+    save_payload: true
+
   common_voices_gender:
     pretrained_models_dir: 'pretrained_models/common_voice'
     classification_column_name: 'common_voices_gender_classification'

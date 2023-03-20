@@ -14,7 +14,7 @@ class SileroVAD(SegmenterComponent):
     def __init__(self, yaml_config: YAMLObject):
         super().__init__(component_type='preprocessing', component_name='silero_vad',
                          yaml_config=yaml_config)
-        self.params = self.config['model_params']
+        self.params = {} if 'model_params' not in self.config else self.config['model_params']
         self.sampling_rate = self.config['sampling_rate']
 
     def load_model(self):

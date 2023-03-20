@@ -5,6 +5,7 @@ from vanpy.core.BasePipeline import BasePipeline
 
 class ClassificationPipeline(BasePipeline):
     components_mapper = {
+        'vanpy_voxceleb_gender': None,
         'common_voices_gender': None,
         'common_voices_age': None,
         'speech_brain_iemocap_emotion': None,
@@ -16,6 +17,9 @@ class ClassificationPipeline(BasePipeline):
 
     def __init__(self, components: List[str], config: YAMLObject):
         for component in components:
+            if component == 'vanpy_voxceleb_gender':
+                from vanpy.core.segment_classification_components.VoxcelebGenderClassifier import VoxcelebGenderClassifier
+                self.components_mapper[component] = VoxcelebGenderClassifier
             if component == 'common_voices_gender':
                 from vanpy.core.segment_classification_components.CVGenderClassifier import CVGenderClassifier
                 self.components_mapper[component] = CVGenderClassifier
