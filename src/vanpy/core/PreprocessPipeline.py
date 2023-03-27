@@ -11,6 +11,7 @@ class PreprocessPipeline(BasePipeline):
         'pyannote_sd': None,
         'silero_vad': None,
         'metricgan_se': None,
+        'sepformer_se': None,
     }
 
     def __init__(self, components: List[str], config: YAMLObject):
@@ -36,6 +37,9 @@ class PreprocessPipeline(BasePipeline):
             elif component == 'metricgan_se':
                 from vanpy.core.preprocess_components.MetricGANSE import MetricGANSE
                 self.components_mapper[component] = MetricGANSE
+            elif component == 'sepformer_se':
+                from vanpy.core.preprocess_components.SepFormerSE import SepFormerSE
+                self.components_mapper[component] = SepFormerSE
 
         super().__init__(components, config)
         self.logger.info(f'Created Preprocessing Pipeline with {len(self.components)} components')

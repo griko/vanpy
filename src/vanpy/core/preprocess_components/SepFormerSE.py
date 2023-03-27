@@ -4,29 +4,28 @@ from vanpy.core.PipelineComponent import PipelineComponent
 from vanpy.core.ComponentPayload import ComponentPayload
 from vanpy.utils.utils import create_dirs_if_not_exist, cut_segment, get_audio_files_paths
 import time
-import torch
 
 
-class MetricGANSE(PipelineComponent):
-    # MagicGAN speech enhancement component
+class SepFormerSE(PipelineComponent):
+    # SepFormer speech enhancement component
     model = None
 
     def __init__(self, yaml_config: YAMLObject):
-        super().__init__(component_type='preprocessing', component_name='metricgan_se',
+        super().__init__(component_type='preprocessing', component_name='sepformer_se',
                          yaml_config=yaml_config)
 
     def load_model(self):
-        from speechbrain.pretrained import SpectralMaskEnhancement
+        import torch
+        from speechbrain.pretrained import SepformerSeparation
         if torch.cuda.is_available():
-            self.model = SpectralMaskEnhancement.from_hparams(source="speechbrain/metricgan-plus-voicebank",
-                                                          savedir="pretrained_models/metricgan-plus-voicebank",
+            self.model = SepformerSeparation.from_hparams(source="speechbrain/sepformer-wham16k-enhancement",
+                                                          savedir="pretrained_models/sepformer-wham16k-enhancement",
                                                           run_opts={"device": "cuda"})
         else:
-            self.model = SpectralMaskEnhancement.from_hparams(source="speechbrain/metricgan-plus-voicebank",
-                                                              savedir="pretrained_models/metricgan-plus-voicebank",)
+            self.model = SepformerSeparation.from_hparams(source="speechbrain/sepformer-wham16k-enhancement",
+                                                              savedir="pretrained_models/sepformer-wham16k-enhancement",)
 
     def process(self, input_payload: ComponentPayload) -> ComponentPayload:
-        import torch
         import torchaudio
         if not self.model:
             self.load_model()
@@ -51,13 +50,8 @@ class MetricGANSE(PipelineComponent):
 
                 if output_file not in existing_files:
                     t_start_segmentation = time.time()
-                    # Load and add fake batch dimension
-                    noisy = self.model.load_audio(f).unsqueeze(0)
-                    # Add relative length tensor
-                    enhanced = self.model.enhance_batch(noisy, lengths=torch.tensor([1.]))
-                    # Saving enhanced signal on disk
-
-                    torchaudio.save(output_file, enhanced.cpu(), 16000)
+                    enhanced = self.model.separate_file(path=f)
+                    torchaudio.save(output_file, enhanced[:, :, 0].detach().cpu(), 16000)
                     end = time.time()
                     self.latent_info_log(
                         f'Enhanced {f} in {end - t_start_segmentation} seconds, {j + 1}/{len(paths_list)}',
@@ -70,7 +64,7 @@ class MetricGANSE(PipelineComponent):
                 self.logger.error(f"An error occurred in {f}, {j + 1}/{len(paths_list)}: {e}")
 
         payload_df[processed_path] = processed_paths_list
-        MetricGANSE.cleanup_softlinks()
+        SepFormerSE.cleanup_softlinks()
         return ComponentPayload(metadata=payload_metadata, df=payload_df)
 
     @staticmethod

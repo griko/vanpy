@@ -72,6 +72,11 @@ preprocessing:
     performance_measurement: true
     overwrite: false
     save_payload: true
+  sepformer_se: # SepFormer model, implemented with SpeechBrain, and pretrained on WHAM! dataset
+    output_dir: 'sepformer_se_preprocessed'
+    performance_measurement: true
+    overwrite: false
+    save_payload: true
 
 feature_extraction:
   librosa_features_extractor:
