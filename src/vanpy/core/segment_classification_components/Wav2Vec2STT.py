@@ -20,7 +20,7 @@ class Wav2Vec2STT(PipelineComponent):
         self.pretrained_models_dir = self.config['pretrained_models_dir']
 
     def load_model(self):
-        self.logger.info("Loading wav2vec 2.0 model")
+        self.logger.info("Loading wav2vec 2.0 Speech-To-Text model")
         self.tokenizer = Wav2Vec2Tokenizer.from_pretrained("facebook/wav2vec2-base-960h", cache_dir=self.pretrained_models_dir)
         self.model = Wav2Vec2ForCTC.from_pretrained("facebook/wav2vec2-base-960h", cache_dir=self.pretrained_models_dir)
 

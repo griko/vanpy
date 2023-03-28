@@ -21,8 +21,8 @@ def main():
     # #     [preprocessing_pipeline, feature_extraction_pipeline, speaker_clf_pipeline], config=config)
     # pipline = CombinedPipeline(
     #         [preprocessing_pipeline, speaker_clf_pipeline], config=config)
-    # 'speechbrain_embedding', 'vanpy_voxceleb_gender', 'vanpy_voxceleb_age', 'vanpy_voxceleb_height'], config=config)
-    pipline = Pipeline(['file_mapper', 'sepformer_se', 'metricgan_se'], config=config)
+    # 'sepformer_se', 'metricgan_se', 'speechbrain_embedding', 'vanpy_voxceleb_gender', 'vanpy_voxceleb_age', 'vanpy_voxceleb_height'], config=config)
+    pipline = Pipeline(['file_mapper', 'wav2vec2adv'], config=config)
     # 'wav_converter', 'metricgan_se',, 'silero_vad', 'speechbrain_embedding', 'cosine_distance_diarization' , 'pyannote_sd', 'openai_whisper_stt'
     # openai_whisper_stt, wav2vec2stt
     # processed_payload = await pipline.process()

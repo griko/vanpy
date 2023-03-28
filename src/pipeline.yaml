@@ -150,6 +150,11 @@ segment_classifier:
     verbal_labels: true
     save_payload: true
 
+  wav2vec2adv:
+    pretrained_models_dir: 'pretrained_models/wav2vec2-large-robust-12-ft-emotion-msp-dim'
+    performance_measurement: true
+    save_payload: true
+
   wav2vec2stt:
     pretrained_models_dir: 'pretrained_models/wav2vec2'
     classification_column_name: 'wav2vec2_transcript'
