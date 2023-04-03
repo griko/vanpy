@@ -14,13 +14,11 @@ class WhisperSTT(PipelineComponent):
     def __init__(self, yaml_config: YAMLObject):
         super().__init__(component_type='segment_classifier', component_name='openai_whisper_stt',
                          yaml_config=yaml_config)
-        self.stt_column_name = self.config['stt_column_name']
-        self.language_classification_column_name = self.config['language_classification_column_name'] \
-            if 'language_classification_column_name' in self.config else 'whisper_transcript'
-        self.pretrained_models_dir = self.config['pretrained_models_dir'] \
-            if 'pretrained_models_dir' in self.config else 'pretrained_models/whisper'
+        self.stt_column_name = self.config.get('stt_column_name', 'whisper_transcript')
+        self.language_classification_column_name = self.config.get('language_classification_column_name', 'whisper_language')
+        self.pretrained_models_dir = self.config.get('pretrained_models_dir', f'pretrained_models/{self.component_name}')
         create_dirs_if_not_exist(self.pretrained_models_dir)
-        self.model_size = self.config['model_size'] if 'model_size' in self.config else 'small'
+        self.model_size = self.config.get('model_size', 'small')
 
     def load_model(self):
         self.logger.info("Loading openai-whisper model")

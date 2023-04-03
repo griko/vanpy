@@ -16,8 +16,7 @@ class Wav2Vec2STT(PipelineComponent):
     def __init__(self, yaml_config: YAMLObject):
         super().__init__(component_type='segment_classifier', component_name='wav2vec2stt',
                          yaml_config=yaml_config)
-        self.classification_column_name = self.config['classification_column_name']
-        self.pretrained_models_dir = self.config['pretrained_models_dir']
+        self.classification_column_name = self.config.get('classification_column_name', f'{self.component_name}_stt')
 
     def load_model(self):
         self.logger.info("Loading wav2vec 2.0 Speech-To-Text model")

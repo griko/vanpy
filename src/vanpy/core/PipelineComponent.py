@@ -16,6 +16,7 @@ class PipelineComponent(ABC):
     component_name: str
     config: Dict
     logger: Logger
+    pretrained_models_dir: str
 
     def __init__(self, component_type: str, component_name: str, yaml_config: YAMLObject):
         """
@@ -32,6 +33,8 @@ class PipelineComponent(ABC):
         self.component_name = component_name
         self.config = self.import_config(yaml_config)
         self.logger = self.get_logger()
+        self.pretrained_models_dir = self.config.get('pretrained_models_dir',
+                                                     f'pretrained_models/{self.component_name}')
 
     def latent_info_log(self, message: str, iteration: int, last_item: bool = False) -> None:
         """

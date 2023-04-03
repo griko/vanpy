@@ -15,7 +15,8 @@ class ClassificationPipeline(BasePipeline):
         'wav2vec2adv': None,
         'wav2vec2stt': None,
         'openai_whisper_stt': None,
-        'cosine_distance_diarization': None
+        'cosine_distance_diarization': None,
+        'yamnet_classifier': None
     }
 
     def __init__(self, components: List[str], config: YAMLObject):
@@ -53,6 +54,9 @@ class ClassificationPipeline(BasePipeline):
             elif component == 'cosine_distance_diarization':
                 from vanpy.core.segment_classification_components.CosineDiarizationClassifier import CosineDiarizationClassifier
                 self.components_mapper[component] = CosineDiarizationClassifier
+            elif component == 'yamnet_classifier':
+                from vanpy.core.segment_classification_components.YamnetClassifier import YamnetClassifier
+                self.components_mapper[component] = YamnetClassifier
 
         super().__init__(components, config)
         self.logger.info(f'Created Classification Pipeline with {len(self.components)} components')

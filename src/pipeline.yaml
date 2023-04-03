@@ -182,3 +182,11 @@ segment_classifier:
     performance_measurement: true
     save_payload: true
 
+  yamnet_classifier:
+    pretrained_models_dir: 'pretrained_models/yamnet_classifier'
+    classification_column_name: 'yamnet_classification'
+    top_k: 3
+    threshold: 0.85
+    verbal_labels: true
+    save_payload: true
+
