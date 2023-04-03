@@ -8,7 +8,7 @@ import pandas as pd
 class SegmenterComponent(PipelineComponent, ABC):
     def __init__(self, component_type: str, component_name: str, yaml_config: YAMLObject):
         super().__init__(component_type, component_name, yaml_config)
-        self.segment_name_separator = yaml_config['segment_name_separator']
+        self.segment_name_separator = yaml_config.get('segment_name_separator', '_')
         self.segment_stop_column_name = None
         self.segment_start_column_name = None
         self.file_performance_column_name = None
@@ -18,12 +18,12 @@ class SegmenterComponent(PipelineComponent, ABC):
         metadata['paths_column'] = processed_path
         metadata['all_paths_columns'].append(processed_path)
         self.segment_start_column_name = self.segment_stop_column_name = ''
-        if 'add_segment_metadata' in self.config and self.config['add_segment_metadata']:
+        if self.config.get('add_segment_metadata', True):
             self.segment_start_column_name = f'{self.get_name()}_segment_start'
             self.segment_stop_column_name = f'{self.get_name()}_segment_stop'
             metadata['meta_columns'].extend([self.segment_start_column_name, self.segment_stop_column_name])
         self.file_performance_column_name = ''
-        if 'performance_measurement' in self.config and self.config['performance_measurement']:
+        if self.config.get('performance_measurement', True):
             self.file_performance_column_name = f'perf_{self.get_name()}_get_voice_segments'
             metadata['meta_columns'].extend([self.file_performance_column_name])
         return processed_path, metadata
@@ -40,7 +40,7 @@ class SegmenterComponent(PipelineComponent, ABC):
     def get_file_paths_and_processed_df_if_not_overwriting(self, p_df, paths_list, processed_path, input_column,
                                                            output_dir, use_dir_prefix=False):
         unprocessed_paths_list = []
-        if not self.config['overwrite']:
+        if not self.config.get('overwrite', False):
             existing_file_list = get_audio_files_paths(output_dir)
             existing_file_list_names = ['.'.join(f.split("/")[-1].split('.')[0:-1]) for f in existing_file_list]
             existing_file_set = {}

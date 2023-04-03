@@ -30,7 +30,7 @@ class FilelistDataFrameCreator(PipelineComponent):
         """
         metadata, df = input_payload.unpack()
 
-        if 'load_payload' in self.config and self.config['load_payload']:
+        if self.config.get('load_payload', False):
             p_df = pd.read_csv(self.config['load_df_path'])
             with open(self.config['load_meta_path'], 'rb') as pickle_file:
                 metadata = pickle.load(pickle_file)

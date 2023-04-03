@@ -42,7 +42,7 @@ class SepFormerSE(PipelineComponent):
         self.config['records_count'] = len(paths_list)
 
         processed_paths_list, existing_files = [], []
-        if 'overwrite' not in self.config or not self.config['overwrite']:
+        if self.config.get('overwrite', False):
             existing_files = get_audio_files_paths(output_dir)
         for j, f in enumerate(paths_list):
             try:

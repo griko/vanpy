@@ -9,15 +9,14 @@ from vanpy.utils.DisjointSet import DisjointSet
 class CosineDiarizationClassifier(PipelineComponent):
     model = None
     classification_column_name: str = ''
-    pretrained_models_dir: str = ''
 
     def __init__(self, yaml_config: YAMLObject):
         super().__init__(component_type='segment_classifier', component_name='cosine_distance_diarization',
                          yaml_config=yaml_config)
-        self.classification_column_name = self.config['classification_column_name'] \
-            if 'classification_column_name' in self.config else 'diarization_classification'
+        self.classification_column_name = self.config.get('classification_column_name',
+                                                          f'{self.component_name}_classification')
         self.similarity = torch.nn.CosineSimilarity(dim=-1, eps=1e-6)
-        self.threshold = self.config['threshold'] if 'threshold' in self.config else 0.25
+        self.threshold = self.config.get('threshold', 0.25)
         self.requested_feature_list = self.build_requested_feature_list()
 
     def build_requested_feature_list(self):
@@ -62,7 +61,7 @@ class CosineDiarizationClassifier(PipelineComponent):
         group_indexes = [f'SPEAKER_{i}' for i in ds.calculate_group_index()]
         payload_df[self.classification_column_name] = group_indexes
         payload_metadata['classification_columns'].extend([self.classification_column_name])
-        if 'performance_measurement' in self. config and self.config['performance_measurement']:
+        if self.config.get('performance_measurement', True):
             file_performance_column_name = f'perf_{self.get_name()}_get_diarization'
             payload_df[file_performance_column_name] = performance_metric
             payload_metadata['meta_columns'].extend([file_performance_column_name])

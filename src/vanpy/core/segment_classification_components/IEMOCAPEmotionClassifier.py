@@ -8,15 +8,14 @@ from vanpy.core.PipelineComponent import PipelineComponent
 class IEMOCAPEmotionClassifier(PipelineComponent):
     model = None
     classification_column_name: str = ''
-    pretrained_models_dir: str = ''
-    verbal_labels: bool = False
+    verbal_labels: bool = True
 
     def __init__(self, yaml_config: YAMLObject):
         super().__init__(component_type='segment_classifier', component_name='speech_brain_iemocap_emotion',
                          yaml_config=yaml_config)
-        self.verbal_labels = self.config['verbal_labels']
-        self.classification_column_name = self.config['classification_column_name']
-        self.pretrained_models_dir = self.config['pretrained_models_dir']
+        self.verbal_labels = self.config.get('verbal_labels', True)
+        self.classification_column_name = self.config.get('classification_column_name',
+                                                          f'{self.component_name}_classification')
 
     def load_model(self):
         from speechbrain.pretrained.interfaces import foreign_class

@@ -11,12 +11,12 @@ class Wav2Vec2STT(PipelineComponent):
     model = None
     tokenizer = None
     classification_column_name: str = ''
-    pretrained_models_dir: str = ''
 
     def __init__(self, yaml_config: YAMLObject):
         super().__init__(component_type='segment_classifier', component_name='wav2vec2stt',
                          yaml_config=yaml_config)
         self.classification_column_name = self.config.get('classification_column_name', f'{self.component_name}_stt')
+        self.sampling_rate = self.config.get('sampling_rate', 16000)
 
     def load_model(self):
         self.logger.info("Loading wav2vec 2.0 Speech-To-Text model")
@@ -38,12 +38,11 @@ class Wav2Vec2STT(PipelineComponent):
         
         stts = []
         performance_metric = []
-        sr = self.config['sampling_rate'] if 'sampling_rate' in self.config else 16000
         for j, f in enumerate(paths_list):
             try:
                 t_start_transcribing = time.time()
                 # Loading the audio file
-                audio, rate = librosa.load(f, sr=sr)
+                audio, rate = librosa.load(f, sr=self.sampling_rate)
                 # Taking an input value
                 input_values = self.tokenizer(audio, return_tensors="pt").input_values
                 # Storing logits (non-normalized prediction values)
@@ -65,7 +64,7 @@ class Wav2Vec2STT(PipelineComponent):
 
         payload_df[self.classification_column_name] = stts
         payload_metadata['classification_columns'].extend([self.classification_column_name])
-        if 'performance_measurement' in self. config and self.config['performance_measurement']:
+        if self.config.get('performance_measurement', True):
             file_performance_column_name = f'perf_{self.get_name()}_get_transcription'
             payload_df[file_performance_column_name] = performance_metric
             payload_metadata['meta_columns'].extend([file_performance_column_name])

@@ -14,8 +14,9 @@ class SileroVAD(SegmenterComponent):
     def __init__(self, yaml_config: YAMLObject):
         super().__init__(component_type='preprocessing', component_name='silero_vad',
                          yaml_config=yaml_config)
-        self.params = {} if 'model_params' not in self.config else self.config['model_params']
-        self.sampling_rate = self.config['sampling_rate']
+        self.params = self.config.get('model_params', {})
+        self.sampling_rate = self.config.get('sampling_rate', 16000)
+        self.keep_only_first_segment = self.config.get('keep_only_first_segment', False)
 
     def load_model(self):
         import torch
@@ -43,7 +44,6 @@ class SileroVAD(SegmenterComponent):
             df = pd.merge(left=df, right=p_df, how='outer', left_on=input_column, right_on=input_column)
             return ComponentPayload(metadata=metadata, df=df)
         self.config['records_count'] = len(paths_list)
-        keep_only_first_segment = 'keep_only_first_segment' in self.config and self.config['keep_only_first_segment']
 
         (get_speech_timestamps,
          save_audio,
@@ -62,13 +62,13 @@ class SileroVAD(SegmenterComponent):
                 for i, segment in enumerate(v_segments):
                     output_path = cut_segment(f, output_dir=output_dir, segment=segment, segment_id=i,
                                               separator=self.segment_name_separator,
-                                              keep_only_first_segment=keep_only_first_segment)
+                                              keep_only_first_segment=self.keep_only_first_segment)
                     f_d = {processed_path: [output_path], input_column: [f]}
                     self.add_segment_metadata(f_d, segment[0], segment[1])
                     self.add_performance_metadata(f_d, t_start_segmentation, t_end_segmentation)
                     f_df = pd.DataFrame.from_dict(f_d)
                     p_df = pd.concat([p_df, f_df], ignore_index=True)
-                    if keep_only_first_segment:
+                    if self.keep_only_first_segment:
                         break
                 self.latent_info_log(
                     f'Extracted {len(v_segments)} from {f} in {t_end_segmentation - t_start_segmentation} seconds, {j + 1}/{len(paths_list)}', iteration=j)

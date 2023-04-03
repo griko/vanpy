@@ -9,14 +9,12 @@ from vanpy.utils.utils import create_dirs_if_not_exist
 class WhisperSTT(PipelineComponent):
     model = None
     classification_column_name: str = ''
-    pretrained_models_dir: str = ''
 
     def __init__(self, yaml_config: YAMLObject):
         super().__init__(component_type='segment_classifier', component_name='openai_whisper_stt',
                          yaml_config=yaml_config)
         self.stt_column_name = self.config.get('stt_column_name', 'whisper_transcript')
         self.language_classification_column_name = self.config.get('language_classification_column_name', 'whisper_language')
-        self.pretrained_models_dir = self.config.get('pretrained_models_dir', f'pretrained_models/{self.component_name}')
         create_dirs_if_not_exist(self.pretrained_models_dir)
         self.model_size = self.config.get('model_size', 'small')
 
@@ -44,7 +42,7 @@ class WhisperSTT(PipelineComponent):
             t_start_transcribing = time.time()
             transcription = self.model.transcribe(f)
             stts.append(transcription['text'])
-            if 'detect_language' in self.config and self.config['detect_language']:
+            if self.config.get('detect_language', False):
                 languages.append(transcription['language'])
             t_end_transcribing = time.time()
             performance_metric.append(t_end_transcribing - t_start_transcribing)
@@ -54,10 +52,10 @@ class WhisperSTT(PipelineComponent):
 
         payload_df[self.stt_column_name] = stts
         payload_metadata['classification_columns'].extend([self.stt_column_name])
-        if 'detect_language' in self.config and self.config['detect_language']:
+        if self.config.get('detect_language', False):
             payload_df[self.language_classification_column_name] = languages
             payload_metadata['classification_columns'].extend([self.language_classification_column_name])
-        if 'performance_measurement' in self. config and self.config['performance_measurement']:
+        if self.config.get('performance_measurement', False):
             file_performance_column_name = f'perf_{self.get_name()}_get_transcription'
             payload_df[file_performance_column_name] = performance_metric
             payload_metadata['meta_columns'].extend([file_performance_column_name])

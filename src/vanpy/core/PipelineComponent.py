@@ -47,8 +47,7 @@ class PipelineComponent(ABC):
         :param last_item: whether this is the last item in the paths list
         :type last_item: bool
         """
-        log_each_x_records = self.config['log_each_x_records'] \
-            if 'log_each_x_records' in self.config and self.config['log_each_x_records'] else 10
+        log_each_x_records = self.config.get('log_each_x_records', 10)
         last_item = False
         if self.config['records_count']:
             last_item = iteration == self.config['records_count'] - 1
@@ -115,8 +114,8 @@ class PipelineComponent(ABC):
         """
         subscript = 'intermediate' if intermediate else 'final'
         self.get_logger().info(
-            f'Called Saved payload {self.get_name(), "save_payload" in self.config and self.config["save_payload"]}, intermediate {intermediate}')
-        if "save_payload" in self.config and self.config["save_payload"]:
+            f'Called Saved payload {self.get_name(), self.config.get("save_payload", False)}, intermediate {intermediate}')
+        if self.config.get("save_payload", False):
             create_dirs_if_not_exist(self.config["intermediate_payload_path"])
             metadata, df = input_payload.unpack()
             with open(

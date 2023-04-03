@@ -64,13 +64,12 @@ class Wav2Vec2ADV(PipelineComponent):
     # A prediction model for arousal, dominance and valence
     model = None
     tokenizer = None
-    pretrained_models_dir: str = ''
 
     def __init__(self, yaml_config: YAMLObject):
         super().__init__(component_type='segment_classifier', component_name='wav2vec2adv',
                          yaml_config=yaml_config)
         self.device = 'gpu' if torch.cuda.is_available() else 'cpu'
-        self.pretrained_models_dir = self.config['pretrained_models_dir']
+        self.sampling_rate = self.config.get('sampling_rate', 16000)
 
     def load_model(self):
         self.logger.info("Loading wav2vec 2.0 arousal, dominance and valence prediction model")
@@ -114,13 +113,12 @@ class Wav2Vec2ADV(PipelineComponent):
         
         prediction = []
         performance_metric = []
-        sr = self.config['sampling_rate'] if 'sampling_rate' in self.config else 16000
         for j, f in enumerate(paths_list):
             try:
                 t_start_transcribing = time.time()
 
                 # Loading the audio file
-                audio, rate = librosa.load(f, sr=sr)
+                audio, rate = librosa.load(f, sr=self.sampling_rate)
                 arousal, dominance, valence = self.process_func(np.reshape(audio, [1, len(audio)]), rate)[0]
                 prediction.append((arousal, dominance, valence))
                 t_end_transcribing = time.time()
@@ -138,7 +136,7 @@ class Wav2Vec2ADV(PipelineComponent):
         for col in prediction_df.columns:
             payload_df[col] = prediction_df[col]
         payload_metadata['classification_columns'].extend([columns])
-        if 'performance_measurement' in self. config and self.config['performance_measurement']:
+        if self.config.get('performance_measurement', True):
             file_performance_column_name = f'perf_{self.get_name()}_get_transcription'
             payload_df[file_performance_column_name] = performance_metric
             payload_metadata['meta_columns'].extend([file_performance_column_name])

@@ -12,14 +12,14 @@ class VoxcelebGenderClassifier(PipelineComponent):
     label_conversion_list = ['female', 'male']
     label_conversion_dict = {i: v for i, v in zip(range(len(label_conversion_list)), label_conversion_list)}
     classification_column_name: str = ''
-    verbal_labels: bool = False
+    verbal_labels: bool = True
 
     def __init__(self, yaml_config: YAMLObject):
         super().__init__(component_type='segment_classifier', component_name='vanpy_voxceleb_gender',
                          yaml_config=yaml_config)
-        self.verbal_labels = self.config['verbal_labels']
-        self.classification_column_name = self.config['classification_column_name']
-        self.pretrained_models_dir = self.config['pretrained_models_dir']
+        self.verbal_labels = self.config.get('verbal_labels', True)
+        self.classification_column_name = self.config.get('classification_column_name',
+                                                          f'{self.component_name}_classification')
 
     def load_model(self):
         self.logger.info("Loading SVM gender classification model, trained on Voxceleb2 dataset with speech_brain embedding [192 features]")

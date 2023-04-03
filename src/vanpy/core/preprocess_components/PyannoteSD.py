@@ -13,10 +13,12 @@ class PyannoteSD(SegmenterComponent):
     def __init__(self, yaml_config: YAMLObject):
         super().__init__(component_type='preprocessing', component_name='pyannote_sd',
                          yaml_config=yaml_config)
-        self.ACCESS_TOKEN = self.config['huggingface_ACCESS_TOKEN']
-        self.skip_overlap = False if 'skip_overlap' not in self.config else self.config['skip_overlap']
-        self.classification_column_name = self.config['classification_column_name'] \
-            if 'classification_column_name' in self.config else 'pyannote_diarization_classification'
+        self.ACCESS_TOKEN = self.config.get('huggingface_ACCESS_TOKEN', None)
+        if self.ACCESS_TOKEN is None:
+            raise KeyError(f'You need to pass huggingface_ACCESS_TOKEN to use {self.component_name} model')
+        self.skip_overlap = self.config.get('skip_overlap', False)
+        self.classification_column_name = self.config.get('classification_column_name',
+                                                          f'{self.component_name}_classification')
 
     def load_model(self):
         from pyannote.audio import Pipeline
@@ -58,8 +60,8 @@ class PyannoteSD(SegmenterComponent):
         for j, f in enumerate(paths_list):
             try:
                 t_start_segmentation = time.time()
-                v_segments = self.get_voice_segments(f)
-                segments_count = len(list(v_segments))
+                v_segments = list(self.get_voice_segments(f))
+                segments_count = len(v_segments)
                 t_end_segmentation = time.time()
                 for i, (segment, label) in enumerate(v_segments):
                     output_path = cut_segment(f, output_dir=output_dir, segment=segment, segment_id=i,

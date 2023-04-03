@@ -18,7 +18,9 @@ class PyannoteEmbedding(PipelineComponent):
     def __init__(self, yaml_config: YAMLObject):
         super().__init__(component_type='feature_extraction', component_name='pyannote_embedding',
                          yaml_config=yaml_config)
-        self.ACCESS_TOKEN = self.config['huggingface_ACCESS_TOKEN']
+        self.ACCESS_TOKEN = self.config.get('huggingface_ACCESS_TOKEN', None)
+        if self.ACCESS_TOKEN is None:
+            raise KeyError(f'You need to pass huggingface_ACCESS_TOKEN to use {self.component_name} model')
 
     def load_model(self):
         model = Model.from_pretrained("pyannote/embedding",  # pyannote%2Fembedding

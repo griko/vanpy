@@ -10,7 +10,6 @@ from vanpy.utils.utils import create_dirs_if_not_exist
 class YamnetClassifier(PipelineComponent):
     model = None
     classification_column_name: str = ''
-    pretrained_models_dir: str = ''
     class_names = None
     threshold = 0.
 

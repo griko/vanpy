@@ -18,9 +18,9 @@ class LibrosaFeaturesExtractor(PipelineComponent):
     def __init__(self, yaml_config: YAMLObject):
         super().__init__(component_type='feature_extraction', component_name='librosa_features_extractor',
                          yaml_config=yaml_config)
-        self.sampling_rate = self.config['sampling_rate']
-        self.features = self.config['features']
-        self.n_mfcc = self.config['n_mfcc']
+        self.sampling_rate = self.config.get('sampling_rate', 16000)
+        self.features = self.config.get('features', ['mfcc'])
+        self.n_mfcc = self.config.get('n_mfcc', 13)
 
     def process(self, input_payload: ComponentPayload) -> ComponentPayload:
         metadata, df = input_payload.unpack()

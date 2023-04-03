@@ -45,7 +45,7 @@ class WAVConverter(SegmenterComponent):
         processed_path, metadata = self.segmenter_create_columns(metadata)
         p_df, paths_list = self.get_file_paths_and_processed_df_if_not_overwriting(p_df, paths_list, processed_path,
                                                                                    input_column, output_dir,
-                                                                                   use_dir_prefix='use_dir_name_as_prefix' in self.config and self.config['use_dir_name_as_prefix'])
+                                                                                   use_dir_prefix=self.config.get('use_dir_name_as_prefix', False))
 
         if not paths_list:
             self.logger.warning('You\'ve supplied an empty list to process')
@@ -58,7 +58,7 @@ class WAVConverter(SegmenterComponent):
         for j, f in enumerate(paths_list):
             filename = ''.join(f.split("/")[-1].split(".")[:-1])
             dir_prefix = ''
-            if 'use_dir_name_as_prefix' in self.config and self.config['use_dir_name_as_prefix']:
+            if self.config.get('use_dir_name_as_prefix', False):
                 dir_prefix = f.split("/")[-2] + '_'
             if not output_dir:
                 input_path = ''.join(f.split("/")[:-1])

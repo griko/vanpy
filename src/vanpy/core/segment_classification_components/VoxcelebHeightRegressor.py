@@ -16,8 +16,7 @@ class VoxcelebHeightRegressor(PipelineComponent):
     def __init__(self, yaml_config: YAMLObject):
         super().__init__(component_type='segment_classifier', component_name='vanpy_voxceleb_height',
                          yaml_config=yaml_config)
-        self.classification_column_name = self.config['classification_column_name']
-        self.pretrained_models_dir = self.config['pretrained_models_dir']
+        self.classification_column_name = self.config.get('classification_column_name', f'{self.component_name}_estimation')
 
     def load_model(self):
         self.logger.info("Loading ANN height regression model, trained on Voxceleb2 dataset with speech_brain embedding [192 features]")
