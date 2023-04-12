@@ -7,14 +7,24 @@ import time
 
 
 class SepFormerSE(PipelineComponent):
-    # SepFormer speech enhancement component
+    """
+    Pipeline component for SepFormer speech enhancement.
+    """
     model = None
 
     def __init__(self, yaml_config: YAMLObject):
+        """
+        Initializes the SepFormerSE component.
+
+        :param yaml_config: A YAMLObject containing the configuration parameters for the component.
+        """
         super().__init__(component_type='preprocessing', component_name='sepformer_se',
                          yaml_config=yaml_config)
 
     def load_model(self):
+        """
+        Loads the SepFormerSeparation pretrained model from huggingface and saves it to self.model.
+        """
         import torch
         from speechbrain.pretrained import SepformerSeparation
         if torch.cuda.is_available():
@@ -26,6 +36,12 @@ class SepFormerSE(PipelineComponent):
                                                               savedir="pretrained_models/sepformer-wham16k-enhancement",)
 
     def process(self, input_payload: ComponentPayload) -> ComponentPayload:
+        """
+        Processes the input payload by performing speech enhancement using the SepFormer model.
+
+        :param input_payload: The input payload containing the paths to the audio files to be enhanced.
+        :return: The output payload containing the paths to the enhanced audio files.
+        """
         import torchaudio
         if not self.model:
             self.load_model()
@@ -69,6 +85,9 @@ class SepFormerSE(PipelineComponent):
 
     @staticmethod
     def cleanup_softlinks():
+        """
+        Remove all soft links to .wav files in the current directory.
+        """
         for link in os.listdir():
             if '.wav' in link and os.path.islink(link):
                 os.unlink(link)

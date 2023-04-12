@@ -1,4 +1,6 @@
 from abc import ABC
+from typing import Dict, List, Tuple
+
 from yaml import YAMLObject
 from vanpy.core.PipelineComponent import PipelineComponent
 from vanpy.utils.utils import get_audio_files_paths
@@ -6,14 +8,30 @@ import pandas as pd
 
 
 class SegmenterComponent(PipelineComponent, ABC):
+    """
+    Base class for `PipelineComponent`s for segmenting audio files into smaller segments.
+    """
     def __init__(self, component_type: str, component_name: str, yaml_config: YAMLObject):
+        """
+        Initializes a new instance of the SegmenterComponent class.
+
+        :param component_type: The type of pipeline component.
+        :param component_name: The name of the pipeline component.
+        :param yaml_config: The YAML configuration object.
+        """
         super().__init__(component_type, component_name, yaml_config)
-        self.segment_name_separator = yaml_config.get('segment_name_separator', '_')
+        self.segment_name_separator = self.config.get('segment_name_separator', '_')
         self.segment_stop_column_name = None
         self.segment_start_column_name = None
         self.file_performance_column_name = None
 
-    def segmenter_create_columns(self, metadata):
+    def segmenter_create_columns(self, metadata: Dict[str, str]) -> Tuple[str, Dict[str, str]]:
+        '''
+        Creates the columns for ComponentPayload for the segmented audio files.
+
+        :param metadata: The ComponentPayload's enhanced metadata.
+        :return: The processed path column name and ComponentPayload's metadata.
+        '''
         processed_path = f'{self.get_name()}_processed_path'
         metadata['paths_column'] = processed_path
         metadata['all_paths_columns'].append(processed_path)
@@ -28,17 +46,43 @@ class SegmenterComponent(PipelineComponent, ABC):
             metadata['meta_columns'].extend([self.file_performance_column_name])
         return processed_path, metadata
 
-    def add_segment_metadata(self, f_d, a, b):
-        if self.config['add_segment_metadata']:
+    def add_segment_metadata(self, f_d: pd.DataFrame, a: float, b: float):
+        """
+        Adds metadata for the start and stop time of audio segments to the temporal DataFrame.
+
+        :param f_d: The temporal DataFrame that is enhanced with the start and stop time of audio segments.
+        :param a: The start time of the audio segment in the input audio file.
+        :param b: The stop time of the audio segment in the input audio file.
+        """
+        if self.config.get('add_segment_metadata', True):
             f_d[self.segment_start_column_name] = [a]
             f_d[self.segment_stop_column_name] = [b]
 
-    def add_performance_metadata(self, f_d, t_start, t_end):
+    def add_performance_metadata(self, f_d: pd.DataFrame, t_start: float, t_end: float):
+        """
+        Adds performance metadata for the audio segments.
+
+        :param f_d: The temporal DataFrame that is enhanced with the performance time of audio segments.
+        :param t_start: The start time of the audio segment extraction.
+        :param t_end: The end time of the audio segment extraction.
+        """
         if self.config['performance_measurement']:
             f_d[self.file_performance_column_name] = t_end - t_start
 
-    def get_file_paths_and_processed_df_if_not_overwriting(self, p_df, paths_list, processed_path, input_column,
-                                                           output_dir, use_dir_prefix=False):
+    def get_file_paths_and_processed_df_if_not_overwriting(self, p_df: pd.DataFrame, paths_list: List[str],
+                                                           processed_path: str, input_column: str,
+                                                           output_dir: str, use_dir_prefix: bool=False) -> Tuple[pd.DataFrame, List[str]]:
+        """
+        Returns a processed DataFrame and a list of unprocessed file paths if not overwriting existing files.
+
+        :param p_df: A pandas DataFrame to append processed file paths and input file paths to.
+        :param paths_list: A list of file paths to process.
+        :param processed_path: The column name to append the processed file path to the `p_df`.
+        :param input_column: The column name to append the input file path to the `p_df`.
+        :param output_dir: The output directory path.
+        :param use_dir_prefix: If True, the directory name is added as a prefix to the processed file name.
+        :return: A tuple containing the updated `p_df` DataFrame and a list of unprocessed file paths.
+        """
         unprocessed_paths_list = []
         if not self.config.get('overwrite', False):
             existing_file_list = get_audio_files_paths(output_dir)

@@ -1,3 +1,4 @@
+from typing import List, Tuple
 from yaml import YAMLObject
 from vanpy.core.ComponentPayload import ComponentPayload
 from vanpy.core.preprocess_components.SegmenterComponent import SegmenterComponent
@@ -7,9 +8,15 @@ import time
 
 
 class PyannoteVAD(SegmenterComponent):
+    """
+    Pyannote Voice Activity Detection (VAD) component for segmenting audio files into voice segments.
+    """
     model = None
 
     def __init__(self, yaml_config: YAMLObject):
+        """
+        Initializes the PyannoteVAD class and parses the configuration parameters
+        """
         super().__init__(component_type='preprocessing', component_name='pyannote_vad',
                          yaml_config=yaml_config)
         self.params = self.config.get('model_params', {})
@@ -19,6 +26,9 @@ class PyannoteVAD(SegmenterComponent):
         self.keep_only_first_segment = self.config.get('keep_only_first_segment', False)
 
     def load_model(self):
+        """
+        Load the pretrained PyannoteVAD segmentation model.
+        """
         from pyannote.audio import Model
         from pyannote.audio.pipelines import VoiceActivityDetection
         model = Model.from_pretrained("pyannote/segmentation",
@@ -27,7 +37,13 @@ class PyannoteVAD(SegmenterComponent):
         self.model = VoiceActivityDetection(segmentation=model)
         self.model.instantiate(self.params)
 
-    def get_voice_segments(self, f):
+    def get_voice_segments(self, f: str) -> List[Tuple[float, float]]:
+        """
+        Get voice segments from the given audio file.
+
+        :param f: Audio file path.
+        :return: A list of tuples representing the start and end times of voice segments.
+        """
         annotation = self.model(f)
         segments = []
         for i, v in enumerate(annotation.itersegments()):

@@ -8,13 +8,25 @@ import pandas as pd
 
 
 class WAVConverter(SegmenterComponent):
+    """
+    A preprocessing component to convert audio files to WAV format using FFMPEG.
+    """
     def __init__(self, yaml_config: YAMLObject):
+        """
+        Initializes the WAVConverter class and creates initial ffmpeg configuration parameters
+        :param yaml_config: A YAMLObject containing the configuration for the pipeline
+        """
         super().__init__(component_type='preprocessing', component_name='wav_converter',
                          yaml_config=yaml_config)
         self.ffmpeg_config = ["ffmpeg", "-y", "-hide_banner", "-loglevel", "error", "-i",
                               "input_file", "-vn", "output_file", '-dn', '-ignore_unknown', '-sn']
 
     def update_ffmpeg_config(self):
+        """
+        Update the FFMPEG configuration with available parameters.
+
+        :return: None
+        """
         available_parameters = ['ab', 'ac', 'ar', 'acodec']
         input_file_idx = self.ffmpeg_config.index("input_file")
         for ap in available_parameters:
@@ -22,8 +34,15 @@ class WAVConverter(SegmenterComponent):
                 self.ffmpeg_config.insert(input_file_idx + 1, str(self.config[ap]))
                 self.ffmpeg_config.insert(input_file_idx + 1, "-" + ap)
 
+    def run_ffmpeg(self, f: str, output_dir: str, output_filename: str):
+        """
+        Run FFMPEG to convert an audio file to WAV format.
 
-    def run_ffmpeg(self, f, output_dir, output_filename):
+        :param f: The path of the input audio file.
+        :param output_dir: The path of the output directory.
+        :param output_filename: The name of the output WAV file.
+        :return: None
+        """
         ffmpeg_config = self.ffmpeg_config.copy()
         input_file_idx = ffmpeg_config.index("input_file")
         output_file_idx = ffmpeg_config.index("output_file")
@@ -33,6 +52,12 @@ class WAVConverter(SegmenterComponent):
         subprocess.run(ffmpeg_config)
 
     def process(self, input_payload: ComponentPayload) -> ComponentPayload:
+        """
+        Convert audio files to WAV format using FFMPEG.
+
+        :param input_payload: A ComponentPayload object containing metadata and a DataFrame with audio file paths.
+        :return: A ComponentPayload object containing metadata and a DataFrame with the converted audio file paths.
+        """
         metadata, df = input_payload.unpack()
         input_column = metadata['paths_column']
         if input_column == '':

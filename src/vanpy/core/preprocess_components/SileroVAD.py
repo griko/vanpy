@@ -7,11 +7,18 @@ from vanpy.utils.utils import cut_segment, create_dirs_if_not_exist
 
 
 class SileroVAD(SegmenterComponent):
+    """
+    A class for performing speech segmentation using Silero VAD.
+    """
     model = None
     utils = None
     sampling_rate: int
 
     def __init__(self, yaml_config: YAMLObject):
+        """
+        Initializes the SileroVAD class and parses the configuration parameters
+        :param yaml_config: A YAMLObject containing the configuration for the pipeline
+        """
         super().__init__(component_type='preprocessing', component_name='silero_vad',
                          yaml_config=yaml_config)
         self.params = self.config.get('model_params', {})
@@ -19,12 +26,23 @@ class SileroVAD(SegmenterComponent):
         self.keep_only_first_segment = self.config.get('keep_only_first_segment', False)
 
     def load_model(self):
+        """
+        Loads the Silero VAD pretrained model and utilities.
+        """
         import torch
         torch.hub.set_dir('pretrained_models/')
         self.model, self.utils = torch.hub.load(repo_or_dir='snakers4/silero-vad', model='silero_vad',
                                                 force_reload=False)
 
     def process(self, input_payload: ComponentPayload) -> ComponentPayload:
+        """
+        Processes the input payload by extraction of speech segments identified by SileroVAD.
+        The number of segments may be bigger than the number of files in input_payload[metadata['paths_column']].
+        It will extract one segment per input path if keep_only_first_segment was set in the configuration.
+
+        :param input_payload: The input payload to process.
+        :return: The processed payload.
+        """
         if not self.model:
             self.load_model()
 
