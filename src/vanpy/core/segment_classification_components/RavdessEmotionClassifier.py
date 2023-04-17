@@ -34,18 +34,22 @@ class RavdessEmotionClassifier(PipelineComponent):
         payload_metadata = input_payload.metadata
         payload_df = input_payload.df
 
-        expected_columns = [f'{i}_speechbrain_embedding' for i in range(192)]
+        expected_columns = [f'{i}_speechbrain_embedding' for i in range(192)]  # expecting features_columns to be ['0_speechbrain_embedding','1_speechbrain_embedding',...'191_speechbrain_embedding']
         if set(expected_columns) - set(payload_df.columns):
             self.logger.error("There are no speechbrain_embedding columns in the payload, please add 'speechbrain_embedding' component to the Pipeline with 'spkrec-ecapa-voxceleb' model (or without model mentioning)")
             return input_payload
         else:
             self.logger.info("Found SpeechBrainEmbedding features in the payload, continuing with classification")
 
-        # X = payload_df[payload_metadata['feature_columns']]
         X = payload_df[expected_columns].convert_dtypes()
-        # X.columns = X.columns.astype(str)  # expecting features_columns to be ['0_speechbrain_embedding','1_speechbrain_embedding',...'191_speechbrain_embedding']
+        nan_idxs = X[X.isna().any(axis=1)].index
+        X = X.fillna(0)
         y_pred = self.model.predict(X)
-        payload_df[self.classification_column_name] = \
-            [self.label_conversion_dict[x] if not self.verbal_labels else x for x in y_pred]
+        if self.verbal_labels:
+            payload_df[self.classification_column_name] = [self.label_conversion_dict[x] for x in y_pred]
+        else:
+            payload_df[self.classification_column_name] = y_pred
+        payload_df.loc[nan_idxs, self.classification_column_name] = None
+
         payload_metadata['classification_columns'].extend([self.classification_column_name])
         return ComponentPayload(metadata=payload_metadata, df=payload_df)
