@@ -44,9 +44,12 @@ class VoxcelebHeightRegressor(PipelineComponent):
 
         # X = payload_df[payload_metadata['feature_columns']]
         X = payload_df[expected_columns].convert_dtypes()
+        nan_idxs = X[X.isna().any(axis=1)].index
+        X = X.fillna(0)
         X = self.transformer.transform(X)
         # X.columns = X.columns.astype(str)  # expecting features_columns to be ['0_speechbrain_embedding','1_speechbrain_embedding',...'191_speechbrain_embedding']
         y_pred = self.model.predict(X)
         payload_df[self.classification_column_name] = y_pred.reshape(-1)
+        payload_df.loc[nan_idxs, self.classification_column_name] = None
         payload_metadata['classification_columns'].extend([self.classification_column_name])
         return ComponentPayload(metadata=payload_metadata, df=payload_df)

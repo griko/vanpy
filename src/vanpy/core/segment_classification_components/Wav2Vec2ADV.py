@@ -68,13 +68,14 @@ class Wav2Vec2ADV(PipelineComponent):
     def __init__(self, yaml_config: YAMLObject):
         super().__init__(component_type='segment_classifier', component_name='wav2vec2adv',
                          yaml_config=yaml_config)
-        self.device = 'gpu' if torch.cuda.is_available() else 'cpu'
+        self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
         self.sampling_rate = self.config.get('sampling_rate', 16000)
 
     def load_model(self):
         self.logger.info("Loading wav2vec 2.0 arousal, dominance and valence prediction model")
         self.processor = Wav2Vec2Processor.from_pretrained("audeering/wav2vec2-large-robust-12-ft-emotion-msp-dim", cache_dir=self.pretrained_models_dir)
         self.model = EmotionModel.from_pretrained("audeering/wav2vec2-large-robust-12-ft-emotion-msp-dim", cache_dir=self.pretrained_models_dir)
+        self.model.to(self.device)
 
     def process_func(self,
         x: np.ndarray,
@@ -124,7 +125,7 @@ class Wav2Vec2ADV(PipelineComponent):
                 t_end_transcribing = time.time()
                 performance_metric.append(t_end_transcribing - t_start_transcribing)
                 self.latent_info_log(
-                    f'Transcribed {f} in {t_end_transcribing - t_start_transcribing} seconds, {j + 1}/{len(paths_list)}',
+                    f'Processed {f} in {t_end_transcribing - t_start_transcribing} seconds, {j + 1}/{len(paths_list)}',
                     iteration=j)
             except RuntimeError as e:
                 prediction.append((None, None, None))
