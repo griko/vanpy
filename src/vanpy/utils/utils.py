@@ -113,3 +113,26 @@ def get_null_wav_path() -> str:
         gdown.download('https://drive.google.com/uc?export=download&confirm=9iBg&id=1URDocYaa0tKe3KLiFJd5ct7tsczA3mX4',
                        path, quiet=True)
     return path
+
+def concat_audio_files_in_dir(input_dir, output_path, extension='.wav', sr=16000):
+    """
+    Concatenate all audio files in a directory into a one audio file.
+    :param input_dir: The directory containing the audio files to be concatenated.
+    :param output_path: The path where the concatenated audio file will be saved.
+    :param extension: The file extension of the audio files in the directory to be concatenated. Defaults to '.wav'.
+    :param sr: The sampling rate of the concatenated audio file. Defaults to 16000.
+    """
+    import os
+    import librosa
+    import numpy as np
+    import soundfile as sf
+
+    files = os.listdir(input_dir)
+    files = [f for f in files if f.endswith(extension)]
+    files = [os.path.join(input_dir, f) for f in files]
+    audio = []
+    for f in files:
+        y, sr = librosa.load(f, sr=sr)
+        audio.append(y)
+    audio = np.concatenate(audio)
+    sf.write(output_path, audio, samplerate=sr)
