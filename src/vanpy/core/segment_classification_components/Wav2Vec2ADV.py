@@ -100,6 +100,11 @@ class Wav2Vec2ADV(PipelineComponent):
         return y
 
     def process(self, input_payload: ComponentPayload) -> ComponentPayload:
+        """
+        Process the input payload and return the output payload.
+        :param input_payload: The input payload.
+        :return: The output payload.
+        """
         if not self.model:
             self.load_model()
 
@@ -136,7 +141,7 @@ class Wav2Vec2ADV(PipelineComponent):
         prediction_df = pd.DataFrame(prediction, columns=columns)
         for col in prediction_df.columns:
             payload_df[col] = prediction_df[col]
-        payload_metadata['classification_columns'].extend([columns])
+        payload_metadata['classification_columns'].extend(columns)
         if self.config.get('performance_measurement', True):
             file_performance_column_name = f'perf_{self.get_name()}_get_transcription'
             payload_df[file_performance_column_name] = performance_metric

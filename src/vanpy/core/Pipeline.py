@@ -37,7 +37,7 @@ class Pipeline:
     def process(self, initial_payload: ComponentPayload = None) -> ComponentPayload:
         process_dir = self.input_dir
         cp: ComponentPayload = ComponentPayload(input_path=process_dir)
-        if initial_payload:
+        if initial_payload is not None:
             cp = initial_payload
 
         for pipeline in self.pipelines:

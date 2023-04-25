@@ -45,15 +45,13 @@ class RavdessEmotionClassifier(PipelineComponent):
         nan_idxs = X[X.isna().any(axis=1)].index
         X = X.fillna(0)
         y_pred = self.model.predict(X)
-        classification_column_type = None
         if self.verbal_labels:
             payload_df[self.classification_column_name] = y_pred
         else:
             payload_df[self.classification_column_name] = [self.label_conversion_dict[x] for x in y_pred]
-            classification_column_type = 'int'
         payload_df.loc[nan_idxs, self.classification_column_name] = None
-        if classification_column_type:
-            payload_df[self.classification_column_name] = payload_df[self.classification_column_name].astype(classification_column_type)
+        if not self.verbal_labels:  # setting None at nan_idxs applies 'float64' dtype if the classification column contained numerical values
+            payload_df[self.classification_column_name] = payload_df[self.classification_column_name].astype('int')
 
         payload_metadata['classification_columns'].extend([self.classification_column_name])
         return ComponentPayload(metadata=payload_metadata, df=payload_df)
