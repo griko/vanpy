@@ -31,11 +31,13 @@ class PyannoteVAD(SegmenterComponent):
         """
         from pyannote.audio import Model
         from pyannote.audio.pipelines import VoiceActivityDetection
+        import torch
         model = Model.from_pretrained("pyannote/segmentation",
                                       use_auth_token=self.ACCESS_TOKEN,
                                       cache_dir='pretrained_models/pyannote_vad')
         self.model = VoiceActivityDetection(segmentation=model)
         self.model.instantiate(self.params)
+        self.logger.info(f'Loaded model to {"GPU" if torch.cuda.device_count() > 0 else "CPU"}')
 
     def get_voice_segments(self, f: str) -> List[Tuple[float, float]]:
         """

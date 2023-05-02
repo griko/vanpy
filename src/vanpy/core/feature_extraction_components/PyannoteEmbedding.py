@@ -36,6 +36,7 @@ class PyannoteEmbedding(PipelineComponent):
                                    window="sliding",
                                    duration=self.config['sliding_window_duration'],
                                    step=self.config['sliding_window_step'])
+        self.logger.info(f'Loaded model to {"GPU" if torch.cuda.is_available() else "CPU"}')
 
     def process(self, input_payload: ComponentPayload) -> ComponentPayload:
         if not self.model:

@@ -24,6 +24,7 @@ class MetricGANSE(PipelineComponent):
         else:
             self.model = SpectralMaskEnhancement.from_hparams(source="speechbrain/metricgan-plus-voicebank",
                                                               savedir="pretrained_models/metricgan-plus-voicebank",)
+        self.logger.info(f'Loaded model to {"GPU" if torch.cuda.is_available() else "CPU"}')
 
     def process(self, input_payload: ComponentPayload) -> ComponentPayload:
         import torch

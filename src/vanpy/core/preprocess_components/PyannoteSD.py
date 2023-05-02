@@ -22,10 +22,12 @@ class PyannoteSD(SegmenterComponent):
 
     def load_model(self):
         from pyannote.audio import Pipeline
+        import torch
         self.model = Pipeline.from_pretrained("pyannote/speaker-diarization@2.1",
                                                 use_auth_token=self.ACCESS_TOKEN,
                                                 cache_dir='pretrained_models/pyannote_sd')
         self.model.der_variant['skip_overlap'] = self.skip_overlap
+        self.logger.info(f'Loaded model to {"GPU" if torch.cuda.device_count() > 0 else "CPU"}')
 
     def get_voice_segments(self, f):
         annotation = self.model(f)

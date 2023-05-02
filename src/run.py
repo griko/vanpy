@@ -23,10 +23,10 @@ def main():
     #         [preprocessing_pipeline, speaker_clf_pipeline], config=config)
     # 'sepformer_se', 'metricgan_se', 'speechbrain_embedding', 'vanpy_voxceleb_gender', 'vanpy_voxceleb_age', 'vanpy_voxceleb_height', 'wav2vec2adv'], config=config)
 
-    # pipline = Pipeline(['file_mapper', 'wav_converter', 'pyannote_sd', 'speechbrain_embedding', 'openai_whisper_stt', 'speech_brain_iemocap_emotion',
-    #                     'vanpy_voxceleb_gender'', ''vanpy_voxceleb_age', 'vanpy_voxceleb_height', 'vanpy_ravdess_emotion', 'wav2vec2adv', 'yamnet_classifier'], config=config)
+    pipline = Pipeline(['file_mapper', 'wav_converter', 'pyannote_sd', 'speechbrain_embedding', 'openai_whisper_stt', 'speech_brain_iemocap_emotion',
+                        'vanpy_voxceleb_gender', 'vanpy_voxceleb_age', 'vanpy_voxceleb_height', 'vanpy_ravdess_emotion', 'wav2vec2adv', 'yamnet_classifier'], config=config)
 
-    pipline = Pipeline(['file_mapper', 'speechbrain_embedding', 'vanpy_ravdess_emotion'], config=config)
+    # pipline = Pipeline(['file_mapper', 'speechbrain_embedding', 'vanpy_ravdess_emotion'], config=config)
     # 'wav_converter', 'metricgan_se',, 'silero_vad', 'speechbrain_embedding', 'cosine_distance_diarization' , 'pyannote_sd', 'openai_whisper_stt'
     # openai_whisper_stt, wav2vec2stt
     # processed_payload = await pipline.process()

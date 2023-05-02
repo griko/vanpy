@@ -34,6 +34,7 @@ class SepFormerSE(PipelineComponent):
         else:
             self.model = SepformerSeparation.from_hparams(source="speechbrain/sepformer-wham16k-enhancement",
                                                               savedir="pretrained_models/sepformer-wham16k-enhancement",)
+        self.logger.info(f'Loaded model to {"GPU" if torch.cuda.is_available() else "CPU"}')
 
     def process(self, input_payload: ComponentPayload) -> ComponentPayload:
         """

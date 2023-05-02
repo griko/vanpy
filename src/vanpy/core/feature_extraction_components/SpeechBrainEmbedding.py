@@ -26,6 +26,7 @@ class SpeechBrainEmbedding(PipelineComponent):
                                                         run_opts={"device": "cuda"})
         else:
             self.model = EncoderClassifier.from_hparams(source=f"speechbrain/{mdl}", savedir=f"pretrained_models/{mdl}")
+        self.logger.info(f'Loaded model to {"GPU" if torch.cuda.is_available() else "CPU"}')
 
     def process(self, input_payload: ComponentPayload) -> ComponentPayload:
         if not self.model:

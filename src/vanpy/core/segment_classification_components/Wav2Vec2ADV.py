@@ -72,10 +72,12 @@ class Wav2Vec2ADV(PipelineComponent):
         self.sampling_rate = self.config.get('sampling_rate', 16000)
 
     def load_model(self):
+        import torch
         self.logger.info("Loading wav2vec 2.0 arousal, dominance and valence prediction model")
         self.processor = Wav2Vec2Processor.from_pretrained("audeering/wav2vec2-large-robust-12-ft-emotion-msp-dim", cache_dir=self.pretrained_models_dir)
         self.model = EmotionModel.from_pretrained("audeering/wav2vec2-large-robust-12-ft-emotion-msp-dim", cache_dir=self.pretrained_models_dir)
         self.model.to(self.device)
+        self.logger.info(f'Loaded model to {"GPU" if torch.cuda.is_available() else "CPU"}')
 
     def process_func(self,
         x: np.ndarray,

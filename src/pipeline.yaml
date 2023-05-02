@@ -1,4 +1,4 @@
-input_dir: 'speech_examples_small'
+input_dir: 'speech_examples'
 segment_name_separator: "_"
 intermediate_payload_path: 'results'
 # device: 'cpu'  # 'cpu'/'cuda'

@@ -33,6 +33,7 @@ class SileroVAD(SegmenterComponent):
         torch.hub.set_dir('pretrained_models/')
         self.model, self.utils = torch.hub.load(repo_or_dir='snakers4/silero-vad', model='silero_vad',
                                                 force_reload=False)
+        self.logger.info(f'Loaded model to {"GPU" if torch.cuda.is_available() else "CPU"}')
 
     def process(self, input_payload: ComponentPayload) -> ComponentPayload:
         """

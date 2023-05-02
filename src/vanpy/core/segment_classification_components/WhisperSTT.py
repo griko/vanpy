@@ -19,8 +19,10 @@ class WhisperSTT(PipelineComponent):
         self.model_size = self.config.get('model_size', 'small')
 
     def load_model(self):
+        import torch
         self.logger.info("Loading openai-whisper model")
         self.model = whisper.load_model(self.model_size, download_root=self.pretrained_models_dir)
+        self.logger.info(f'Loaded model to {"GPU" if torch.cuda.is_available() else "CPU"}')
 
     def process(self, input_payload: ComponentPayload) -> ComponentPayload:
         if not self.model:
