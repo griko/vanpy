@@ -2,6 +2,9 @@
 # implemented calculate_group_index
 
 class DisjointSet:
+    """
+    Class to represent Disjoint Set Data structure with Find and ranked Union operations
+    """
     def __init__(self, n):
         # Constructor to create and
         # initialize sets of n items
