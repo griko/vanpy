@@ -25,7 +25,7 @@ def main():
 
     # pipeline = Pipeline(['file_mapper', 'wav_converter', 'pyannote_sd', 'speechbrain_embedding', 'openai_whisper_stt', 'speech_brain_iemocap_emotion',
     #                     'vanpy_voxceleb_gender', 'vanpy_voxceleb_age', 'vanpy_voxceleb_height', 'vanpy_ravdess_emotion', 'wav2vec2adv', 'yamnet_classifier'], config=config)
-    pipeline = Pipeline(['file_mapper', 'vanpy_speaker_embedding'], config=config)
+    pipeline = Pipeline(['file_mapper', 'pyannote_sd'], config=config)  # 'vanpy_speaker_embedding'
 
     # pipeline = Pipeline(['file_mapper', 'speechbrain_embedding', 'vanpy_ravdess_emotion'], config=config)
     # 'wav_converter', 'metricgan_se',, 'silero_vad', 'speechbrain_embedding', 'cosine_distance_diarization' , 'pyannote_sd', 'openai_whisper_stt'

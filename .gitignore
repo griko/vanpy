@@ -14,6 +14,7 @@
 /src/convert_preprocessed
 /src/metricgan_se_preprocessed
 /src/pretrained_models
+/src/pyannote_sd.yaml
 
 
 
@@ -78,18 +79,6 @@ atlassian-ide-plugin.xml
 
 # Cursive Clojure plugin
 .idea/replstate.xml
-
-# Crashlytics plugin (for Android Studio and IntelliJ)
-com_crashlytics_export_strings.xml
-crashlytics.properties
-crashlytics-build.properties
-fabric.properties
-
-# Editor-based Rest Client
-.idea/httpRequests
-
-# Android studio 3.1+ serialized cache file
-.idea/caches/build_file_checksums.ser
 
 ### VirtualEnv template
 # Virtualenv

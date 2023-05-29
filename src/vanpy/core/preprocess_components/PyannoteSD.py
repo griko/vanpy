@@ -1,3 +1,6 @@
+import os
+
+import yaml
 from yaml import YAMLObject
 from vanpy.core.ComponentPayload import ComponentPayload
 from vanpy.core.preprocess_components.SegmenterComponent import SegmenterComponent
@@ -23,9 +26,16 @@ class PyannoteSD(SegmenterComponent):
     def load_model(self):
         from pyannote.audio import Pipeline
         import torch
-        self.model = Pipeline.from_pretrained("pyannote/speaker-diarization@2.1",
-                                                use_auth_token=self.ACCESS_TOKEN,
-                                                cache_dir='pretrained_models/pyannote_sd')
+        if 'hparams' in self.config:
+            yaml.dump(self.config['hparams'], open('pyannote_sd.yaml', 'w'), default_flow_style=False)
+        if os.path.exists('pyannote_sd.yaml'):
+            self.model = Pipeline.from_pretrained("pyannote/speaker-diarization@2.1",
+                                                  use_auth_token=self.ACCESS_TOKEN, hparams_file='pyannote_sd.yaml',
+                                                  cache_dir='pretrained_models/pyannote_sd')
+        else:
+            self.model = Pipeline.from_pretrained("pyannote/speaker-diarization@2.1",
+                                                  use_auth_token=self.ACCESS_TOKEN,
+                                                  cache_dir='pretrained_models/pyannote_sd')
         self.model.der_variant['skip_overlap'] = self.skip_overlap
         self.logger.info(f'Loaded model to {"GPU" if torch.cuda.device_count() > 0 else "CPU"}')
 
