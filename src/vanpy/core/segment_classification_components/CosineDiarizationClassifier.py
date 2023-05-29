@@ -49,6 +49,8 @@ class CosineDiarizationClassifier(PipelineComponent):
             emb1 = payload_df.iloc[i][features_columns]
             for j in range(self.config['records_count']):
                 emb2 = payload_df.iloc[j][features_columns]
+                if None in emb1.values or None in emb2.values:  # empty (None) row
+                    continue
                 if i != j and self.similarity(torch.Tensor(emb1), torch.Tensor(emb2)) > self.threshold:
                     ds.union(i, j)
                     break

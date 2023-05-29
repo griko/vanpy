@@ -1,4 +1,4 @@
-input_dir: 'speech_examples'
+input_dir: 'mkl'  # 'speech_examples', 'speech_examples_small'
 segment_name_separator: "_"
 intermediate_payload_path: 'results'
 # device: 'cpu'  # 'cpu'/'cuda'
@@ -198,7 +198,7 @@ segment_classifier:
 
   cosine_distance_diarization:
     classification_column_name: 'diarization_classification'
-    threshold: 0.25  # cosine similarity threshold of the embeddings
+    threshold: 0.3  # cosine similarity threshold of the embeddings
     features_list:  # assumes multiple column features are labeled 'i_<component_name>' where i is between
                     # start_index (inclusive) and stop_index (exclusive)
       - speechbrain_embedding:
