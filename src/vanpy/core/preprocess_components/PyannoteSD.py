@@ -3,13 +3,13 @@ import os
 import yaml
 from yaml import YAMLObject
 from vanpy.core.ComponentPayload import ComponentPayload
-from vanpy.core.preprocess_components.SegmenterComponent import SegmenterComponent
+from vanpy.core.preprocess_components.BaseSegmenterComponent import BaseSegmenterComponent
 from vanpy.utils.utils import create_dirs_if_not_exist, cut_segment
 import pandas as pd
 import time
 
 
-class PyannoteSD(SegmenterComponent):
+class PyannoteSD(BaseSegmenterComponent):
     # Pyannote speaker diarization model
     model = None
 

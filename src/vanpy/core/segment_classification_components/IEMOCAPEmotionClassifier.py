@@ -43,7 +43,7 @@ class IEMOCAPEmotionClassifier(PipelineComponent):
             try:
                 out_prob, score, index, text_lab = self.model.classify_file(f)
                 emotion_prediction.append(text_lab[0] if self.verbal_labels else index)
-            except RuntimeError as e:
+            except (RuntimeError, TypeError) as e:
                 emotion_prediction.append(None)
                 self.logger.error(f"An error occurred in {f}, {j + 1}/{len(paths_list)}: {e}")
 

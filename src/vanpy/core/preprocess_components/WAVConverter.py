@@ -1,13 +1,13 @@
 import subprocess
 
 from vanpy.core.ComponentPayload import ComponentPayload
-from vanpy.core.preprocess_components.SegmenterComponent import SegmenterComponent
+from vanpy.core.preprocess_components.BaseSegmenterComponent import BaseSegmenterComponent
 from vanpy.utils.utils import create_dirs_if_not_exist
 from yaml import YAMLObject
 import pandas as pd
 
 
-class WAVConverter(SegmenterComponent):
+class WAVConverter(BaseSegmenterComponent):
     """
     A preprocessing component to convert audio files to WAV format using FFMPEG.
     """

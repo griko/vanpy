@@ -2,11 +2,11 @@ import time
 from yaml import YAMLObject
 import pandas as pd
 from vanpy.core.ComponentPayload import ComponentPayload
-from vanpy.core.preprocess_components.SegmenterComponent import SegmenterComponent
+from vanpy.core.preprocess_components.BaseSegmenterComponent import BaseSegmenterComponent
 from vanpy.utils.utils import cut_segment, create_dirs_if_not_exist
 
 
-class SileroVAD(SegmenterComponent):
+class SileroVAD(BaseSegmenterComponent):
     """
     A class for performing speech segmentation using Silero VAD.
     """

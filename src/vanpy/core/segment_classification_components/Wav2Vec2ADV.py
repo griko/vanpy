@@ -134,7 +134,7 @@ class Wav2Vec2ADV(PipelineComponent):
                 self.latent_info_log(
                     f'Processed {f} in {t_end_transcribing - t_start_transcribing} seconds, {j + 1}/{len(paths_list)}',
                     iteration=j)
-            except RuntimeError as e:
+            except (RuntimeError, TypeError) as e:
                 prediction.append((None, None, None))
                 performance_metric.append(float('inf'))
                 self.logger.error(f'An error occurred in {f}, {j + 1}/{len(paths_list)}: {e}')

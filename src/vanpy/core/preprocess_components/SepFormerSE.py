@@ -76,7 +76,7 @@ class SepFormerSE(PipelineComponent):
                 else:
                     self.latent_info_log(f'Skipping enhancement for {f}, already exists, {j + 1}/{len(paths_list)}', iteration=j)
                 processed_paths_list.append(output_file)
-            except RuntimeError as e:
+            except (RuntimeError, AttributeError) as e:
                 processed_paths_list.append(None)
                 self.logger.error(f"An error occurred in {f}, {j + 1}/{len(paths_list)}: {e}")
 

@@ -1,10 +1,20 @@
-from typing import List
+from typing import List, Dict, Optional
 from yaml import YAMLObject
 from vanpy.core.BasePipeline import BasePipeline
+from vanpy.core.PipelineComponent import PipelineComponent
 
 
 class ClassificationPipeline(BasePipeline):
-    components_mapper = {
+    """
+    Class representing a classification pipeline, which is a specific type of BasePipeline.
+    It comprises various predefined components for audio classification.
+
+    :ivar components_mapper: Dictionary mapping component names to component classes or None.
+        Each key is a string (the name of the component), and each value is either None or an instance of a class
+        that inherits from PipelineComponent.
+    :vartype components_mapper: Dict[str, Optional[PipelineComponent]]
+    """
+    components_mapper: Dict[str, Optional[PipelineComponent]] = {
         'vanpy_voxceleb_gender': None,
         'vanpy_voxceleb_age': None,
         'vanpy_voxceleb_height': None,
@@ -16,10 +26,23 @@ class ClassificationPipeline(BasePipeline):
         'wav2vec2stt': None,
         'openai_whisper_stt': None,
         'cosine_distance_diarization': None,
+        'agglomerative_clustering_diarization': None,
         'yamnet_classifier': None
     }
 
     def __init__(self, components: List[str], config: YAMLObject):
+        """
+        Initializes the ClassificationPipeline object with the specified components and YAML configuration.
+
+        The components list should be a list of strings where each string is a key in the `components_mapper`
+        dictionary. The function then replaces the None value for each key in the `components_mapper` dictionary
+        with the corresponding component class.
+
+        :param components: List of names of the classification components to include in this pipeline.
+        :type components: List[str]
+        :param config: YAML configuration for the pipeline.
+        :type config: YAMLObject
+        """
         for component in components:
             if component == 'vanpy_voxceleb_gender':
                 from vanpy.core.segment_classification_components.VoxcelebGenderClassifier import VoxcelebGenderClassifier
@@ -54,6 +77,9 @@ class ClassificationPipeline(BasePipeline):
             elif component == 'cosine_distance_diarization':
                 from vanpy.core.segment_classification_components.CosineDiarizationClassifier import CosineDiarizationClassifier
                 self.components_mapper[component] = CosineDiarizationClassifier
+            elif component == 'agglomerative_clustering_diarization':
+                from vanpy.core.segment_classification_components.AgglomerativeDiarizationClassifier import AgglomerativeDiarizationClassifier
+                self.components_mapper[component] = AgglomerativeDiarizationClassifier
             elif component == 'yamnet_classifier':
                 from vanpy.core.segment_classification_components.YamnetClassifier import YamnetClassifier
                 self.components_mapper[component] = YamnetClassifier

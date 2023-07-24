@@ -7,7 +7,7 @@ from vanpy.utils.utils import get_audio_files_paths
 import pandas as pd
 
 
-class SegmenterComponent(PipelineComponent, ABC):
+class BaseSegmenterComponent(PipelineComponent, ABC):
     """
     Base class for `PipelineComponent`s for segmenting audio files into smaller segments.
     """

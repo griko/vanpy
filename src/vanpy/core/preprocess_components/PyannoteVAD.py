@@ -1,13 +1,13 @@
 from typing import List, Tuple
 from yaml import YAMLObject
 from vanpy.core.ComponentPayload import ComponentPayload
-from vanpy.core.preprocess_components.SegmenterComponent import SegmenterComponent
+from vanpy.core.preprocess_components.BaseSegmenterComponent import BaseSegmenterComponent
 from vanpy.utils.utils import create_dirs_if_not_exist, cut_segment
 import pandas as pd
 import time
 
 
-class PyannoteVAD(SegmenterComponent):
+class PyannoteVAD(BaseSegmenterComponent):
     """
     Pyannote Voice Activity Detection (VAD) component for segmenting audio files into voice segments.
     """

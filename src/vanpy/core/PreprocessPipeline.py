@@ -1,9 +1,20 @@
-from typing import List
+from typing import List, Dict, Optional, Type
 from yaml import YAMLObject
 from vanpy.core.BasePipeline import BasePipeline
+from vanpy.core.PipelineComponent import PipelineComponent
+
 
 class PreprocessPipeline(BasePipeline):
-    components_mapper = {
+    """
+    Class representing a preprocessing pipeline, which is a specific type of BasePipeline.
+    It comprises various predefined components for audio preprocessing.
+
+    :ivar components_mapper: Dictionary mapping component names to component classes or None.
+        Each key is a string (the name of the component), and each value is either None or an instance of a class
+        that inherits from PipelineComponent.
+    :vartype components_mapper: Dict[str, Optional[PipelineComponent]]
+    """
+    components_mapper: Dict[str, Optional[PipelineComponent]] = {
         'file_mapper': None,
         'wav_converter': None,
         'ina_speech_segmenter': None,
@@ -15,6 +26,18 @@ class PreprocessPipeline(BasePipeline):
     }
 
     def __init__(self, components: List[str], config: YAMLObject):
+        """
+        Initializes the PreprocessPipeline object with the specified components and YAML configuration.
+
+        The components list should be a list of strings where each string is a key in the `components_mapper`
+        dictionary. The function then replaces the None value for each key in the `components_mapper` dictionary
+        with the corresponding component class.
+
+        :param components: List of names of the preprocessing components to include in this pipeline.
+        :type components: List[str]
+        :param config: YAML configuration for the pipeline.
+        :type config: YAMLObject
+        """
         for component in components:
             if component == 'file_mapper':
                 from vanpy.core.preprocess_components.FilelistDataFrameCreator import FilelistDataFrameCreator

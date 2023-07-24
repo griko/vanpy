@@ -17,17 +17,18 @@ class VanpySpeakerEmbedding(PipelineComponent):
         super().__init__(component_type='feature_extraction', component_name='vanpy_speaker_embedding',
                          yaml_config=yaml_config)
         self.pretrained_models_dir = self.config['pretrained_models_dir']
+        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     def load_model(self):
         # if self.config['model']:
         #     mdl = self.config['model']
-        model_path = cached_download('https://drive.google.com/uc?id=1CW5zuEzIIjj2kf2AtG-Xx61couMcGgLi',
-                                     f'{self.pretrained_models_dir}/speaker_embedding_mozcv_step_200.pkl')
-        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        model_path = cached_download('https://drive.google.com/uc?id=1mXKTrxD5xkqu-Cnzeec3Bky0KxX56Bbf',
+                                     f'{self.pretrained_models_dir}/speaker_embedding_mozcv_sliding_mean.pkl')
         model = vanpy_speaker_embedding.ConformerModel(n_mels=128, n_time_steps=100, n_conformer_blocks=2, d_model=128, nhead=4,
                                    n_embeddings=192).to(self.device)
         optimizer = optim.Adam(model.parameters())
         self.model, _, _, _, _ = vanpy_speaker_embedding.load_checkpoint(model, optimizer, model_path)
+        self.model.eval()
         self.logger.info(f'Loaded model to {"GPU" if torch.cuda.is_available() else "CPU"}')
 
     def process(self, input_payload: ComponentPayload) -> ComponentPayload:

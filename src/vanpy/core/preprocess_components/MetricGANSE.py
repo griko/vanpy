@@ -58,7 +58,7 @@ class MetricGANSE(PipelineComponent):
                     enhanced = self.model.enhance_batch(noisy, lengths=torch.tensor([1.]))
                     # Saving enhanced signal on disk
 
-                    torchaudio.save(output_file, enhanced.cpu(), 16000)
+                    torchaudio.save(output_file, enhanced.cpu(), self.config['sampling_rate'])
                     end = time.time()
                     self.latent_info_log(
                         f'Enhanced {f} in {end - t_start_segmentation} seconds, {j + 1}/{len(paths_list)}',
@@ -66,7 +66,7 @@ class MetricGANSE(PipelineComponent):
                 else:
                     self.latent_info_log(f'Skipping enhancement for {f}, already exists, {j + 1}/{len(paths_list)}', iteration=j)
                 processed_paths_list.append(output_file)
-            except RuntimeError as e:
+            except (RuntimeError, AttributeError) as e:
                 processed_paths_list.append(None)
                 self.logger.error(f"An error occurred in {f}, {j + 1}/{len(paths_list)}: {e}")
 

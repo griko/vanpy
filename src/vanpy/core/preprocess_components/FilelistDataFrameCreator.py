@@ -32,8 +32,9 @@ class FilelistDataFrameCreator(PipelineComponent):
 
         if self.config.get('load_payload', False):
             p_df = pd.read_csv(self.config['load_df_path'])
-            with open(self.config['load_meta_path'], 'rb') as pickle_file:
-                metadata = pickle.load(pickle_file)
+            if 'load_meta_path' in self.config:
+                with open(self.config['load_meta_path'], 'rb') as pickle_file:
+                    metadata = pickle.load(pickle_file)
         else:
             if 'input_path' not in metadata:
                 raise AttributeError(

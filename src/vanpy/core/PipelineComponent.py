@@ -12,6 +12,14 @@ from vanpy.utils.utils import create_dirs_if_not_exist
 
 @dataclass
 class PipelineComponent(ABC):
+    """
+    The base class for all pipeline components.
+
+    :param component_type: the type of component (e.g. "preprocessing", "feature_extraction", etc.)
+    :type component_type: str
+    :param component_name: the name of the component (e.g. "pyannote_vad", "speechbrain_embedding", etc.)
+    :type component_name: str
+    """
     component_type: str
     component_name: str
     config: Dict

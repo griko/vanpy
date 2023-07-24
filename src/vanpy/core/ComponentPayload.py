@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import Dict, Tuple, List
 import pandas as pd
+import pickle
 
 
 @dataclass
@@ -134,4 +135,19 @@ class ComponentPayload:
         for c in self.df.columns:
             if c.startswith('Unnamed') or c == '':
                 self.df.drop([c], axis=1, inplace=True)
+
+    def save(self, output_dir: str, name: str = 'payload', index=False):
+        """
+        Saves the payload's dataframe to a csv file and metadata as pickle in the given output directory.
+
+        :param output_dir: the output directory
+        :type output_dir: str
+        :param name: the name of the output file
+        :type name: str
+        :param index: whether to include the index in the output file
+        :type index: bool
+        """
+        self.df.to_csv(f'{output_dir}/{name}.csv', index=index)
+        pickle.dump(self.metadata, open(f'{output_dir}/{name}.pkl', 'wb'))
+
 

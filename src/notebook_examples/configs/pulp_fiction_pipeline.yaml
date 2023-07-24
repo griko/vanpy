@@ -1,6 +1,6 @@
-input_dir: 'mkl'  # 'speech_examples', 'speech_examples_small'
+input_dir: '../cut_preprocessed'  # 'speech_examples', 'speech_examples_small'
 segment_name_separator: "_"
-intermediate_payload_path: 'results'
+intermediate_payload_path: 'results/pulp_fiction'
 # device: 'cpu'  # 'cpu'/'cuda'
 log_each_x_records: 1000
 huggingface_ACCESS_TOKEN: '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'
@@ -9,9 +9,11 @@ sampling_rate: 16000
 preprocessing:
   file_mapper:
     save_payload: false  # use it if you want to save the payload when the component process is completed
-    load_payload: false  # use it if you want to load a previously saved payload, overrides listing of an input_path
-    load_df_path: '{{intermediate_payload_path}}/preprocessing_silero_vad_df_20221031175555_final.csv'
-    load_meta_path: '{{intermediate_payload_path}}/preprocessing_silero_vad_metadata_20221031175555_final.pickle'
+    load_payload: true  # use it if you want to load a previously saved payload, overrides listing of an input_path
+#    load_df_path: '{{intermediate_payload_path}}/preprocessing_silero_vad_df_20230703143304_final.csv'
+#    load_meta_path: '{{intermediate_payload_path}}/preprocessing_silero_vad_metadata_20230703143304_final.pickle'
+    load_df_path: '{{intermediate_payload_path}}/final_feature_classification_1190_df.csv'
+    load_meta_path: '{{intermediate_payload_path}}/final_feature_classification_1190_df.pickle'
   wav_converter:
     output_dir: 'convert_preprocessed'
     ab: '256k'  # bitrate, may not be considered depending on a chosen codec
@@ -50,25 +52,25 @@ preprocessing:
     skip_overlap: true
     overwrite: true
     save_payload: true
-    hparams:
-      pipeline:
-        name: pyannote.audio.pipelines.SpeakerDiarization
-        params:
-          clustering: AgglomerativeClustering
-          embedding: speechbrain/spkrec-ecapa-voxceleb
-          embedding_batch_size: 32
-          embedding_exclude_overlap: true
-          segmentation: pyannote/segmentation@2022.07
-          segmentation_batch_size: 32
-
-      params:
-        clustering:
-          method: centroid  # ["average", "centroid", "complete", "median", "single", "ward", "weighted"]
-          min_cluster_size: 13  # 15
-          threshold: 0.71  # 0.7153814381597874
-        segmentation:
-          min_duration_off: 0.1  # 0.5817029604921046
-          threshold: 0.6  # 0.4442333667381752
+#    hparams:
+#      pipeline:
+#        name: pyannote.audio.pipelines.SpeakerDiarization
+#        params:
+#          clustering: AgglomerativeClustering
+#          embedding: speechbrain/spkrec-ecapa-voxceleb
+#          embedding_batch_size: 32
+#          embedding_exclude_overlap: true
+#          segmentation: pyannote/segmentation@2022.07
+#          segmentation_batch_size: 32
+#
+#      params:
+#        clustering:
+#          method: centroid  # ["average", "centroid", "complete", "median", "single", "ward", "weighted"]
+#          min_cluster_size: 13  # 15
+#          threshold: 0.71  # 0.7153814381597874
+#        segmentation:
+#          min_duration_off: 0.1  # 0.5817029604921046
+#          threshold: 0.6  # 0.4442333667381752
   silero_vad:
     output_dir: 'silero_vad_preprocessed'
     add_segment_metadata: true
@@ -198,9 +200,20 @@ segment_classifier:
 
   cosine_distance_diarization:
     classification_column_name: 'diarization_classification'
-    threshold: 0.3  # cosine similarity threshold of the embeddings
+    threshold: 0.3  # cosine similarity threshold of the embeddings, the less the value - the less the amount of speakers
     features_list:  # assumes multiple column features are labeled 'i_<component_name>' where i is between
                     # start_index (inclusive) and stop_index (exclusive)
+      - speechbrain_embedding:
+          start_index: 0
+          stop_index: 192
+    performance_measurement: true
+    save_payload: true
+
+  agglomerative_clustering_diarization:
+    classification_column_name: 'diarization_classification'
+    threshold: 2.3  # cosine similarity threshold of the embeddings, the greater the value - the less the amount of speakers
+    features_list: # assumes multiple column features are labeled 'i_<component_name>' where i is between
+      # start_index (inclusive) and stop_index (exclusive)
       - speechbrain_embedding:
           start_index: 0
           stop_index: 192

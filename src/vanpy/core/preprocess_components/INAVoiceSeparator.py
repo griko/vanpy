@@ -1,14 +1,14 @@
 from yaml import YAMLObject
 
 from vanpy.core.ComponentPayload import ComponentPayload
-from vanpy.core.preprocess_components.SegmenterComponent import SegmenterComponent
+from vanpy.core.preprocess_components.BaseSegmenterComponent import BaseSegmenterComponent
 from vanpy.utils.utils import create_dirs_if_not_exist, cut_segment
 from inaSpeechSegmenter import Segmenter
 import pandas as pd
 import time
 
 
-class INAVoiceSeparator(SegmenterComponent):
+class INAVoiceSeparator(BaseSegmenterComponent):
     model = None
 
     def __init__(self, yaml_config: YAMLObject):
@@ -58,7 +58,7 @@ class INAVoiceSeparator(SegmenterComponent):
                 v_segments, f_segments = INAVoiceSeparator.get_voice_segments(segmentation)
                 t_end_segmentation = time.time()
                 for i, segment in enumerate(v_segments):
-                    output_path = cut_segment(f, output_dir=output_dir, segment=segment, segment_id=i, separator=self.segment_name_separator)
+                    output_path = cut_segment(f, output_dir=output_dir, segment=segment, segment_id=i, separator=self.segment_name_separator, keep_only_first_segment=True)
                     f_d = {processed_path: [output_path], input_column: [f]}
                     self.add_segment_metadata(f_d, segment[0], segment[1])
                     self.add_performance_metadata(f_d, t_start_segmentation, t_end_segmentation)

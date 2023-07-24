@@ -20,8 +20,10 @@ class WhisperSTT(PipelineComponent):
 
     def load_model(self):
         import torch
-        self.logger.info("Loading openai-whisper model")
-        self.model = whisper.load_model(self.model_size, download_root=self.pretrained_models_dir)
+        self.logger.info("Loading openai-whisper speech-to-text model")
+        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        self.model = whisper.load_model(self.model_size, download_root=self.pretrained_models_dir).to(device)
+        self.model.eval()
         self.logger.info(f'Loaded model to {"GPU" if torch.cuda.is_available() else "CPU"}')
 
     def process(self, input_payload: ComponentPayload) -> ComponentPayload:
@@ -41,16 +43,21 @@ class WhisperSTT(PipelineComponent):
         languages = []
         performance_metric = []
         for j, f in enumerate(paths_list):
-            t_start_transcribing = time.time()
-            transcription = self.model.transcribe(f)
-            stts.append(transcription['text'])
-            if self.config.get('detect_language', False):
+            try:
+                t_start_transcribing = time.time()
+                transcription = self.model.transcribe(f)
+                stts.append(transcription['text'])
                 languages.append(transcription['language'])
-            t_end_transcribing = time.time()
-            performance_metric.append(t_end_transcribing - t_start_transcribing)
-            self.latent_info_log(
-                f'Transcribed {f} in {t_end_transcribing - t_start_transcribing} seconds, {j + 1}/{len(paths_list)}',
-                iteration=j)
+                t_end_transcribing = time.time()
+                performance_metric.append(t_end_transcribing - t_start_transcribing)
+                self.latent_info_log(
+                    f'Transcribed {f} in {t_end_transcribing - t_start_transcribing} seconds, {j + 1}/{len(paths_list)}',
+                    iteration=j)
+            except Exception as e:
+                self.logger.error(f'Failed to transcribe {f}, {j + 1}/{len(paths_list)}: {e}')
+                stts.append(None)
+                languages.append(None)
+                performance_metric.append(None)
 
         payload_df[self.stt_column_name] = stts
         payload_metadata['classification_columns'].extend([self.stt_column_name])

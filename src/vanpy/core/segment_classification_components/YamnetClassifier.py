@@ -94,7 +94,7 @@ class YamnetClassifier(PipelineComponent):
                         top_class_indices_refined.append(idx)
                 inferred_class = '; '.join([self.class_names[x] for x in top_class_indices_refined])  # self.class_names[scores_np.mean(axis=0).argmax()]
                 class_prediction.append(inferred_class)
-            except RuntimeError as e:
+            except (RuntimeError, TypeError) as e:
                 class_prediction.append(None)
                 self.logger.error(f"An error occurred in {f}, {j + 1}/{len(paths_list)}: {e}")
 
