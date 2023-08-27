@@ -64,9 +64,15 @@ def main():
     #     ['file_mapper', 'pyannote_sd', 'speechbrain_embedding', 'openai_whisper_stt', 'speech_brain_iemocap_emotion',
     #      'vanpy_voxceleb_gender', 'vanpy_voxceleb_age', 'vanpy_voxceleb_height', 'vanpy_ravdess_emotion', 'wav2vec2adv',
     #      'yamnet_classifier','cosine_distance_diarization'], config=config)
+
+    # pipeline = Pipeline(
+    #     ['file_mapper', 'pyannote_sd', 'speechbrain_embedding', 'openai_whisper_stt', 'speech_brain_iemocap_emotion',
+    #      'vanpy_voxceleb_gender', 'vanpy_voxceleb_age', 'vanpy_voxceleb_height', 'vanpy_ravdess_emotion', 'wav2vec2adv', 'yamnet_classifier',
+    #      'cosine_distance_diarization', 'agglomerative_clustering_diarization', 'gmm_clustering_diarization'], config=config)
     pipeline = Pipeline(
-        ['file_mapper', 'pyannote_sd', 'speechbrain_embedding', 'openai_whisper_stt', 'speech_brain_iemocap_emotion',
-         'vanpy_voxceleb_gender', 'vanpy_voxceleb_age', 'vanpy_voxceleb_height', 'vanpy_ravdess_emotion', 'wav2vec2adv', 'yamnet_classifier', 'cosine_distance_diarization'], config=config)
+        ['file_mapper',
+         'cosine_distance_diarization', 'agglomerative_clustering_diarization', 'gmm_clustering_diarization'],
+        config=config)
     # pipeline = Pipeline(['file_mapper', 'speechbrain_embedding', 'vanpy_ravdess_emotion'], config=config)
     # 'wav_converter', 'metricgan_se',, 'silero_vad', 'speechbrain_embedding', 'cosine_distance_diarization' , 'pyannote_sd', 'openai_whisper_stt'
     # openai_whisper_stt, wav2vec2stt
@@ -80,51 +86,51 @@ def main():
 
     import pandas as pd
     df = processed_payload.df
-    df['diarization_classification_spacy_names'] = None
-    df['authored_text'] = df.apply(lambda x: str(x['pyannote_diarization_classification']) + "/" + str(
-        x['diarization_classification_spacy_names'] if x[
-                                                           'diarization_classification_spacy_names'] is not None else '') + ": " + str(
-        x['whisper_transcript']), axis=1)
-    from vanpy.utils.srt_generator import to_srt
-
-#     params:
-#     clustering:
-#     method: centroid
-#     min_cluster_size: 15
-#     threshold: 0.7153814381597874
+#     df['diarization_classification_spacy_names'] = None
+#     df['authored_text'] = df.apply(lambda x: str(x['pyannote_diarization_classification']) + "/" + str(
+#         x['diarization_classification_spacy_names'] if x[
+#                                                            'diarization_classification_spacy_names'] is not None else '') + ": " + str(
+#         x['whisper_transcript']), axis=1)
+#     from vanpy.utils.srt_generator import to_srt
+#
+# #     params:
+# #     clustering:
+# #     method: centroid
+# #     min_cluster_size: 15
+# #     threshold: 0.7153814381597874
+# #
+# #
+# # segmentation:
+# # min_duration_off: 0.5817029604921046
+# # threshold: 0.4442333667381752
+#     p_seg_off = config.get('preprocessing', {}).get('pyannote_sd', {}).get('hparams', {}).get('params', {}).get(
+#         'segmentation', {}).get('min_duration_off', 'none')
+#     p_seg_t = config.get('preprocessing', {}).get('pyannote_sd', {}).get('hparams', {}).get('params', {}).get(
+#         'segmentation', {}).get('threshold', 'none')
+#     p_clust_size = config.get('preprocessing', {}).get('pyannote_sd', {}).get('hparams', {}).get('params', {}).get(
+#         'clustering', {}).get('min_cluster_size', 'none')
+#     p_clust_t = config.get('preprocessing', {}).get('pyannote_sd', {}).get('hparams', {}).get('params', {}).get(
+#         'clustering', {}).get('threshold', 'none')
+#
+#     df.to_csv(f'results/final/mkl_local_hparams_pyannote_{p_seg_off=:.2f}_{p_seg_t=:.2f}_{p_clust_size=:.2f}_{p_clust_t=:.2f}_lrg.csv', index=False)
+#     # to_srt(df, 'silero_vad_segment_start', 'silero_vad_segment_stop', 'authored_text')
+#     df = df[df['whisper_transcript'].str.strip().str.len() > 0]
+#     df = df[(df['pyannote_sd_segment_stop'] - df['pyannote_sd_segment_start']) > 0.5]
+#     with open(f'results/final/subtitles_mkl_local_hparams_pyannote_{p_seg_off=:.2f}_{p_seg_t=:.2f}_{p_clust_size=:.2f}_{p_clust_t=:.2f}_lrg.srt', 'w', encoding="utf-8") as f:
+#         # with open('subtitles_mkl_silero.srt', 'w') as f:
+#         # f.write(to_srt(df, 'silero_vad_segment_start', 'silero_vad_segment_stop', 'authored_text'))
+#         f.write(to_srt(df, 'pyannote_sd_segment_start', 'pyannote_sd_segment_stop', 'authored_text'))
 #
 #
-# segmentation:
-# min_duration_off: 0.5817029604921046
-# threshold: 0.4442333667381752
-    p_seg_off = config.get('preprocessing', {}).get('pyannote_sd', {}).get('hparams', {}).get('params', {}).get(
-        'segmentation', {}).get('min_duration_off', 'none')
-    p_seg_t = config.get('preprocessing', {}).get('pyannote_sd', {}).get('hparams', {}).get('params', {}).get(
-        'segmentation', {}).get('threshold', 'none')
-    p_clust_size = config.get('preprocessing', {}).get('pyannote_sd', {}).get('hparams', {}).get('params', {}).get(
-        'clustering', {}).get('min_cluster_size', 'none')
-    p_clust_t = config.get('preprocessing', {}).get('pyannote_sd', {}).get('hparams', {}).get('params', {}).get(
-        'clustering', {}).get('threshold', 'none')
-
-    df.to_csv(f'results/final/mkl_local_hparams_pyannote_{p_seg_off=:.2f}_{p_seg_t=:.2f}_{p_clust_size=:.2f}_{p_clust_t=:.2f}_lrg.csv', index=False)
-    # to_srt(df, 'silero_vad_segment_start', 'silero_vad_segment_stop', 'authored_text')
-    df = df[df['whisper_transcript'].str.strip().str.len() > 0]
-    df = df[(df['pyannote_sd_segment_stop'] - df['pyannote_sd_segment_start']) > 0.5]
-    with open(f'results/final/subtitles_mkl_local_hparams_pyannote_{p_seg_off=:.2f}_{p_seg_t=:.2f}_{p_clust_size=:.2f}_{p_clust_t=:.2f}_lrg.srt', 'w', encoding="utf-8") as f:
-        # with open('subtitles_mkl_silero.srt', 'w') as f:
-        # f.write(to_srt(df, 'silero_vad_segment_start', 'silero_vad_segment_stop', 'authored_text'))
-        f.write(to_srt(df, 'pyannote_sd_segment_start', 'pyannote_sd_segment_stop', 'authored_text'))
-
-
-
-    print(Counter(processed_payload.get_classification_df()['pyannote_diarization_classification']))
-
-
-    print(processed_payload.get_features_df())
-    processed_payload.get_classification_df()
-    print(processed_payload.get_classification_df(all_paths_columns=False, meta_columns=False))
+#
+#     print(Counter(processed_payload.get_classification_df()['pyannote_diarization_classification']))
+#
+#
+#     print(processed_payload.get_features_df())
+#     processed_payload.get_classification_df()
+#     print(processed_payload.get_classification_df(all_paths_columns=False, meta_columns=False))
 
 
 if __name__ == '__main__':
     # asyncio.run(main())
-    main2()
+    main()

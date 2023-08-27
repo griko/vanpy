@@ -27,6 +27,7 @@ class ClassificationPipeline(BasePipeline):
         'openai_whisper_stt': None,
         'cosine_distance_diarization': None,
         'agglomerative_clustering_diarization': None,
+        'gmm_clustering_diarization': None,
         'yamnet_classifier': None
     }
 
@@ -47,13 +48,13 @@ class ClassificationPipeline(BasePipeline):
             if component == 'vanpy_voxceleb_gender':
                 from vanpy.core.segment_classification_components.VoxcelebGenderClassifier import VoxcelebGenderClassifier
                 self.components_mapper[component] = VoxcelebGenderClassifier
-            if component == 'vanpy_voxceleb_age':
+            elif component == 'vanpy_voxceleb_age':
                 from vanpy.core.segment_classification_components.VoxcelebAgeRegressor import VoxcelebAgeRegressor
                 self.components_mapper[component] = VoxcelebAgeRegressor
-            if component == 'vanpy_voxceleb_height':
+            elif component == 'vanpy_voxceleb_height':
                 from vanpy.core.segment_classification_components.VoxcelebHeightRegressor import VoxcelebHeightRegressor
                 self.components_mapper[component] = VoxcelebHeightRegressor
-            if component == 'common_voices_gender':
+            elif component == 'common_voices_gender':
                 from vanpy.core.segment_classification_components.CVGenderClassifier import CVGenderClassifier
                 self.components_mapper[component] = CVGenderClassifier
             elif component == 'common_voices_age':
@@ -80,6 +81,9 @@ class ClassificationPipeline(BasePipeline):
             elif component == 'agglomerative_clustering_diarization':
                 from vanpy.core.segment_classification_components.AgglomerativeDiarizationClassifier import AgglomerativeDiarizationClassifier
                 self.components_mapper[component] = AgglomerativeDiarizationClassifier
+            elif component == 'gmm_clustering_diarization':
+                from vanpy.core.segment_classification_components.GMMDiarizationClassifier import GMMDiarizationClassifier
+                self.components_mapper[component] = GMMDiarizationClassifier
             elif component == 'yamnet_classifier':
                 from vanpy.core.segment_classification_components.YamnetClassifier import YamnetClassifier
                 self.components_mapper[component] = YamnetClassifier

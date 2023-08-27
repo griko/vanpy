@@ -2,13 +2,13 @@ import time
 import torch
 from yaml import YAMLObject
 from vanpy.core.ComponentPayload import ComponentPayload
-from vanpy.core.PipelineComponent import PipelineComponent
+from vanpy.core.segment_classification_components.BaseClassificationComponent import BaseClassificationComponent
 from vanpy.utils.DisjointSet import DisjointSet
 from sklearn.preprocessing import normalize
 import numpy as np
 
 
-class CosineDiarizationClassifier(PipelineComponent):
+class CosineDiarizationClassifier(BaseClassificationComponent):
     model = None
     classification_column_name: str = ''
 
@@ -21,24 +21,10 @@ class CosineDiarizationClassifier(PipelineComponent):
         self.threshold = self.config.get('threshold', 0.25)
         self.requested_feature_list = self.build_requested_feature_list()
 
-    def build_requested_feature_list(self):
-        features_list = []
-        if 'features_list' in self.config:
-            for feature in self.config['features_list']:
-                if isinstance(feature, str):
-                    features_list.append(feature)
-                elif isinstance(feature, dict):
-                    key = tuple(feature.keys())[0]
-                    if 'start_index' not in feature[key] or 'stop_index' not in feature[key]:
-                        raise AttributeError('Invalid form of multiple-index feature. You have to supply start_index and stop_index')
-                    for i in range(int(feature[key]['start_index']), int(feature[key]['stop_index'])):
-                        features_list.append(f'{i}_{key}')
-        return features_list
-
     def process(self, input_payload: ComponentPayload) -> ComponentPayload:
         payload_metadata, payload_df = input_payload.unpack()
         features_columns = [column for column in payload_df.columns if column in self.requested_feature_list]
-        payload_df_normalized = payload_df[features_columns].apply(lambda x: normalize(x.values.reshape(1, -1), norm='l2').reshape(-1), axis=1)
+        payload_df_normalized = payload_df[features_columns].apply(lambda x: normalize(x.values.reshape(1, -1), norm='l2').reshape(-1) if all(x.notnull()) else x, axis=1)
         self.config['records_count'] = len(payload_df)
 
         payload_df[self.classification_column_name] = None

@@ -9,9 +9,9 @@ sampling_rate: 16000
 preprocessing:
   file_mapper:
     save_payload: false  # use it if you want to save the payload when the component process is completed
-    load_payload: false  # use it if you want to load a previously saved payload, overrides listing of an input_path
-    load_df_path: '{{intermediate_payload_path}}/preprocessing_silero_vad_df_20221031175555_final.csv'
-    load_meta_path: '{{intermediate_payload_path}}/preprocessing_silero_vad_metadata_20221031175555_final.pickle'
+    load_payload: true  # use it if you want to load a previously saved payload, overrides listing of an input_path
+    load_df_path: '{{intermediate_payload_path}}/feature_extraction_speechbrain_embedding_df_20230821142843_final.csv'
+    load_meta_path: '{{intermediate_payload_path}}/feature_extraction_speechbrain_embedding_metadata_20230821142843_final.pickle'
   wav_converter:
     output_dir: 'convert_preprocessed'
     ab: '256k'  # bitrate, may not be considered depending on a chosen codec
@@ -197,10 +197,34 @@ segment_classifier:
     save_payload: true
 
   cosine_distance_diarization:
-    classification_column_name: 'diarization_classification'
+    classification_column_name: 'cosine_distance_diarization'
     threshold: 0.3  # cosine similarity threshold of the embeddings
     features_list:  # assumes multiple column features are labeled 'i_<component_name>' where i is between
                     # start_index (inclusive) and stop_index (exclusive)
+      - speechbrain_embedding:
+          start_index: 0
+          stop_index: 192
+    performance_measurement: true
+    save_payload: true
+
+  agglomerative_clustering_diarization:
+    classification_column_name: 'agglomerative_clustering_diarization'
+    threshold: 2.3  # float or blank (None), set to None if using n_clusters
+    n_clusters:  # int or blank (None), set to None if using threshold
+    features_list: # assumes multiple column features are labeled 'i_<component_name>' where i is between
+      # start_index (inclusive) and stop_index (exclusive)
+      - speechbrain_embedding:
+          start_index: 0
+          stop_index: 192
+    performance_measurement: true
+    save_payload: true
+
+  gmm_clustering_diarization:
+    classification_column_name: 'gmm_clustering_diarization'
+    n_components: 6
+    covariance_type: 'full'  # ‘full’, ‘tied’, ‘diag’, ‘spherical’
+    features_list: # assumes multiple column features are labeled 'i_<component_name>' where i is between
+      # start_index (inclusive) and stop_index (exclusive)
       - speechbrain_embedding:
           start_index: 0
           stop_index: 192
