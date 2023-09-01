@@ -2,7 +2,7 @@ from sklearn.mixture import GaussianMixture
 from vanpy.core.ComponentPayload import ComponentPayload
 from yaml import YAMLObject
 import time
-from vanpy.core.segment_classification_components.BaseClassificationComponent import BaseClassificationComponent
+from vanpy.core.model_inference_components.BaseClassificationComponent import BaseClassificationComponent
 
 
 class GMMDiarizationClassifier(BaseClassificationComponent):

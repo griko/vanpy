@@ -49,46 +49,47 @@ class PyannoteSD(BaseSegmenterComponent):
             labels.append(lbl)
         return zip(segments, labels)
 
+    def process_item(self, f, p_df, processed_path, input_column, output_dir):
+        t_start_segmentation = time.time()
+        v_segments = self.get_voice_segments(f)
+        t_end_segmentation = time.time()
+
+        for i, (segment, label) in enumerate(v_segments):
+            output_path = cut_segment(f, output_dir=output_dir, segment=segment, segment_id=i,
+                                      separator=self.segment_name_separator,
+                                      keep_only_first_segment=False)
+            f_d = {processed_path: [output_path], input_column: [f], self.classification_column_name: [label]}
+            self.add_segment_metadata(f_d, segment[0], segment[1])
+            self.add_performance_metadata(f_d, t_start_segmentation, t_end_segmentation)
+
+            f_df = pd.DataFrame.from_dict(f_d)
+            p_df = pd.concat([p_df, f_df], ignore_index=True)
+
+        return p_df
+
     def process(self, input_payload: ComponentPayload) -> ComponentPayload:
         if not self.model:
             self.load_model()
 
-        payload_metadata, payload_df = input_payload.unpack()
-        input_column = payload_metadata['paths_column']
-        paths_list = payload_df[input_column].tolist()
-        # processed_path = f'{self.get_name()}_processed_path'
+        metadata, df = input_payload.unpack()
+        input_column = metadata['paths_column']
+        paths_list = df[input_column].tolist()
         output_dir = self.config['output_dir']
         create_dirs_if_not_exist(output_dir)
 
+        processed_path = self.get_processed_path()
         p_df = pd.DataFrame()
-        processed_path, payload_metadata = self.segmenter_create_columns(payload_metadata)
         p_df, paths_list = self.get_file_paths_and_processed_df_if_not_overwriting(p_df, paths_list, processed_path,
                                                                                    input_column, output_dir)
-        p_df[self.classification_column_name] = None
-        if payload_df.empty:
-            ComponentPayload(metadata=payload_metadata, df=payload_df)
+        metadata = self.enhance_metadata(metadata)
+
+        if not paths_list:
+            self.logger.warning('You\'ve supplied an empty list to process')
+            df = pd.merge(left=df, right=p_df, how='outer', left_on=input_column, right_on=input_column)
+            return ComponentPayload(metadata=metadata, df=df)
         self.config['records_count'] = len(paths_list)
 
-        for j, f in enumerate(paths_list):
-            try:
-                t_start_segmentation = time.time()
-                v_segments = list(self.get_voice_segments(f))
-                segments_count = len(v_segments)
-                t_end_segmentation = time.time()
-                for i, (segment, label) in enumerate(v_segments):
-                    output_path = cut_segment(f, output_dir=output_dir, segment=segment, segment_id=i,
-                                              separator=self.segment_name_separator,
-                                              keep_only_first_segment=False)
-                    f_d = {processed_path: [output_path], input_column: [f], self.classification_column_name: [label]}
-                    self.add_segment_metadata(f_d, segment[0], segment[1])
-                    self.add_performance_metadata(f_d, t_start_segmentation, t_end_segmentation)
-                    f_df = pd.DataFrame.from_dict(f_d)
-                    p_df = pd.concat([p_df, f_df], ignore_index=True)
-                end = time.time()
-                self.latent_info_log(f'Extracted {segments_count} from {f} in {end - t_start_segmentation} seconds, {j + 1}/{len(paths_list)}', iteration=j)
-            except RuntimeError as e:
-                self.logger.error(f"An error occurred in {f}, {j + 1}/{len(paths_list)}: {e}")
+        p_df = self.process_with_progress(paths_list, metadata, self.process_item, p_df, processed_path, input_column, output_dir)
 
-        payload_metadata['classification_columns'].extend([self.classification_column_name])
-        df = pd.merge(left=payload_df, right=p_df, how='outer', left_on=input_column, right_on=input_column)
-        return ComponentPayload(metadata=payload_metadata, df=df)
+        df = pd.merge(left=df, right=p_df, how='outer', left_on=input_column, right_on=input_column)
+        return ComponentPayload(metadata=metadata, df=df)

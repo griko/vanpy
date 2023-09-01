@@ -1,13 +1,17 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Dict
+from typing import Dict, Union
+
+import pandas as pd
 from yaml import YAMLObject
 from logging import Logger
 import logging
 import pickle
 from datetime import datetime
+import time
 from vanpy.core.ComponentPayload import ComponentPayload
 from vanpy.utils.utils import create_dirs_if_not_exist
+from tqdm.auto import tqdm
 
 
 @dataclass
@@ -41,8 +45,13 @@ class PipelineComponent(ABC):
         self.component_name = component_name
         self.config = self.import_config(yaml_config)
         self.logger = self.get_logger()
+        self.latent_logger_enabled = self.config.get('latent_logger', False) and self.config['latent_logger'].get(
+            'enabled', False)
         self.pretrained_models_dir = self.config.get('pretrained_models_dir',
                                                      f'pretrained_models/{self.component_name}')
+        self.performance_measurement = self.config.get('performance_measurement', False)
+        self.file_performance_column_name = self.config.get('file_performance_column_name',
+                                                            f'perf_{self.get_name()}_get_features')
 
     def latent_info_log(self, message: str, iteration: int, last_item: bool = False) -> None:
         """
@@ -108,7 +117,37 @@ class PipelineComponent(ABC):
         :return: the output payload after processing
         :rtype: ComponentPayload
         """
-        pass
+        raise NotImplementedError
+
+    def process_item(self, *args, **kwargs):
+        """
+        Processes a single item from the input payload.
+        To be used in process_with_progress.
+        """
+        raise NotImplementedError
+
+    def process_with_progress(self, iterable, metadata, process_func, *args, **kwargs) -> pd.DataFrame:
+        """
+        Iterable: the list or other iterable to loop over
+        process_func: the function that takes an element from the iterable
+        *args, **kwargs: additional arguments to pass to process_func
+        """
+        p_df = pd.DataFrame()
+        for i, elem in enumerate(tqdm(iterable)):
+            try:
+                start_time = time.time()
+                f_df = process_func(elem, *args, **kwargs)
+                p_df = pd.concat([p_df, f_df], ignore_index=True)
+                end_time = time.time()
+                if self.latent_logger_enabled:
+                    self.latent_info_log(
+                        f'{self.component_name} processed {elem}, {i + 1}/{len(iterable)} in {end_time - start_time} seconds',
+                        iteration=i)
+                self.save_intermediate_payload(i, ComponentPayload(metadata=metadata, df=p_df))
+            except (RuntimeError, AssertionError, ValueError) as e:
+                self.logger.error(f'An error occurred in {elem}, {i + 1}/{len(iterable)}: {e}')
+                continue
+        return p_df
 
     # @staticmethod
     def save_component_payload(self, input_payload: ComponentPayload, intermediate=False) -> None:
@@ -126,10 +165,11 @@ class PipelineComponent(ABC):
         if self.config.get("save_payload", False):
             create_dirs_if_not_exist(self.config["intermediate_payload_path"])
             metadata, df = input_payload.unpack()
-            with open(
-                f'{self.config["intermediate_payload_path"]}/{self.component_type}_{self.component_name}_metadata_{datetime.now().strftime("%Y%m%d%H%M%S")}_{subscript}.pickle',
-                'wb') as handle:
-                pickle.dump(metadata, handle, protocol=pickle.HIGHEST_PROTOCOL)
+            if metadata:
+                with open(
+                        f'{self.config["intermediate_payload_path"]}/{self.component_type}_{self.component_name}_metadata_{datetime.now().strftime("%Y%m%d%H%M%S")}_{subscript}.pickle',
+                        'wb') as handle:
+                    pickle.dump(metadata, handle, protocol=pickle.HIGHEST_PROTOCOL)
             # input_payload.get_classification_df(all_paths_columns=True, meta_columns=True).to_csv(f'{self.config["intermediate_payload_path"]}/{self.component_type}_{self.component_name}_clf_df_{datetime.now().strftime("%Y%m%d%H%M%S")}_{subscript}.csv')
             df.to_csv(
                 f'{self.config["intermediate_payload_path"]}/{self.component_type}_{self.component_name}_df_{datetime.now().strftime("%Y%m%d%H%M%S")}_{subscript}.csv',
@@ -147,3 +187,20 @@ class PipelineComponent(ABC):
         """
         if 'save_payload_periodicity' in self.config and i % self.config['save_payload_periodicity'] == 0 and i > 0:
             self.save_component_payload(input_payload, intermediate=True)
+
+    def add_performance_column_to_metadata(self, metadata: Dict) -> Dict:
+        if self.config.get('performance_measurement', True):
+            self.file_performance_column_name = f'perf_{self.get_name()}'
+            metadata['meta_columns'].extend([self.file_performance_column_name])
+        return metadata
+
+    def add_performance_metadata(self, f_d: Union[pd.DataFrame, Dict], t_start: float, t_end: float):
+        """
+        Adds performance metadata for the audio segments.
+
+        :param f_d: The temporal DataFrame that is enhanced with the performance time of audio segments.
+        :param t_start: The start time of the audio segment extraction.
+        :param t_end: The end time of the audio segment extraction.
+        """
+        if self.performance_measurement:
+            f_d[self.file_performance_column_name] = t_end - t_start

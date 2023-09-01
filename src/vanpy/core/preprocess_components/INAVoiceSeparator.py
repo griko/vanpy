@@ -29,6 +29,21 @@ class INAVoiceSeparator(BaseSegmenterComponent):
                 filtered_sections.append((start, stop))
         return voice_sections, filtered_sections
 
+    def process_item(self, f, p_df, processed_path, input_column, output_dir):
+        t_start_segmentation = time.time()
+        segmentation = self.model(f)
+        v_segments, f_segments = INAVoiceSeparator.get_voice_segments(segmentation)
+        t_end_segmentation = time.time()
+        for i, segment in enumerate(v_segments):
+            output_path = cut_segment(f, output_dir=output_dir, segment=segment, segment_id=i,
+                                      separator=self.segment_name_separator, keep_only_first_segment=True)
+            f_d = {processed_path: [output_path], input_column: [f]}
+            self.add_segment_metadata(f_d, segment[0], segment[1])
+            self.add_performance_metadata(f_d, t_start_segmentation, t_end_segmentation)
+            f_df = pd.DataFrame.from_dict(f_d)
+            p_df = pd.concat([p_df, f_df], ignore_index=True)
+        return p_df
+
     def process(self, input_payload: ComponentPayload) -> ComponentPayload:
         if not self.model:
             self.load_model()
@@ -37,13 +52,13 @@ class INAVoiceSeparator(BaseSegmenterComponent):
         input_column = metadata['paths_column']
         paths_list = df[input_column].tolist()
         output_dir = self.config['output_dir']
-        filtered_dir = self.config['filtered_dir']
-        create_dirs_if_not_exist(output_dir, filtered_dir)
+        create_dirs_if_not_exist(output_dir)
 
+        processed_path = self.get_processed_path()
         p_df = pd.DataFrame()
-        processed_path, metadata = self.segmenter_create_columns(metadata)
         p_df, paths_list = self.get_file_paths_and_processed_df_if_not_overwriting(p_df, paths_list, processed_path,
                                                                                    input_column, output_dir)
+        metadata = self.enhance_metadata(metadata)
 
         if not paths_list:
             self.logger.warning('You\'ve supplied an empty list to process')
@@ -51,22 +66,7 @@ class INAVoiceSeparator(BaseSegmenterComponent):
             return ComponentPayload(metadata=metadata, df=df)
         self.config['records_count'] = len(paths_list)
 
-        for j, f in enumerate(paths_list):
-            try:
-                t_start_segmentation = time.time()
-                segmentation = self.model(f)
-                v_segments, f_segments = INAVoiceSeparator.get_voice_segments(segmentation)
-                t_end_segmentation = time.time()
-                for i, segment in enumerate(v_segments):
-                    output_path = cut_segment(f, output_dir=output_dir, segment=segment, segment_id=i, separator=self.segment_name_separator, keep_only_first_segment=True)
-                    f_d = {processed_path: [output_path], input_column: [f]}
-                    self.add_segment_metadata(f_d, segment[0], segment[1])
-                    self.add_performance_metadata(f_d, t_start_segmentation, t_end_segmentation)
-                    f_df = pd.DataFrame.from_dict(f_d)
-                    p_df = pd.concat([p_df, f_df], ignore_index=True)
-                self.latent_info_log(f'Extracted {len(v_segments)} from {f} in {t_end_segmentation - t_start_segmentation} seconds, {j + 1}/{len(paths_list)}', iteration=j)
-            except AssertionError as e:
-                self.logger.error(f"An error occurred in {f}, {j + 1}/{len(paths_list)}: {e}")
+        p_df = self.process_with_progress(paths_list, metadata, self.process_item, p_df, processed_path, input_column, output_dir)
 
         df = pd.merge(left=df, right=p_df, how='outer', left_on=input_column, right_on=input_column)
         return ComponentPayload(metadata=metadata, df=df)

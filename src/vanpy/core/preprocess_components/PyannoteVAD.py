@@ -53,6 +53,27 @@ class PyannoteVAD(BaseSegmenterComponent):
             segments.append((start, stop))
         return segments
 
+    def process_item(self, f, p_df, processed_path, input_column, output_dir):
+        t_start_segmentation = time.time()
+        v_segments = self.get_voice_segments(f)
+        t_end_segmentation = time.time()
+
+        for i, segment in enumerate(v_segments):
+            output_path = cut_segment(f, output_dir=output_dir, segment=segment, segment_id=i,
+                                      separator=self.segment_name_separator,
+                                      keep_only_first_segment=self.keep_only_first_segment)
+            f_d = {processed_path: [output_path], input_column: [f]}
+            self.add_segment_metadata(f_d, segment[0], segment[1])
+            self.add_performance_metadata(f_d, t_start_segmentation, t_end_segmentation)
+
+            f_df = pd.DataFrame.from_dict(f_d)
+            p_df = pd.concat([p_df, f_df], ignore_index=True)
+
+            if self.keep_only_first_segment:
+                break
+        return p_df
+
+
     def process(self, input_payload: ComponentPayload) -> ComponentPayload:
         if not self.model:
             self.load_model()
@@ -63,10 +84,11 @@ class PyannoteVAD(BaseSegmenterComponent):
         output_dir = self.config['output_dir']
         create_dirs_if_not_exist(output_dir)
 
+        processed_path = self.get_processed_path()
         p_df = pd.DataFrame()
-        processed_path, metadata = self.segmenter_create_columns(metadata)
         p_df, paths_list = self.get_file_paths_and_processed_df_if_not_overwriting(p_df, paths_list, processed_path,
                                                                                    input_column, output_dir)
+        metadata = self.enhance_metadata(metadata)
 
         if not paths_list:
             self.logger.warning('You\'ve supplied an empty list to process')
@@ -74,27 +96,7 @@ class PyannoteVAD(BaseSegmenterComponent):
             return ComponentPayload(metadata=metadata, df=df)
         self.config['records_count'] = len(paths_list)
 
-
-        for j, f in enumerate(paths_list):
-            try:
-                t_start_segmentation = time.time()
-                v_segments = self.get_voice_segments(f)
-                t_end_segmentation = time.time()
-                for i, segment in enumerate(v_segments):
-                    output_path = cut_segment(f, output_dir=output_dir, segment=segment, segment_id=i,
-                                              separator=self.segment_name_separator,
-                                              keep_only_first_segment=self.keep_only_first_segment)
-                    f_d = {processed_path: [output_path], input_column: [f]}
-                    self.add_segment_metadata(f_d, segment[0], segment[1])
-                    self.add_performance_metadata(f_d, t_start_segmentation, t_end_segmentation)
-                    f_df = pd.DataFrame.from_dict(f_d)
-                    p_df = pd.concat([p_df, f_df], ignore_index=True)
-                    if self.keep_only_first_segment:
-                        break
-                end = time.time()
-                self.latent_info_log(f'Extracted {len(v_segments)} from {f} in {end - t_start_segmentation} seconds, {j + 1}/{len(paths_list)}', iteration=j)
-            except RuntimeError as e:
-                self.logger.error(f"An error occurred in {f}, {j + 1}/{len(paths_list)}: {e}")
+        p_df = self.process_with_progress(paths_list, metadata, self.process_item, p_df, processed_path, input_column, output_dir)
 
         df = pd.merge(left=df, right=p_df, how='outer', left_on=input_column, right_on=input_column)
         return ComponentPayload(metadata=metadata, df=df)

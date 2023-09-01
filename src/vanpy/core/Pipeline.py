@@ -11,7 +11,7 @@ from yaml import YAMLObject
 from vanpy.core.PipelineComponent import PipelineComponent
 from vanpy.core.PreprocessPipeline import PreprocessPipeline
 from vanpy.core.FeatureExtractionPipeline import FeatureExtractionPipeline
-from vanpy.core.ClassificationPipeline import ClassificationPipeline
+from vanpy.core.ModelInferencePipeline import ClassificationPipeline
 
 
 @dataclass

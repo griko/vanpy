@@ -2,7 +2,7 @@ import time
 import torch
 from yaml import YAMLObject
 from vanpy.core.ComponentPayload import ComponentPayload
-from vanpy.core.segment_classification_components.BaseClassificationComponent import BaseClassificationComponent
+from vanpy.core.model_inference_components.BaseClassificationComponent import BaseClassificationComponent
 from vanpy.utils.DisjointSet import DisjointSet
 from sklearn.preprocessing import normalize
 import numpy as np

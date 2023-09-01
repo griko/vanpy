@@ -3,7 +3,7 @@ import time
 import numpy as np
 from yaml import YAMLObject
 from vanpy.core.ComponentPayload import ComponentPayload
-from vanpy.core.segment_classification_components.BaseClassificationComponent import BaseClassificationComponent
+from vanpy.core.model_inference_components.BaseClassificationComponent import BaseClassificationComponent
 from sklearn.preprocessing import normalize
 from sklearn.cluster import AgglomerativeClustering
 
@@ -24,7 +24,7 @@ class AgglomerativeDiarizationClassifier(BaseClassificationComponent):
     def process(self, input_payload: ComponentPayload) -> ComponentPayload:
         payload_metadata, payload_df = input_payload.unpack()
         features_columns = [column for column in payload_df.columns if column in self.requested_feature_list]
-        payload_df_normalized = payload_df[features_columns].apply(lambda x: normalize(x.values.reshape(1, -1), norm='l2').reshape(-1) if all(x.notnull()) else np.array([-100 for _ in x]).reshape(-1), axis=1)
+        payload_df_normalized = payload_df[features_columns].apply(lambda x: normalize(x.values.reshape(1, -1), norm='l2').reshape(-1) if all(x.notnull()) else np.array([-100.0 for _ in x]).reshape(-1), axis=1)
         payload_arr_normalized = []
         for r in payload_df_normalized.iteritems():
             payload_arr_normalized.append(r[1])
@@ -38,7 +38,7 @@ class AgglomerativeDiarizationClassifier(BaseClassificationComponent):
         t_start = time.time()
         clustering = AgglomerativeClustering(n_clusters=self.n_clusters, distance_threshold=self.threshold).fit(payload_df_normalized)
         performance_metric = [time.time() - t_start] * len(clustering.labels_)
-        payload_df[self.classification_column_name] = [f'SPEAKER_{i}' if -100 not in payload_df_normalized[i] else '' for i in clustering.labels_]
+        payload_df[self.classification_column_name] = [f'SPEAKER_{i}' if -100.0 not in payload_df_normalized[i] else '' for i in clustering.labels_]
         payload_metadata['classification_columns'].extend([self.classification_column_name])
         if self.config.get('performance_measurement', True):
             file_performance_column_name = f'perf_{self.get_name()}_get_diarization'

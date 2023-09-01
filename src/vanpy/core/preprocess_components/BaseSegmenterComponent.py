@@ -1,7 +1,7 @@
 from abc import ABC
-from typing import Dict, List, Tuple
-
+from typing import Dict, List, Tuple, Union
 from yaml import YAMLObject
+from vanpy.core.ComponentPayload import ComponentPayload
 from vanpy.core.PipelineComponent import PipelineComponent
 from vanpy.utils.utils import get_audio_files_paths
 import pandas as pd
@@ -11,6 +11,7 @@ class BaseSegmenterComponent(PipelineComponent, ABC):
     """
     Base class for `PipelineComponent`s for segmenting audio files into smaller segments.
     """
+
     def __init__(self, component_type: str, component_name: str, yaml_config: YAMLObject):
         """
         Initializes a new instance of the SegmenterComponent class.
@@ -24,29 +25,42 @@ class BaseSegmenterComponent(PipelineComponent, ABC):
         self.segment_stop_column_name = None
         self.segment_start_column_name = None
         self.file_performance_column_name = None
+        self.classification_column_name = None
 
-    def segmenter_create_columns(self, metadata: Dict[str, str]) -> Tuple[str, Dict[str, str]]:
-        '''
+    def get_processed_path(self):
+        return f'{self.get_name()}_processed_path'
+
+    def add_segment_columns_to_metadata(self, metadata: Dict) -> Dict:
+        """
         Creates the columns for ComponentPayload for the segmented audio files.
-
-        :param metadata: The ComponentPayload's enhanced metadata.
-        :return: The processed path column name and ComponentPayload's metadata.
-        '''
-        processed_path = f'{self.get_name()}_processed_path'
-        metadata['paths_column'] = processed_path
-        metadata['all_paths_columns'].append(processed_path)
+        """
         self.segment_start_column_name = self.segment_stop_column_name = ''
         if self.config.get('add_segment_metadata', True):
             self.segment_start_column_name = f'{self.get_name()}_segment_start'
             self.segment_stop_column_name = f'{self.get_name()}_segment_stop'
-            metadata['meta_columns'].extend([self.segment_start_column_name, self.segment_stop_column_name])
+            metadata['meta_columns'].extend(
+                [self.segment_start_column_name, self.segment_stop_column_name])
         self.file_performance_column_name = ''
-        if self.config.get('performance_measurement', True):
-            self.file_performance_column_name = f'perf_{self.get_name()}_get_voice_segments'
-            metadata['meta_columns'].extend([self.file_performance_column_name])
-        return processed_path, metadata
+        return metadata
 
-    def add_segment_metadata(self, f_d: pd.DataFrame, a: float, b: float):
+    def add_processed_path_to_metadata(self, processed_path, metadata: Dict) -> Dict:
+        metadata['paths_column'] = processed_path
+        metadata['all_paths_columns'].append(processed_path)
+        return metadata
+
+    def add_classification_column_to_metadata(self, metadata: Dict) -> Dict:
+        metadata['classification_columns'].extend([self.classification_column_name])
+        return metadata
+
+    def enhance_metadata(self, metadata: Dict) -> Dict:
+        metadata = self.add_segment_columns_to_metadata(metadata)
+        metadata = self.add_performance_column_to_metadata(metadata)
+        metadata = self.add_processed_path_to_metadata(self.get_processed_path(), metadata)
+        if self.classification_column_name is not None:
+            metadata = self.add_classification_column_to_metadata(metadata)
+        return metadata
+
+    def add_segment_metadata(self, f_d: Union[pd.DataFrame, Dict], a: float, b: float):
         """
         Adds metadata for the start and stop time of audio segments to the temporal DataFrame.
 
@@ -58,20 +72,10 @@ class BaseSegmenterComponent(PipelineComponent, ABC):
             f_d[self.segment_start_column_name] = [a]
             f_d[self.segment_stop_column_name] = [b]
 
-    def add_performance_metadata(self, f_d: pd.DataFrame, t_start: float, t_end: float):
-        """
-        Adds performance metadata for the audio segments.
-
-        :param f_d: The temporal DataFrame that is enhanced with the performance time of audio segments.
-        :param t_start: The start time of the audio segment extraction.
-        :param t_end: The end time of the audio segment extraction.
-        """
-        if self.config['performance_measurement']:
-            f_d[self.file_performance_column_name] = t_end - t_start
-
     def get_file_paths_and_processed_df_if_not_overwriting(self, p_df: pd.DataFrame, paths_list: List[str],
                                                            processed_path: str, input_column: str,
-                                                           output_dir: str, use_dir_prefix: bool=False) -> Tuple[pd.DataFrame, List[str]]:
+                                                           output_dir: str, use_dir_prefix: bool = False) -> Tuple[
+        pd.DataFrame, List[str]]:
         """
         Returns a processed DataFrame and a list of unprocessed file paths if not overwriting existing files.
 
@@ -90,7 +94,7 @@ class BaseSegmenterComponent(PipelineComponent, ABC):
             existing_file_set = {}
             for p in existing_file_list:
                 short_name = f'{self.segment_name_separator}'.join('.'.join(p.split("/")[-1].split(".")[0:-1])
-                                           .split(f'{self.segment_name_separator}')[:-1])
+                                                                   .split(f'{self.segment_name_separator}')[:-1])
                 if short_name in existing_file_set:
                     existing_file_set[short_name].append(p)
                 else:
@@ -106,7 +110,9 @@ class BaseSegmenterComponent(PipelineComponent, ABC):
                     p_df = pd.concat([p_df, f_df], ignore_index=True)
                 elif file_name_without_extension in existing_file_list_names:
                     f_df = pd.DataFrame.from_dict(
-                        {processed_path: [existing_file_list[existing_file_list_names.index(file_name_without_extension)]], input_column: [f]})
+                        {processed_path: [
+                            existing_file_list[existing_file_list_names.index(file_name_without_extension)]],
+                         input_column: [f]})
                     p_df = pd.concat([p_df, f_df], ignore_index=True)
                 else:
                     unprocessed_paths_list.append(f)

@@ -1,5 +1,5 @@
 from vanpy.utils import srt_to_df, ffmpeg_utils
-from vanpy.core.ClassificationPipeline import ClassificationPipeline
+from vanpy.core.ModelInferencePipeline import ClassificationPipeline
 from vanpy.core.ComponentPayload import ComponentPayload
 from vanpy.core.FeatureExtractionPipeline import FeatureExtractionPipeline
 from vanpy.core.PreprocessPipeline import PreprocessPipeline
@@ -69,10 +69,7 @@ def main():
     #     ['file_mapper', 'pyannote_sd', 'speechbrain_embedding', 'openai_whisper_stt', 'speech_brain_iemocap_emotion',
     #      'vanpy_voxceleb_gender', 'vanpy_voxceleb_age', 'vanpy_voxceleb_height', 'vanpy_ravdess_emotion', 'wav2vec2adv', 'yamnet_classifier',
     #      'cosine_distance_diarization', 'agglomerative_clustering_diarization', 'gmm_clustering_diarization'], config=config)
-    pipeline = Pipeline(
-        ['file_mapper',
-         'cosine_distance_diarization', 'agglomerative_clustering_diarization', 'gmm_clustering_diarization'],
-        config=config)
+    pipeline = Pipeline(['file_mapper', 'pyannote_embedding', 'speechbrain_embedding'], config=config)
     # pipeline = Pipeline(['file_mapper', 'speechbrain_embedding', 'vanpy_ravdess_emotion'], config=config)
     # 'wav_converter', 'metricgan_se',, 'silero_vad', 'speechbrain_embedding', 'cosine_distance_diarization' , 'pyannote_sd', 'openai_whisper_stt'
     # openai_whisper_stt, wav2vec2stt
@@ -86,6 +83,7 @@ def main():
 
     import pandas as pd
     df = processed_payload.df
+    print(df)
 #     df['diarization_classification_spacy_names'] = None
 #     df['authored_text'] = df.apply(lambda x: str(x['pyannote_diarization_classification']) + "/" + str(
 #         x['diarization_classification_spacy_names'] if x[

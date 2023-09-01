@@ -64,7 +64,9 @@ def cached_download(url, path) -> str:
     if os.path.exists(path):
         pass
     else:
-        create_dirs_if_not_exist(separator.join(path.split(separator)[:-1]))
+        folder_name = separator.join(path.split(separator)[:-1])
+        if folder_name != '':
+            create_dirs_if_not_exist(folder_name)
         gdown.download(url, path, quiet=True)
     return path
 
@@ -114,13 +116,14 @@ def get_null_wav_path() -> str:
                        path, quiet=True)
     return path
 
-def concat_audio_files_in_dir(input_dir, output_path, extension='.wav', sr=16000):
+def concat_audio_files_in_dir(input_dir, output_path, extension='.wav', sr=16000, required_substring=''):
     """
-    Concatenate all audio files in a directory into a one audio file.
+    Concatenate audio files that contain "required_substring" in a directory into a one audio file.
     :param input_dir: The directory containing the audio files to be concatenated.
     :param output_path: The path where the concatenated audio file will be saved.
     :param extension: The file extension of the audio files in the directory to be concatenated. Defaults to '.wav'.
     :param sr: The sampling rate of the concatenated audio file. Defaults to 16000.
+    :param required_substring: The required substring in the audio file names to be concatenated. Defaults to ''.
     """
     import os
     import librosa
@@ -128,7 +131,7 @@ def concat_audio_files_in_dir(input_dir, output_path, extension='.wav', sr=16000
     import soundfile as sf
 
     files = os.listdir(input_dir)
-    files = [f for f in files if f.endswith(extension)]
+    files = [f for f in files if f.endswith(extension) and required_substring in f]
     files = [os.path.join(input_dir, f) for f in files]
     audio = []
     for f in files:

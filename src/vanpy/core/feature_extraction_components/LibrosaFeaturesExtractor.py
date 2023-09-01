@@ -5,10 +5,10 @@ from librosa.util.exceptions import ParameterError
 from yaml import YAMLObject
 import numpy as np
 import pandas as pd
-
 from vanpy.core.ComponentPayload import ComponentPayload
 from vanpy.core.PipelineComponent import PipelineComponent
 from typing import List
+from tqdm.auto import tqdm
 
 
 class LibrosaFeaturesExtractor(PipelineComponent):
@@ -36,7 +36,7 @@ class LibrosaFeaturesExtractor(PipelineComponent):
 
         df, feature_columns = self.create_and_get_feature_columns(df)
 
-        for j, f in enumerate(paths_list):
+        for j, f in enumerate(tqdm(paths_list)):
             try:
                 t_start_feature_extraction = time.time()
                 y, sr = librosa.load(f, sr=self.sampling_rate)

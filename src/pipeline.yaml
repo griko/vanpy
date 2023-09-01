@@ -1,15 +1,17 @@
-input_dir: 'mkl'  # 'speech_examples', 'speech_examples_small'
+input_dir: 'speech_examples_small'  # 'speech_examples', 'speech_examples_small', 'streams'
 segment_name_separator: "_"
 intermediate_payload_path: 'results'
 # device: 'cpu'  # 'cpu'/'cuda'
-log_each_x_records: 1000
 huggingface_ACCESS_TOKEN: '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'
 sampling_rate: 16000
+latent_logger:
+  enabled: false
+  log_each_x_records: 1000
 
 preprocessing:
   file_mapper:
     save_payload: false  # use it if you want to save the payload when the component process is completed
-    load_payload: true  # use it if you want to load a previously saved payload, overrides listing of an input_path
+    load_payload: false  # use it if you want to load a previously saved payload, overrides listing of an input_path
     load_df_path: '{{intermediate_payload_path}}/feature_extraction_speechbrain_embedding_df_20230821142843_final.csv'
     load_meta_path: '{{intermediate_payload_path}}/feature_extraction_speechbrain_embedding_metadata_20230821142843_final.pickle'
   wav_converter:

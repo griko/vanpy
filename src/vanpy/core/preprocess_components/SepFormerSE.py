@@ -1,12 +1,14 @@
 import os
+
+import pandas as pd
 from yaml import YAMLObject
-from vanpy.core.PipelineComponent import PipelineComponent
+from vanpy.core.preprocess_components.BaseSegmenterComponent import BaseSegmenterComponent
 from vanpy.core.ComponentPayload import ComponentPayload
 from vanpy.utils.utils import create_dirs_if_not_exist, cut_segment, get_audio_files_paths
 import time
 
 
-class SepFormerSE(PipelineComponent):
+class SepFormerSE(BaseSegmenterComponent):
     """
     Pipeline component for SepFormer speech enhancement.
     """
@@ -36,6 +38,19 @@ class SepFormerSE(PipelineComponent):
                                                               savedir="pretrained_models/sepformer-wham16k-enhancement",)
         self.logger.info(f'Loaded model to {"GPU" if torch.cuda.is_available() else "CPU"}')
 
+    def process_item(self, f, p_df, processed_path, input_column, output_dir):
+        import torchaudio
+        output_file = f'{output_dir}/{f.split("/")[-1]}'
+        t_start_segmentation = time.time()
+        enhanced = self.model.separate_file(path=f)
+        torchaudio.save(output_file, enhanced[:, :, 0].detach().cpu(), 16000)
+        t_end_segmentation = time.time()
+        f_d = {processed_path: [output_file], input_column: [f]}
+        self.add_performance_metadata(f_d, t_start_segmentation, t_end_segmentation)
+        f_df = pd.DataFrame.from_dict(f_d)
+        p_df = pd.concat([p_df, f_df], ignore_index=True)
+        return p_df
+
     def process(self, input_payload: ComponentPayload) -> ComponentPayload:
         """
         Processes the input payload by performing speech enhancement using the SepFormer model.
@@ -43,46 +58,34 @@ class SepFormerSE(PipelineComponent):
         :param input_payload: The input payload containing the paths to the audio files to be enhanced.
         :return: The output payload containing the paths to the enhanced audio files.
         """
-        import torchaudio
         if not self.model:
             self.load_model()
 
-        payload_metadata, payload_df = input_payload.unpack()
-        input_column = payload_metadata['paths_column']
-        paths_list = payload_df[input_column].tolist()
-        processed_path = f'{self.get_name()}_processed_path'
+        metadata, df = input_payload.unpack()
+        input_column = metadata['paths_column']
+        paths_list = df[input_column].tolist()
         output_dir = self.config['output_dir']
         create_dirs_if_not_exist(output_dir)
 
-        if payload_df.empty:
-            ComponentPayload(metadata=payload_metadata, df=payload_df)
+        processed_path = self.get_processed_path()
+        p_df = pd.DataFrame()
+        p_df, paths_list = self.get_file_paths_and_processed_df_if_not_overwriting(p_df, paths_list, processed_path,
+                                                                                   input_column, output_dir)
+        metadata = self.add_processed_path_to_metadata(self.get_processed_path(), metadata)
+        metadata = self.add_performance_column_to_metadata(metadata)
+
+        if not paths_list:
+            self.logger.warning('You\'ve supplied an empty list to process')
+            df = pd.merge(left=df, right=p_df, how='outer', left_on=input_column, right_on=input_column)
+            return ComponentPayload(metadata=metadata, df=df)
         self.config['records_count'] = len(paths_list)
 
-        processed_paths_list, existing_files = [], []
-        if self.config.get('overwrite', False):
-            existing_files = get_audio_files_paths(output_dir)
-        for j, f in enumerate(paths_list):
-            try:
-                output_file = f'{output_dir}/{f.split("/")[-1]}'
+        p_df = self.process_with_progress(paths_list, metadata, self.process_item, p_df, processed_path,
+                                          input_column, output_dir)
 
-                if output_file not in existing_files:
-                    t_start_segmentation = time.time()
-                    enhanced = self.model.separate_file(path=f)
-                    torchaudio.save(output_file, enhanced[:, :, 0].detach().cpu(), 16000)
-                    end = time.time()
-                    self.latent_info_log(
-                        f'Enhanced {f} in {end - t_start_segmentation} seconds, {j + 1}/{len(paths_list)}',
-                        iteration=j)
-                else:
-                    self.latent_info_log(f'Skipping enhancement for {f}, already exists, {j + 1}/{len(paths_list)}', iteration=j)
-                processed_paths_list.append(output_file)
-            except (RuntimeError, AttributeError) as e:
-                processed_paths_list.append(None)
-                self.logger.error(f"An error occurred in {f}, {j + 1}/{len(paths_list)}: {e}")
-
-        payload_df[processed_path] = processed_paths_list
         SepFormerSE.cleanup_softlinks()
-        return ComponentPayload(metadata=payload_metadata, df=payload_df)
+        df = pd.merge(left=df, right=p_df, how='outer', left_on=input_column, right_on=input_column)
+        return ComponentPayload(metadata=metadata, df=df)
 
     @staticmethod
     def cleanup_softlinks():
