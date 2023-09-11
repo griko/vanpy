@@ -1,19 +1,21 @@
-input_dir: 'speech_examples_small'  # 'speech_examples', 'speech_examples_small', 'streams'
+input_dir: 'streams'  # 'speech_examples', 'speech_examples_small', 'streams'
 segment_name_separator: "_"
 intermediate_payload_path: 'results'
 # device: 'cpu'  # 'cpu'/'cuda'
 huggingface_ACCESS_TOKEN: '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'
+max_workers: 4  # set the number of workers for parallel threads, especially for preprocessing
 sampling_rate: 16000
 latent_logger:
   enabled: false
   log_each_x_records: 1000
 
+
 preprocessing:
   file_mapper:
     save_payload: false  # use it if you want to save the payload when the component process is completed
-    load_payload: false  # use it if you want to load a previously saved payload, overrides listing of an input_path
-    load_df_path: '{{intermediate_payload_path}}/feature_extraction_speechbrain_embedding_df_20230821142843_final.csv'
-    load_meta_path: '{{intermediate_payload_path}}/feature_extraction_speechbrain_embedding_metadata_20230821142843_final.pickle'
+    load_payload: true  # use it if you want to load a previously saved payload, overrides listing of an input_path
+    load_df_path: '{{intermediate_payload_path}}/feature_extraction_speechbrain_embedding_df_20230909000033_final.csv'
+    load_meta_path: '{{intermediate_payload_path}}/feature_extraction_speechbrain_embedding_metadata_20230909000033_final.pickle'
   wav_converter:
     output_dir: 'convert_preprocessed'
     ab: '256k'  # bitrate, may not be considered depending on a chosen codec
@@ -52,6 +54,7 @@ preprocessing:
     skip_overlap: true
     overwrite: true
     save_payload: true
+    save_payload_periodicity: 10  # save intermediate payload results every X processed files
     hparams:
       pipeline:
         name: pyannote.audio.pipelines.SpeakerDiarization
@@ -197,6 +200,7 @@ segment_classifier:
     language_classification_column_name: 'whisper_language'
     performance_measurement: true
     save_payload: true
+    save_payload_periodicity: 10000
 
   cosine_distance_diarization:
     classification_column_name: 'cosine_distance_diarization'

@@ -1,6 +1,8 @@
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Dict, Union
+# import os
 
 import pandas as pd
 from yaml import YAMLObject
@@ -52,6 +54,7 @@ class PipelineComponent(ABC):
         self.performance_measurement = self.config.get('performance_measurement', False)
         self.file_performance_column_name = self.config.get('file_performance_column_name',
                                                             f'perf_{self.get_name()}_get_features')
+        self.max_workers = self.config.get('max_workers', 4)
 
     def latent_info_log(self, message: str, iteration: int, last_item: bool = False) -> None:
         """
@@ -127,27 +130,51 @@ class PipelineComponent(ABC):
         raise NotImplementedError
 
     def process_with_progress(self, iterable, metadata, process_func, *args, **kwargs) -> pd.DataFrame:
-        """
-        Iterable: the list or other iterable to loop over
-        process_func: the function that takes an element from the iterable
-        *args, **kwargs: additional arguments to pass to process_func
-        """
         p_df = pd.DataFrame()
-        for i, elem in enumerate(tqdm(iterable)):
-            try:
-                start_time = time.time()
-                f_df = process_func(elem, *args, **kwargs)
-                p_df = pd.concat([p_df, f_df], ignore_index=True)
-                end_time = time.time()
-                if self.latent_logger_enabled:
-                    self.latent_info_log(
-                        f'{self.component_name} processed {elem}, {i + 1}/{len(iterable)} in {end_time - start_time} seconds',
-                        iteration=i)
-                self.save_intermediate_payload(i, ComponentPayload(metadata=metadata, df=p_df))
-            except (RuntimeError, AssertionError, ValueError) as e:
-                self.logger.error(f'An error occurred in {elem}, {i + 1}/{len(iterable)}: {e}')
-                continue
+        # cpu_count = os.cpu_count()
+
+        with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
+            futures = {executor.submit(process_func, elem, *args, **kwargs): elem for elem in iterable}
+
+            for i, future in enumerate(tqdm(as_completed(futures), total=len(futures))):
+                elem = futures[future]
+                try:
+                    start_time = time.time()
+                    f_df = future.result()
+                    p_df = pd.concat([p_df, f_df], ignore_index=True)
+                    end_time = time.time()
+                    if self.latent_logger_enabled:
+                        self.latent_info_log(
+                            f'{self.component_name} processed {elem}, {i + 1}/{len(iterable)} in {end_time - start_time} seconds',
+                            iteration=i)
+                    self.save_intermediate_payload(i, ComponentPayload(metadata=metadata, df=p_df))
+                except (RuntimeError, AssertionError, ValueError, TypeError) as e:
+                    self.logger.error(f'An error occurred in {elem}: {e}')
+
         return p_df
+
+    # def process_with_progress(self, iterable, metadata, process_func, *args, **kwargs) -> pd.DataFrame:
+    #     """
+    #     Iterable: the list or other iterable to loop over
+    #     process_func: the function that takes an element from the iterable
+    #     *args, **kwargs: additional arguments to pass to process_func
+    #     """
+    #     p_df = pd.DataFrame()
+    #     for i, elem in enumerate(tqdm(iterable)):
+    #         try:
+    #             start_time = time.time()
+    #             f_df = process_func(elem, *args, **kwargs)
+    #             p_df = pd.concat([p_df, f_df], ignore_index=True)
+    #             end_time = time.time()
+    #             if self.latent_logger_enabled:
+    #                 self.latent_info_log(
+    #                     f'{self.component_name} processed {elem}, {i + 1}/{len(iterable)} in {end_time - start_time} seconds',
+    #                     iteration=i)
+    #             self.save_intermediate_payload(i, ComponentPayload(metadata=metadata, df=p_df))
+    #         except (RuntimeError, AssertionError, ValueError) as e:
+    #             self.logger.error(f'An error occurred in {elem}, {i + 1}/{len(iterable)}: {e}')
+    #             continue
+    #     return p_df
 
     # @staticmethod
     def save_component_payload(self, input_payload: ComponentPayload, intermediate=False) -> None:

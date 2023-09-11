@@ -49,10 +49,11 @@ class WAVConverter(BaseSegmenterComponent):
         create_dirs_if_not_exist(output_dir)
 
         p_df = pd.DataFrame()
-        processed_path, metadata = self.segmenter_create_columns(metadata)
+        processed_path = self.get_processed_path()
         p_df, paths_list = self.get_file_paths_and_processed_df_if_not_overwriting(p_df, paths_list, processed_path,
                                                                                    input_column, output_dir,
                                                                                    use_dir_prefix=self.config.get('use_dir_name_as_prefix', False))
+        metadata = self.enhance_metadata(metadata)
 
         if not paths_list:
             self.logger.warning('You\'ve supplied an empty list to process')
