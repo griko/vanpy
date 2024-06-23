@@ -1,7 +1,7 @@
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Dict, Union
+from typing import Dict, Union, List
 # import os
 
 import pandas as pd
@@ -14,7 +14,7 @@ import time
 from vanpy.core.ComponentPayload import ComponentPayload
 from vanpy.utils.utils import create_dirs_if_not_exist
 from tqdm.auto import tqdm
-
+from queue import Queue
 
 @dataclass
 class PipelineComponent(ABC):
@@ -129,23 +129,33 @@ class PipelineComponent(ABC):
         """
         raise NotImplementedError
 
+    def wrapper_process_item(self, q: Queue, *args, **kwargs):
+        start_time = time.time()
+        result = self.process_item(*args, **kwargs)
+        end_time = time.time()
+        q.put(end_time - start_time)
+        return result
+
     def process_with_progress(self, iterable, metadata, process_func, *args, **kwargs) -> pd.DataFrame:
+        self.logger.debug(f"Executing process_with_progress using {self.max_workers} thread workers")
         p_df = pd.DataFrame()
+        time_queue = Queue()
         # cpu_count = os.cpu_count()
 
         with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
-            futures = {executor.submit(process_func, elem, *args, **kwargs): elem for elem in iterable}
+            futures = {executor.submit(self.wrapper_process_item, time_queue, elem, *args, **kwargs): elem for elem in
+                       iterable}
 
             for i, future in enumerate(tqdm(as_completed(futures), total=len(futures))):
                 elem = futures[future]
                 try:
-                    start_time = time.time()
                     f_df = future.result()
+                    time_taken = time_queue.get()  # Retrieve the timing from the queue
+                    self.add_performance_metadata(f_df, time_taken)
                     p_df = pd.concat([p_df, f_df], ignore_index=True)
-                    end_time = time.time()
                     if self.latent_logger_enabled:
                         self.latent_info_log(
-                            f'{self.component_name} processed {elem}, {i + 1}/{len(iterable)} in {end_time - start_time} seconds',
+                            f'{self.component_name} processed {elem}, {i + 1}/{len(iterable)} in {time_taken} seconds',
                             iteration=i)
                     self.save_intermediate_payload(i, ComponentPayload(metadata=metadata, df=p_df))
                 except (RuntimeError, AssertionError, ValueError, TypeError) as e:
@@ -221,13 +231,29 @@ class PipelineComponent(ABC):
             metadata['meta_columns'].extend([self.file_performance_column_name])
         return metadata
 
-    def add_performance_metadata(self, f_d: Union[pd.DataFrame, Dict], t_start: float, t_end: float):
+    def add_classification_columns_to_metadata(self, metadata: Dict, cols: Union[List[str], str]) -> Dict:
+        if cols:
+            if isinstance(cols, str):
+                cols = [cols]
+            metadata['classification_columns'].extend(cols)
+        elif self.config.get('classification_column_name', True):
+            self.classification_column_name = f'clf_{self.get_name()}'
+            cols = [self.classification_column_name]
+            metadata['classification_columns'].app(cols)
+        else:
+            self.logger.warning(f'No classification columns were added to metadata for {self.get_name()}')
+        return metadata
+
+    def add_performance_metadata(self, f_d: Union[pd.DataFrame, Dict], t_start: float, t_end: Union[None, float]=None):
         """
         Adds performance metadata for the audio segments.
 
         :param f_d: The temporal DataFrame that is enhanced with the performance time of audio segments.
-        :param t_start: The start time of the audio segment extraction.
-        :param t_end: The end time of the audio segment extraction.
+        :param t_start: The start time of the audio segment extraction. If passed without t_end, it is assumed that the performance time is the time it took to process the audio segment.
+        :param t_end: The end time of the audio segment extraction. If None, it is assumed that the performance time is the time it took to process the audio segment is passed through t_start.
         """
         if self.performance_measurement:
-            f_d[self.file_performance_column_name] = t_end - t_start
+            if t_end:
+                f_d[self.file_performance_column_name] = t_end - t_start
+            else:
+                f_d[self.file_performance_column_name] = t_start

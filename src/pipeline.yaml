@@ -1,9 +1,9 @@
-input_dir: 'streams'  # 'speech_examples', 'speech_examples_small', 'streams'
+input_dir: 'speech_examples_small'  # 'speech_examples', 'speech_examples_small', 'streams'
 segment_name_separator: "_"
 intermediate_payload_path: 'results'
 # device: 'cpu'  # 'cpu'/'cuda'
 huggingface_ACCESS_TOKEN: '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'
-max_workers: 4  # set the number of workers for parallel threads, especially for preprocessing
+max_workers: 4  # set the number of workers for parallel threads
 sampling_rate: 16000
 latent_logger:
   enabled: false
@@ -13,7 +13,7 @@ latent_logger:
 preprocessing:
   file_mapper:
     save_payload: false  # use it if you want to save the payload when the component process is completed
-    load_payload: true  # use it if you want to load a previously saved payload, overrides listing of an input_path
+    load_payload: false  # use it if you want to load a previously saved payload, overrides listing of an input_path
     load_df_path: '{{intermediate_payload_path}}/feature_extraction_speechbrain_embedding_df_20230909000033_final.csv'
     load_meta_path: '{{intermediate_payload_path}}/feature_extraction_speechbrain_embedding_metadata_20230909000033_final.pickle'
   wav_converter:
@@ -171,6 +171,7 @@ segment_classifier:
   speech_brain_iemocap_emotion:
     pretrained_models_dir: 'pretrained_models/speech_brain_iemocap_emotion'
     classification_column_name: 'speech_brain_iemocap_emotion'
+    performance_measurement: true
     verbal_labels: true
     save_payload: true
 

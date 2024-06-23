@@ -101,6 +101,33 @@ class Wav2Vec2ADV(PipelineComponent):
 
         return y
 
+    def process_item(self, f, p_df, input_column):
+        try:
+            # Loading the audio file
+            audio, rate = librosa.load(f, sr=self.sampling_rate)
+            arousal, dominance, valence = self.process_func(np.reshape(audio, [1, len(audio)]), rate)[0]
+
+            # Create a DataFrame to hold the results
+            f_df = pd.DataFrame({
+                input_column: [f],
+                'arousal': [arousal],
+                'dominance': [dominance],
+                'valence': [valence],
+            })
+
+        except (RuntimeError, TypeError, EOFError) as e:
+            self.logger.error(f"An error occurred in {f}: {e}")
+            f_df = pd.DataFrame({
+                input_column: [f],
+                'arousal': [None],
+                'dominance': [None],
+                'valence': [None],
+            })
+
+        p_df = pd.concat([p_df, f_df], ignore_index=True)
+
+        return p_df
+
     def process(self, input_payload: ComponentPayload) -> ComponentPayload:
         """
         Process the input payload and return the output payload.
@@ -118,35 +145,17 @@ class Wav2Vec2ADV(PipelineComponent):
         if not paths_list:
             self.logger.warning('You\'ve supplied an empty list to process')
             return input_payload
-        
-        prediction = []
-        performance_metric = []
-        for j, f in enumerate(paths_list):
-            try:
-                t_start_transcribing = time.time()
 
-                # Loading the audio file
-                audio, rate = librosa.load(f, sr=self.sampling_rate)
-                arousal, dominance, valence = self.process_func(np.reshape(audio, [1, len(audio)]), rate)[0]
-                prediction.append((arousal, dominance, valence))
-                t_end_transcribing = time.time()
-                performance_metric.append(t_end_transcribing - t_start_transcribing)
-                self.latent_info_log(
-                    f'Processed {f} in {t_end_transcribing - t_start_transcribing} seconds, {j + 1}/{len(paths_list)}',
-                    iteration=j)
-            except (RuntimeError, TypeError) as e:
-                prediction.append((None, None, None))
-                performance_metric.append(float('inf'))
-                self.logger.error(f'An error occurred in {f}, {j + 1}/{len(paths_list)}: {e}')
+        p_df = pd.DataFrame()
 
-        columns = ['arousal', 'dominance', 'valence']
-        prediction_df = pd.DataFrame(prediction, columns=columns)
-        for col in prediction_df.columns:
-            payload_df[col] = prediction_df[col]
-        payload_metadata['classification_columns'].extend(columns)
-        if self.config.get('performance_measurement', True):
-            file_performance_column_name = f'perf_{self.get_name()}_get_transcription'
-            payload_df[file_performance_column_name] = performance_metric
-            payload_metadata['meta_columns'].extend([file_performance_column_name])
+        # Define which columns should be in the metadata
+        payload_metadata = self.add_performance_column_to_metadata(payload_metadata)
+        payload_metadata = self.add_classification_columns_to_metadata(payload_metadata, ['arousal', 'dominance', 'valence'])
+
+        # Call process_with_progress
+        p_df = self.process_with_progress(paths_list, payload_metadata, self.process_item, p_df, input_column)
+
+        # Merge the processed DataFrame back into the original DataFrame
+        payload_df = pd.merge(left=payload_df, right=p_df, how='outer', left_on=input_column, right_on=input_column)
 
         return ComponentPayload(metadata=payload_metadata, df=payload_df)

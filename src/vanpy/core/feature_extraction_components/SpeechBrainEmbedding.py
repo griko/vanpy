@@ -29,14 +29,11 @@ class SpeechBrainEmbedding(PipelineComponent):
         self.logger.info(f'Loaded model to {"GPU" if torch.cuda.is_available() else "CPU"}')
 
     def process_item(self, f, p_df, input_column):
-        t_start_feature_extraction = time.time()
         signal, fs = torchaudio.load(f)
         embedding = self.model.encode_batch(signal)
         f_df = pd.DataFrame(embedding.to('cpu').numpy().ravel()).T
         f_df.columns = [c for c in self.get_feature_columns()]
         f_df[input_column] = f
-        t_end_feature_extraction = time.time()
-        self.add_performance_metadata(f_df, t_start_feature_extraction, t_end_feature_extraction)
         p_df = pd.concat([p_df, f_df], ignore_index=True)
         return p_df
 
