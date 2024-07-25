@@ -70,7 +70,11 @@ class WAVConverter(BaseSegmenterComponent):
                 input_path = ''.join(f.split("/")[:-1])
                 output_dir = input_path
             output_filename = f'{dir_prefix}{filename}.wav'
-            AudioSegment.from_file(f).export(f'{output_dir}/{output_filename}', format='wav', parameters=self.params_list)
+            try:
+                AudioSegment.from_file(f).export(f'{output_dir}/{output_filename}', format='wav', parameters=self.params_list)
+            except Exception as e:
+                self.logger.error(f'Error converting {f}: {e}')
+                continue
 
             f_df = pd.DataFrame.from_dict({processed_path: [f'{output_dir}/{output_filename}'],
                                            input_column: [f]})

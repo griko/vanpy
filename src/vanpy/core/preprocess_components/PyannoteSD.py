@@ -40,14 +40,18 @@ class PyannoteSD(BaseSegmenterComponent):
         self.logger.info(f'Loaded model to {"GPU" if torch.cuda.device_count() > 0 else "CPU"}')
 
     def get_voice_segments(self, f):
-        annotation = self.model(f)
-        segments = []
-        labels = []
-        for i, (v, _, lbl) in enumerate(annotation.itertracks(yield_label=True)):
-            start, stop = v
-            segments.append((start, stop))
-            labels.append(lbl)
-        return zip(segments, labels)
+        try:
+            annotation = self.model(f)
+            segments = []
+            labels = []
+            for i, (v, _, lbl) in enumerate(annotation.itertracks(yield_label=True)):
+                start, stop = v
+                segments.append((start, stop))
+                labels.append(lbl)
+            return zip(segments, labels)
+        except ValueError as e:
+            self.logger.error(f'Error in {f}: {e}')
+            return []
 
     def process_item(self, f, p_df, processed_path, input_column, output_dir):
         t_start_segmentation = time.time()
