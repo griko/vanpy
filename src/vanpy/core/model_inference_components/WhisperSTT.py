@@ -4,7 +4,7 @@ from yaml import YAMLObject
 from vanpy.core.ComponentPayload import ComponentPayload
 from vanpy.core.PipelineComponent import PipelineComponent
 from vanpy.utils.utils import create_dirs_if_not_exist
-
+import pandas as pd
 
 class WhisperSTT(PipelineComponent):
     model = None
@@ -26,6 +26,20 @@ class WhisperSTT(PipelineComponent):
         self.model.eval()
         self.logger.info(f'Loaded model to {"GPU" if torch.cuda.is_available() else "CPU"}')
 
+    def process_item(self, f, p_df, input_column, stt_column_name, language_column_name):
+        try:
+            transcription = self.model.transcribe(f)
+            stt = transcription['text']
+            language = transcription['language']
+        except Exception as e:
+            self.logger.error(f'Failed to transcribe {f}: {e}')
+            stt = None
+            language = None
+
+        f_df = pd.DataFrame({input_column: [f], stt_column_name: [stt], language_column_name: [language]})
+        p_df = pd.concat([p_df, f_df], ignore_index=True)
+        return p_df
+
     def process(self, input_payload: ComponentPayload) -> ComponentPayload:
         if not self.model:
             self.load_model()
@@ -39,34 +53,29 @@ class WhisperSTT(PipelineComponent):
             self.logger.warning('You\'ve supplied an empty list to process')
             return input_payload
 
-        stts = []
-        languages = []
-        performance_metric = []
-        for j, f in enumerate(paths_list):
-            try:
-                t_start_transcribing = time.time()
-                transcription = self.model.transcribe(f)
-                stts.append(transcription['text'])
-                languages.append(transcription['language'])
-                t_end_transcribing = time.time()
-                performance_metric.append(t_end_transcribing - t_start_transcribing)
-                self.latent_info_log(
-                    f'Transcribed {f} in {t_end_transcribing - t_start_transcribing} seconds, {j + 1}/{len(paths_list)}',
-                    iteration=j)
-            except Exception as e:
-                self.logger.error(f'Failed to transcribe {f}, {j + 1}/{len(paths_list)}: {e}')
-                stts.append(None)
-                languages.append(None)
-                performance_metric.append(None)
+        p_df = pd.DataFrame()
+        payload_metadata['classification_columns'].extend([self.stt_column_name, self.language_classification_column_name])
 
-        payload_df[self.stt_column_name] = stts
-        payload_metadata['classification_columns'].extend([self.stt_column_name])
-        if self.config.get('detect_language', False):
-            payload_df[self.language_classification_column_name] = languages
-            payload_metadata['classification_columns'].extend([self.language_classification_column_name])
+        p_df = self.process_with_progress(
+            paths_list,
+            payload_metadata,
+            self.process_item,
+            p_df,
+            input_column,
+            self.stt_column_name,
+            self.language_classification_column_name
+        )
+
+        payload_df = pd.merge(
+            left=payload_df,
+            right=p_df,
+            how='outer',
+            left_on=input_column,
+            right_on=input_column
+        )
+
         if self.config.get('performance_measurement', False):
             file_performance_column_name = f'perf_{self.get_name()}_get_transcription'
-            payload_df[file_performance_column_name] = performance_metric
             payload_metadata['meta_columns'].extend([file_performance_column_name])
 
         return ComponentPayload(metadata=payload_metadata, df=payload_df)

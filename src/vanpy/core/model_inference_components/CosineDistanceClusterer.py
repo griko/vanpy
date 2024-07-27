@@ -8,7 +8,7 @@ from sklearn.preprocessing import normalize
 import numpy as np
 
 
-class CosineDiarizationClassifier(BaseClassificationComponent):
+class CosineDistanceClusterer(BaseClassificationComponent):
     model = None
     classification_column_name: str = ''
 

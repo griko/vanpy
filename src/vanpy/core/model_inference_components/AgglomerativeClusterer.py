@@ -8,7 +8,7 @@ from sklearn.preprocessing import normalize
 from sklearn.cluster import AgglomerativeClustering
 
 
-class AgglomerativeDiarizationClassifier(BaseClassificationComponent):
+class AgglomerativeClusterer(BaseClassificationComponent):
     model = None
     classification_column_name: str = ''
 

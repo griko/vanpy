@@ -76,14 +76,14 @@ class ClassificationPipeline(BasePipeline):
                 from vanpy.core.model_inference_components.WhisperSTT import WhisperSTT
                 self.components_mapper[component] = WhisperSTT
             elif component == 'cosine_distance_diarization':
-                from vanpy.core.model_inference_components.CosineDiarizationClassifier import CosineDiarizationClassifier
-                self.components_mapper[component] = CosineDiarizationClassifier
+                from vanpy.core.model_inference_components.CosineDistanceClusterer import CosineDistanceClusterer
+                self.components_mapper[component] = CosineDistanceClusterer
             elif component == 'agglomerative_clustering_diarization':
-                from vanpy.core.model_inference_components.AgglomerativeDiarizationClassifier import AgglomerativeDiarizationClassifier
-                self.components_mapper[component] = AgglomerativeDiarizationClassifier
+                from vanpy.core.model_inference_components.AgglomerativeClusterer import AgglomerativeClusterer
+                self.components_mapper[component] = AgglomerativeClusterer
             elif component == 'gmm_clustering_diarization':
-                from vanpy.core.model_inference_components.GMMDiarizationClassifier import GMMDiarizationClassifier
-                self.components_mapper[component] = GMMDiarizationClassifier
+                from vanpy.core.model_inference_components.GMMClusterer import GMMClusterer
+                self.components_mapper[component] = GMMClusterer
             elif component == 'yamnet_classifier':
                 from vanpy.core.model_inference_components.YamnetClassifier import YamnetClassifier
                 self.components_mapper[component] = YamnetClassifier

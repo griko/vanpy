@@ -65,11 +65,11 @@ def main():
     #      'vanpy_voxceleb_gender', 'vanpy_voxceleb_age', 'vanpy_voxceleb_height', 'vanpy_ravdess_emotion', 'wav2vec2adv',
     #      'yamnet_classifier','cosine_distance_diarization'], config=config)
 
-    pipeline = Pipeline(
-        ['file_mapper', 'pyannote_sd', 'speechbrain_embedding', 'openai_whisper_stt', 'speech_brain_iemocap_emotion',
-         'vanpy_voxceleb_gender', 'vanpy_voxceleb_age', 'vanpy_voxceleb_height', 'vanpy_ravdess_emotion', 'wav2vec2adv', 'wav2vec2stt', 'yamnet_classifier',
-         'cosine_distance_diarization', 'agglomerative_clustering_diarization', 'gmm_clustering_diarization'], config=config)
-    # pipeline = Pipeline(['file_mapper', 'speechbrain_embedding', 'wav2vec2stt'], config=config)
+    # pipeline = Pipeline(
+    #     ['file_mapper', 'pyannote_sd', 'speechbrain_embedding', 'openai_whisper_stt', 'speech_brain_iemocap_emotion',
+    #      'vanpy_voxceleb_gender', 'vanpy_voxceleb_age', 'vanpy_voxceleb_height', 'vanpy_ravdess_emotion', 'wav2vec2adv', 'wav2vec2stt', 'yamnet_classifier',
+    #      'cosine_distance_diarization', 'agglomerative_clustering_diarization', 'gmm_clustering_diarization'], config=config)
+    pipeline = Pipeline(['file_mapper', 'openai_whisper_stt'], config=config)
     # pipeline = Pipeline(['file_mapper', 'speechbrain_embedding', 'vanpy_ravdess_emotion'], config=config)
     # 'wav_converter', 'metricgan_se',, 'silero_vad', 'speechbrain_embedding', 'cosine_distance_diarization' , 'pyannote_sd', 'openai_whisper_stt'
     # openai_whisper_stt, wav2vec2stt

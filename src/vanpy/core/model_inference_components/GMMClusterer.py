@@ -5,7 +5,7 @@ import time
 from vanpy.core.model_inference_components.BaseClassificationComponent import BaseClassificationComponent
 
 
-class GMMDiarizationClassifier(BaseClassificationComponent):
+class GMMClusterer(BaseClassificationComponent):
     model = None
     classification_column_name: str = ''
 

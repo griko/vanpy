@@ -194,6 +194,7 @@ segment_classifier:
 
   openai_whisper_stt:
     # Pay attention: "Inference is currently only implemented for short-form i.e. audio is pre-segmented into <=30s segments"
+    max_workers: 1  # whisper doesn't support multi-threading, https://github.com/openai/whisper/discussions/951
     model_size: 'tiny'  # 'tiny', 'base', 'small', 'medium', 'large'
     pretrained_models_dir: 'pretrained_models/whisper'
     stt_column_name: 'whisper_transcript'
