@@ -17,6 +17,7 @@ class PreprocessPipeline(BasePipeline):
     components_mapper: Dict[str, Optional[PipelineComponent]] = {
         'file_mapper': None,
         'wav_converter': None,
+        'wav_splitter': None,
         'ina_speech_segmenter': None,
         'pyannote_vad': None,
         'pyannote_sd': None,
@@ -45,6 +46,9 @@ class PreprocessPipeline(BasePipeline):
             elif component == 'wav_converter':
                 from vanpy.core.preprocess_components.WAVConverter import WAVConverter
                 self.components_mapper[component] = WAVConverter
+            elif component == 'wav_splitter':
+                from vanpy.core.preprocess_components.WAVSplitter import WAVSplitter
+                self.components_mapper[component] = WAVSplitter
             elif component == 'ina_speech_segmenter':
                 from vanpy.core.preprocess_components.INAVoiceSeparator import INAVoiceSeparator
                 self.components_mapper[component] = INAVoiceSeparator

@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from logging import Logger
 import pandas as pd
 import logging
-from typing import List
+from typing import List, Union
 
 from vanpy.core.BasePipeline import BasePipeline
 from vanpy.core.ComponentPayload import ComponentPayload
@@ -67,10 +67,14 @@ class Pipeline:
         :return: Processed payload after all pipelines
         :rtype: ComponentPayload
         """
-        process_dir = self.input_dir
-        cp: ComponentPayload = ComponentPayload(input_path=process_dir)
+        cp: Union[None, ComponentPayload] = None
+
         if initial_payload is not None:
             cp = initial_payload
+        elif self.input_dir is not None:
+            cp = ComponentPayload(input_path=self.input_dir)
+        else:
+            raise AttributeError("You have supplied both empty initial payload and input directory")
 
         for pipeline in self.pipelines:
             if pipeline is not None:
