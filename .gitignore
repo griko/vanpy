@@ -19,6 +19,7 @@
 /src/metricgan_se_preprocessed
 /src/pretrained_models
 /src/pyannote_sd.yaml
+/src/speech_examples/**
 
 
 

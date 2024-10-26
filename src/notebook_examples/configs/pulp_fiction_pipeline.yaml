@@ -2,14 +2,17 @@ input_dir: '../cut_preprocessed'  # 'speech_examples', 'speech_examples_small'
 segment_name_separator: "_"
 intermediate_payload_path: 'results/pulp_fiction'
 # device: 'cpu'  # 'cpu'/'cuda'
-log_each_x_records: 1000
 huggingface_ACCESS_TOKEN: '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'
+max_workers: 4  # set the number of workers for parallel threads
 sampling_rate: 16000
+latent_logger:
+  enabled: true
+  log_each_x_records: 1000
 
 preprocessing:
   file_mapper:
     save_payload: false  # use it if you want to save the payload when the component process is completed
-    load_payload: true  # use it if you want to load a previously saved payload, overrides listing of an input_path
+    load_payload: false  # use it if you want to load a previously saved payload, overrides listing of an input_path
 #    load_df_path: '{{intermediate_payload_path}}/preprocessing_silero_vad_df_20230703143304_final.csv'
 #    load_meta_path: '{{intermediate_payload_path}}/preprocessing_silero_vad_metadata_20230703143304_final.pickle'
     load_df_path: '{{intermediate_payload_path}}/final_feature_classification_1190_df.csv'
@@ -22,6 +25,12 @@ preprocessing:
     acodec: 'pcm_s16le'  # specify codec
     use_dir_name_as_prefix: true  # will name converted file with parent_dir prefix:
                                   # '<path>/<parent_dir>/<filename>' -> '<ouput_dir>/<parent_dir>_<filename>'
+    overwrite: false
+    save_payload: true
+  wav_splitter:
+    output_dir: 'split_preprocessed'
+#    max_audio_length: 30  # split duration in seconds (overrides max_wav_file_size)
+    max_wav_file_size: 1  # split file size in MB  (at least one of max_audio_length or max_wav_file_size should be set)
     overwrite: false
     save_payload: true
   ina_speech_segmenter:
@@ -52,25 +61,26 @@ preprocessing:
     skip_overlap: true
     overwrite: true
     save_payload: true
-#    hparams:
-#      pipeline:
-#        name: pyannote.audio.pipelines.SpeakerDiarization
-#        params:
-#          clustering: AgglomerativeClustering
-#          embedding: speechbrain/spkrec-ecapa-voxceleb
-#          embedding_batch_size: 32
-#          embedding_exclude_overlap: true
-#          segmentation: pyannote/segmentation@2022.07
-#          segmentation_batch_size: 32
-#
-#      params:
-#        clustering:
-#          method: centroid  # ["average", "centroid", "complete", "median", "single", "ward", "weighted"]
-#          min_cluster_size: 13  # 15
-#          threshold: 0.71  # 0.7153814381597874
-#        segmentation:
-#          min_duration_off: 0.1  # 0.5817029604921046
-#          threshold: 0.6  # 0.4442333667381752
+    save_payload_periodicity: 10  # save intermediate payload results every X processed files
+    hparams:
+      pipeline:
+        name: pyannote.audio.pipelines.SpeakerDiarization
+        params:
+          clustering: AgglomerativeClustering
+          embedding: speechbrain/spkrec-ecapa-voxceleb
+          embedding_batch_size: 32
+          embedding_exclude_overlap: true
+          segmentation: pyannote/segmentation@2022.07
+          segmentation_batch_size: 32
+
+      params:
+        clustering:
+          method: centroid  # ["average", "centroid", "complete", "median", "single", "ward", "weighted"]
+          min_cluster_size: 13  # 15
+          threshold: 0.71  # 0.7153814381597874
+        segmentation:
+          min_duration_off: 0.1  # 0.5817029604921046
+          threshold: 0.6  # 0.4442333667381752
   silero_vad:
     output_dir: 'silero_vad_preprocessed'
     add_segment_metadata: true
@@ -110,7 +120,7 @@ feature_extraction:
       - spectral_centroid
       - spectral_bandwidth
       - spectral_contrast
-#      - spectral_flatness
+      - spectral_flatness
 #      - f0
       - tonnetz
     save_payload: true
@@ -134,46 +144,55 @@ feature_extraction:
 #    model: 20230517-020537_loss_0.005514454140314478-ep_24-batch_128-lr_1e-06.pt
 
 segment_classifier:
-  vanpy_voxceleb_gender:
-    pretrained_models_dir: 'pretrained_models/vanpy_voxceleb_gender'
-    classification_column_name: 'vanpy_voxceleb_gender_classification'
+  vanpy_gender:
+    pretrained_models_dir: 'pretrained_models/vanpy_gender'
+    classification_column_name: 'vanpy_gender_classification'
+    model: 'svm_ecapa_192_sb_voxceleb'  #  choose from 'svm_ecapa_192_sb_voxceleb', 'svm_xvect_512_sb_voxceleb'
     verbal_labels: true
+    apply_transform: true  # run fitted standard-scaler on features
     performance_measurement: true
     save_payload: true
 
-  vanpy_voxceleb_age:
-    pretrained_models_dir: 'pretrained_models/vanpy_voxceleb_age'
-    classification_column_name: 'vanpy_voxceleb_age_estimation'
+  vanpy_age:
+    pretrained_models_dir: 'pretrained_models/vanpy_age'
+    classification_column_name: 'vanpy_age_estimation'
+    model: 'ann_ecapa_192_sb_librosa_31_combined'  #  choose from 'svr_ecapa_192_sb_voxceleb'
+                                                   #              'svr_ecapa_192_sb_librosa_31_voxceleb'
+                                                   #              'ann_ecapa_192_sb_timit'
+                                                   #              'ann_ecapa_192_sb_librosa_31_combined'
+    apply_transform: true  # run fitted standard-scaler on features, not inplace
     performance_measurement: true
     save_payload: true
 
-  vanpy_voxceleb_height:
-    pretrained_models_dir: 'pretrained_models/vanpy_voxceleb_height'
-    classification_column_name: 'vanpy_voxceleb_height_estimation'
+  vanpy_height:
+    pretrained_models_dir: 'pretrained_models/vanpy_height'
+    classification_column_name: 'vanpy_height_estimation'
+    apply_transform: true  # run fitted standard-scaler on features, not inplace
     performance_measurement: true
     save_payload: true
 
-  common_voices_gender:
-    pretrained_models_dir: 'pretrained_models/common_voice'
-    classification_column_name: 'common_voices_gender_classification'
+  vanpy_emotion:
+    pretrained_models_dir: 'pretrained_models/vanpy_emotion'
+    classification_column_name: 'vanpy_emotion_classification'
     verbal_labels: true
     save_payload: true
 
-  common_voices_age:
-    pretrained_models_dir: 'pretrained_models/common_voice'
-    classification_column_name: 'common_voices_age_classification'
-    verbal_labels: true
-    save_payload: true
+#  common_voices_gender:
+#    pretrained_models_dir: 'pretrained_models/common_voice'
+#    classification_column_name: 'common_voices_gender_classification'
+#    verbal_labels: true
+#    save_payload: true
+#
+#  common_voices_age:
+#    pretrained_models_dir: 'pretrained_models/common_voice'
+#    classification_column_name: 'common_voices_age_classification'
+#    verbal_labels: true
+#    save_payload: true
 
   speech_brain_iemocap_emotion:
     pretrained_models_dir: 'pretrained_models/speech_brain_iemocap_emotion'
     classification_column_name: 'speech_brain_iemocap_emotion'
-    verbal_labels: true
-    save_payload: true
-
-  vanpy_ravdess_emotion:
-    pretrained_models_dir: 'pretrained_models/vanpy_ravdess_emotion'
-    classification_column_name: 'vanpy_ravdess_emotion'
+    performance_measurement: true
     verbal_labels: true
     save_payload: true
 
@@ -190,6 +209,7 @@ segment_classifier:
 
   openai_whisper_stt:
     # Pay attention: "Inference is currently only implemented for short-form i.e. audio is pre-segmented into <=30s segments"
+    max_workers: 1  # whisper doesn't support multi-threading, https://github.com/openai/whisper/discussions/951
     model_size: 'tiny'  # 'tiny', 'base', 'small', 'medium', 'large'
     pretrained_models_dir: 'pretrained_models/whisper'
     stt_column_name: 'whisper_transcript'
@@ -197,10 +217,11 @@ segment_classifier:
     language_classification_column_name: 'whisper_language'
     performance_measurement: true
     save_payload: true
+    save_payload_periodicity: 10000
 
   cosine_distance_diarization:
-    classification_column_name: 'diarization_classification'
-    threshold: 0.3  # cosine similarity threshold of the embeddings, the less the value - the less the amount of speakers
+    classification_column_name: 'cosine_distance_diarization'
+    threshold: 0.3  # cosine similarity threshold of the embeddings
     features_list:  # assumes multiple column features are labeled 'i_<component_name>' where i is between
                     # start_index (inclusive) and stop_index (exclusive)
       - speechbrain_embedding:
@@ -210,8 +231,21 @@ segment_classifier:
     save_payload: true
 
   agglomerative_clustering_diarization:
-    classification_column_name: 'diarization_classification'
-    threshold: 2.3  # cosine similarity threshold of the embeddings, the greater the value - the less the amount of speakers
+    classification_column_name: 'agglomerative_clustering_diarization'
+    threshold: 2.3  # float or blank (None), set to None if using n_clusters
+    n_clusters:  # int or blank (None), set to None if using threshold
+    features_list: # assumes multiple column features are labeled 'i_<component_name>' where i is between
+      # start_index (inclusive) and stop_index (exclusive)
+      - speechbrain_embedding:
+          start_index: 0
+          stop_index: 192
+    performance_measurement: true
+    save_payload: true
+
+  gmm_clustering_diarization:
+    classification_column_name: 'gmm_clustering_diarization'
+    n_components: 6
+    covariance_type: 'full'  # ‘full’, ‘tied’, ‘diag’, ‘spherical’
     features_list: # assumes multiple column features are labeled 'i_<component_name>' where i is between
       # start_index (inclusive) and stop_index (exclusive)
       - speechbrain_embedding:

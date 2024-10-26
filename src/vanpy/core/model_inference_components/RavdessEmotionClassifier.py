@@ -15,7 +15,7 @@ class RavdessEmotionClassifier(PipelineComponent):
     verbal_labels: bool = True
 
     def __init__(self, yaml_config: YAMLObject):
-        super().__init__(component_type='segment_classifier', component_name='vanpy_ravdess_emotion',
+        super().__init__(component_type='segment_classifier', component_name='vanpy_emotion',
                          yaml_config=yaml_config)
         self.verbal_labels = self.config.get('verbal_labels', True)
         self.classification_column_name = self.config.get('classification_column_name',
@@ -26,6 +26,7 @@ class RavdessEmotionClassifier(PipelineComponent):
         model_path = cached_download('https://drive.google.com/uc?id=1-kQ7eschXQeYiK7wpLTrBnVv6PTSZPfO',
                                      f'{self.pretrained_models_dir}/ravdess_svm_speechbrain_ecapa_voxceleb_no_processor_cv.pkl')
         self.model = pickle.load(open(model_path, "rb"))
+        self.expected_feature_columns = [f'{i}_speechbrain_embedding' for i in range(192)]  # expecting features_columns to be ['0_speechbrain_embedding','1_speechbrain_embedding',...'191_speechbrain_embedding']
 
     def process(self, input_payload: ComponentPayload) -> ComponentPayload:
         if not self.model:
@@ -34,14 +35,13 @@ class RavdessEmotionClassifier(PipelineComponent):
         payload_metadata = input_payload.metadata
         payload_df = input_payload.df
 
-        expected_columns = [f'{i}_speechbrain_embedding' for i in range(192)]  # expecting features_columns to be ['0_speechbrain_embedding','1_speechbrain_embedding',...'191_speechbrain_embedding']
-        if set(expected_columns) - set(payload_df.columns):
+        if set(self.expected_feature_columns) - set(payload_df.columns):
             self.logger.error("There are no speechbrain_embedding columns in the payload, please add 'speechbrain_embedding' component to the Pipeline with 'spkrec-ecapa-voxceleb' model (or without model mentioning)")
             return input_payload
         else:
             self.logger.info("Found SpeechBrainEmbedding features in the payload, continuing with classification")
 
-        X = payload_df[expected_columns].convert_dtypes()
+        X = payload_df[self.expected_feature_columns].convert_dtypes()
         nan_idxs = X[X.isna().any(axis=1)].index
         X = X.fillna(0)
         y_pred = self.model.predict(X)

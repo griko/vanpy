@@ -60,7 +60,7 @@ preprocessing:
     skip_overlap: true
     overwrite: true
     save_payload: true
-    save_payload_periodicity: 10  # save intermediate payload results every X processed files
+    save_payload_periodicity: 10000  # save intermediate payload results every X processed files
     hparams:
       pipeline:
         name: pyannote.audio.pipelines.SpeakerDiarization
@@ -119,7 +119,7 @@ feature_extraction:
       - spectral_centroid
       - spectral_bandwidth
       - spectral_contrast
-#      - spectral_flatness
+      - spectral_flatness
 #      - f0
       - tonnetz
     save_payload: true
@@ -143,47 +143,55 @@ feature_extraction:
 #    model: 20230517-020537_loss_0.005514454140314478-ep_24-batch_128-lr_1e-06.pt
 
 segment_classifier:
-  vanpy_voxceleb_gender:
-    pretrained_models_dir: 'pretrained_models/vanpy_voxceleb_gender'
-    classification_column_name: 'vanpy_voxceleb_gender_classification'
+  vanpy_gender:
+    pretrained_models_dir: 'pretrained_models/vanpy_gender'
+    classification_column_name: 'vanpy_gender_classification'
+    model: 'svm_ecapa_192_sb_voxceleb'  #  choose from 'svm_ecapa_192_sb_voxceleb', 'svm_xvect_512_sb_voxceleb'
     verbal_labels: true
+    apply_transform: true  # run fitted standard-scaler on features, not inplace
     performance_measurement: true
     save_payload: true
 
-  vanpy_voxceleb_age:
-    pretrained_models_dir: 'pretrained_models/vanpy_voxceleb_age'
-    classification_column_name: 'vanpy_voxceleb_age_estimation'
+  vanpy_age:
+    pretrained_models_dir: 'pretrained_models/vanpy_age'
+    classification_column_name: 'vanpy_age_estimation'
+    model: 'ann_ecapa_192_sb_librosa_31_combined'  #  choose from 'svr_ecapa_192_sb_voxceleb'
+                                                   #              'svr_ecapa_192_sb_librosa_31_voxceleb'
+                                                   #              'ann_ecapa_192_sb_timit'
+                                                   #              'ann_ecapa_192_sb_librosa_31_combined'
+    apply_transform: true  # run fitted standard-scaler on features, not inplace
     performance_measurement: true
     save_payload: true
 
-  vanpy_voxceleb_height:
-    pretrained_models_dir: 'pretrained_models/vanpy_voxceleb_height'
-    classification_column_name: 'vanpy_voxceleb_height_estimation'
+  vanpy_height:
+    pretrained_models_dir: 'pretrained_models/vanpy_height'
+    classification_column_name: 'vanpy_height_estimation'
+    apply_transform: true  # run fitted standard-scaler on features, not inplace
     performance_measurement: true
     save_payload: true
 
-  common_voices_gender:
-    pretrained_models_dir: 'pretrained_models/common_voice'
-    classification_column_name: 'common_voices_gender_classification'
+  vanpy_emotion:
+    pretrained_models_dir: 'pretrained_models/vanpy_emotion'
+    classification_column_name: 'vanpy_emotion_classification'
     verbal_labels: true
     save_payload: true
 
-  common_voices_age:
-    pretrained_models_dir: 'pretrained_models/common_voice'
-    classification_column_name: 'common_voices_age_classification'
-    verbal_labels: true
-    save_payload: true
+#  common_voices_gender:
+#    pretrained_models_dir: 'pretrained_models/common_voice'
+#    classification_column_name: 'common_voices_gender_classification'
+#    verbal_labels: true
+#    save_payload: true
+#
+#  common_voices_age:
+#    pretrained_models_dir: 'pretrained_models/common_voice'
+#    classification_column_name: 'common_voices_age_classification'
+#    verbal_labels: true
+#    save_payload: true
 
   speech_brain_iemocap_emotion:
     pretrained_models_dir: 'pretrained_models/speech_brain_iemocap_emotion'
     classification_column_name: 'speech_brain_iemocap_emotion'
     performance_measurement: true
-    verbal_labels: true
-    save_payload: true
-
-  vanpy_ravdess_emotion:
-    pretrained_models_dir: 'pretrained_models/vanpy_ravdess_emotion'
-    classification_column_name: 'vanpy_ravdess_emotion'
     verbal_labels: true
     save_payload: true
 

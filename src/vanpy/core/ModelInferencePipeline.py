@@ -15,13 +15,13 @@ class ClassificationPipeline(BasePipeline):
     :vartype components_mapper: Dict[str, Optional[PipelineComponent]]
     """
     components_mapper: Dict[str, Optional[PipelineComponent]] = {
-        'vanpy_voxceleb_gender': None,
-        'vanpy_voxceleb_age': None,
-        'vanpy_voxceleb_height': None,
+        'vanpy_gender': None,
+        'vanpy_age': None,
+        'vanpy_height': None,
+        'vanpy_emotion': None,
         # 'common_voices_gender': None,
         # 'common_voices_age': None,
         'speech_brain_iemocap_emotion': None,
-        'vanpy_ravdess_emotion': None,
         'wav2vec2adv': None,
         'wav2vec2stt': None,
         'openai_whisper_stt': None,
@@ -45,27 +45,27 @@ class ClassificationPipeline(BasePipeline):
         :type config: YAMLObject
         """
         for component in components:
-            if component == 'vanpy_voxceleb_gender':
+            if component == 'vanpy_gender':
                 from vanpy.core.model_inference_components.VoxcelebGenderClassifier import VoxcelebGenderClassifier
                 self.components_mapper[component] = VoxcelebGenderClassifier
-            elif component == 'vanpy_voxceleb_age':
+            elif component == 'vanpy_age':
                 from vanpy.core.model_inference_components.VoxcelebAgeRegressor import VoxcelebAgeRegressor
                 self.components_mapper[component] = VoxcelebAgeRegressor
-            elif component == 'vanpy_voxceleb_height':
+            elif component == 'vanpy_height':
                 from vanpy.core.model_inference_components.VoxcelebHeightRegressor import VoxcelebHeightRegressor
                 self.components_mapper[component] = VoxcelebHeightRegressor
-            elif component == 'common_voices_gender':
-                from vanpy.core.model_inference_components.CVGenderClassifier import CVGenderClassifier
-                self.components_mapper[component] = CVGenderClassifier
-            elif component == 'common_voices_age':
-                from vanpy.core.model_inference_components.CVAgeClassifier import CVAgeClassifier
-                self.components_mapper[component] = CVAgeClassifier
+            elif component == 'vanpy_emotion':
+                from vanpy.core.model_inference_components.RavdessEmotionClassifier import RavdessEmotionClassifier
+                self.components_mapper[component] = RavdessEmotionClassifier
+            # elif component == 'common_voices_gender':
+            #     from vanpy.core.model_inference_components.CVGenderClassifier import CVGenderClassifier
+            #     self.components_mapper[component] = CVGenderClassifier
+            # elif component == 'common_voices_age':
+            #     from vanpy.core.model_inference_components.CVAgeClassifier import CVAgeClassifier
+            #     self.components_mapper[component] = CVAgeClassifier
             elif component == 'speech_brain_iemocap_emotion':
                 from vanpy.core.model_inference_components.IEMOCAPEmotionClassifier import IEMOCAPEmotionClassifier
                 self.components_mapper[component] = IEMOCAPEmotionClassifier
-            elif component == 'vanpy_ravdess_emotion':
-                from vanpy.core.model_inference_components.RavdessEmotionClassifier import RavdessEmotionClassifier
-                self.components_mapper[component] = RavdessEmotionClassifier
             elif component == 'wav2vec2adv':
                 from vanpy.core.model_inference_components.Wav2Vec2ADV import Wav2Vec2ADV
                 self.components_mapper[component] = Wav2Vec2ADV
