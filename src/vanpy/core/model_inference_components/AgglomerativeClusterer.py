@@ -24,25 +24,46 @@ class AgglomerativeClusterer(BaseClassificationComponent):
     def process(self, input_payload: ComponentPayload) -> ComponentPayload:
         payload_metadata, payload_df = input_payload.unpack()
         features_columns = [column for column in payload_df.columns if column in self.requested_feature_list]
-        payload_df_normalized = payload_df[features_columns].apply(lambda x: normalize(x.values.reshape(1, -1), norm='l2').reshape(-1) if all(x.notnull()) else np.array([-100.0 for _ in x]).reshape(-1), axis=1)
-        payload_arr_normalized = []
-        for r in payload_df_normalized.iteritems():
-            payload_arr_normalized.append(r[1])
-        payload_df_normalized = np.array(payload_arr_normalized)
-        self.config['records_count'] = len(payload_df)
+        if len(features_columns) != len(self.requested_feature_list):
+            self.logger.warning('Some requested features are not present in the input payload. Skipping diarization.')
+            return ComponentPayload(metadata=payload_metadata, df=payload_df)
 
+        # Create mask for rows with all features present
+        valid_rows_mask = payload_df[features_columns].notna().all(axis=1)
+
+        # Initialize columns with None
         payload_df[self.classification_column_name] = None
-        if payload_df.empty:
-            ComponentPayload(metadata=payload_metadata, df=payload_df)
-
-        t_start = time.time()
-        clustering = AgglomerativeClustering(n_clusters=self.n_clusters, distance_threshold=self.threshold).fit(payload_df_normalized)
-        performance_metric = [time.time() - t_start] * len(clustering.labels_)
-        payload_df[self.classification_column_name] = [f'SPEAKER_{i}' if -100.0 not in payload_df_normalized[i] else '' for i in clustering.labels_]
-        payload_metadata['classification_columns'].extend([self.classification_column_name])
         if self.config.get('performance_measurement', True):
             file_performance_column_name = f'perf_{self.get_name()}_get_diarization'
-            payload_df[file_performance_column_name] = performance_metric
+            payload_df[file_performance_column_name] = None
+
+        if payload_df.empty or not valid_rows_mask.any():
+            return ComponentPayload(metadata=payload_metadata, df=payload_df)
+
+        # Get indices of valid rows
+        valid_indices = valid_rows_mask[valid_rows_mask].index
+
+        # Normalize only valid rows
+        valid_features = payload_df.loc[valid_indices, features_columns].values
+        valid_features_normalized = normalize(valid_features, norm='l2')
+
+        # Perform clustering only on valid rows
+        t_start = time.time()
+        clustering = AgglomerativeClustering(
+            n_clusters=self.n_clusters,
+            distance_threshold=self.threshold
+        ).fit(valid_features_normalized)
+        processing_time = time.time() - t_start
+
+        # Assign speaker labels only to valid rows
+        speaker_labels = [f'SPEAKER_{label}' for label in clustering.labels_]
+        payload_df.loc[valid_indices, self.classification_column_name] = speaker_labels
+
+        # Add performance measurements if enabled
+        if self.config.get('performance_measurement', True):
+            payload_df.loc[valid_indices, file_performance_column_name] = processing_time
             payload_metadata['meta_columns'].extend([file_performance_column_name])
+
+        payload_metadata['classification_columns'].extend([self.classification_column_name])
 
         return ComponentPayload(metadata=payload_metadata, df=payload_df)

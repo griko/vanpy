@@ -20,6 +20,7 @@ class PyannoteSD(BaseSegmenterComponent):
         self.skip_overlap = self.config.get('skip_overlap', False)
         self.classification_column_name = self.config.get('classification_column_name',
                                                           f'{self.component_name}_classification')
+        self.keep_only_first_segment = self.config.get('keep_only_first_segment', False)
 
     def load_model(self):
         """Load the pretrained Pyannote speaker diarization model."""
@@ -66,7 +67,7 @@ class PyannoteSD(BaseSegmenterComponent):
             self.logger.error(f'Error in {audio_file}: {e}')
             return []
 
-    def process_item(self, audio_file: str, p_df: pd.DataFrame, processed_path: str, input_column: str,
+    def process_item(self, audio_file: str, processed_path: str, input_column: str,
                      output_dir: str) -> pd.DataFrame:
         """
         Process a single audio file for speaker diarization.
@@ -85,23 +86,32 @@ class PyannoteSD(BaseSegmenterComponent):
         segments = self.get_voice_segments(audio_file)
         t_end_segmentation = time.time()
 
+        if not segments:
+            return pd.DataFrame({
+                processed_path: [None],
+                input_column: [audio_file]
+            })
+
+        f_df = pd.DataFrame()
         for i, segment in enumerate(segments):
             output_path = cut_segment(audio_file, output_dir=output_dir, segment=(segment["start"], segment["stop"]),
                                       segment_id=i, separator=self.segment_name_separator,
-                                      keep_only_first_segment=False)
+                                      keep_only_first_segment=self.keep_only_first_segment)
 
-            f_d = {
+            s_d = {
                 processed_path: [output_path],
                 input_column: [audio_file],
                 self.classification_column_name: [segment["label"]]
             }
-            self.add_segment_metadata(f_d, segment["start"], segment["stop"])
-            self.add_performance_metadata(f_d, t_start_segmentation, t_end_segmentation)
+            self.add_segment_metadata(s_d, segment["start"], segment["stop"])
+            self.add_performance_metadata(s_d, t_start_segmentation, t_end_segmentation)
 
-            f_df = pd.DataFrame.from_dict(f_d)
-            p_df = pd.concat([p_df, f_df], ignore_index=True)
+            s_df = pd.DataFrame.from_dict(s_d)
+            f_df = pd.concat([f_df, s_df], ignore_index=True)
 
-        return p_df
+            if self.keep_only_first_segment:
+                break
+        return f_df
 
     def process(self, input_payload: ComponentPayload) -> ComponentPayload:
         """
@@ -118,25 +128,20 @@ class PyannoteSD(BaseSegmenterComponent):
 
         metadata, df = input_payload.unpack()
         input_column = metadata['paths_column']
-        paths_list = df[input_column].tolist()
+        paths_list = df[input_column].dropna().tolist()
         output_dir = self.config['output_dir']
         create_dirs_if_not_exist(output_dir)
 
         processed_path = self.get_processed_path()
-        p_df = pd.DataFrame()
-        p_df, paths_list = self.get_file_paths_and_processed_df_if_not_overwriting(p_df, paths_list, processed_path,
-                                                                                   input_column, output_dir)
         metadata = self.enhance_metadata(metadata)
 
+        p_df, paths_list = self.get_file_paths_and_processed_df_if_not_overwriting(paths_list, processed_path,
+                                                                                   input_column, output_dir)
         if not paths_list:
             self.logger.warning('You\'ve supplied an empty list to process')
-            df = pd.merge(left=df, right=p_df, how='outer', left_on=input_column, right_on=input_column)
-            return ComponentPayload(metadata=metadata, df=df)
+        else:
+            fp_df = self.process_with_progress(paths_list, metadata, processed_path, input_column, output_dir)
+            p_df = pd.concat([p_df, fp_df], ignore_index=True)
 
-        self.config['records_count'] = len(paths_list)
-
-        p_df = self.process_with_progress(paths_list, metadata, self.process_item, p_df, processed_path, input_column,
-                                          output_dir)
-
-        df = pd.merge(left=df, right=p_df, how='outer', left_on=input_column, right_on=input_column)
+        df = pd.merge(left=df, right=p_df, how='outer', on=input_column)
         return ComponentPayload(metadata=metadata, df=df)

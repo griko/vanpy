@@ -20,11 +20,13 @@ class LibrosaFeaturesExtractor(PipelineComponent):
         self.features = self.config.get('features', ['mfcc'])
         self.n_mfcc = self.config.get('n_mfcc', 13)
 
+        self.feature_columns = self.get_feature_columns()
+
         # Disable numba DEBUG logs
         numba_logger = logging.getLogger('numba')
         numba_logger.setLevel(logging.WARNING)
 
-    def process_item(self, f, p_df, input_column):
+    def process_item(self, f, input_column):
         try:
             y, sr = librosa.load(f, sr=self.sampling_rate)
             f_df = pd.DataFrame()
@@ -65,28 +67,25 @@ class LibrosaFeaturesExtractor(PipelineComponent):
                 f_df['tonnetz'] = [np.mean(librosa.feature.tonnetz(y=y, sr=self.sampling_rate))]
 
             f_df[input_column] = f
-            p_df = pd.concat([p_df, f_df], ignore_index=True)
 
-        except (RuntimeError, TypeError, ParameterError) as e:
+        except (FileNotFoundError, RuntimeError, TypeError, ParameterError) as e:
             self.logger.error(f'An error occurred processing {f}: {e}')
 
-        return p_df
+        return f_df
 
     def process(self, input_payload: ComponentPayload) -> ComponentPayload:
         metadata, df = input_payload.unpack()
         input_column = metadata['paths_column']
-        paths_list = df[input_column].tolist()
-        self.config['records_count'] = len(paths_list)
+        paths_list = df[input_column].dropna().tolist()
 
-        p_df = pd.DataFrame()
         metadata = self.add_performance_column_to_metadata(metadata)
 
-        p_df = self.process_with_progress(paths_list, metadata, self.process_item, p_df, input_column)
+        p_df = self.process_with_progress(paths_list, metadata, input_column)
 
-        df = pd.merge(left=df, right=p_df, how='outer', left_on=input_column, right_on=input_column)
+        df = pd.merge(left=df, right=p_df, how='left', on=input_column)
 
         # Add feature columns to metadata
-        feature_columns = self.get_feature_columns()
+        feature_columns = self.feature_columns
         metadata['feature_columns'].extend(feature_columns)
 
         return ComponentPayload(metadata=metadata, df=df)

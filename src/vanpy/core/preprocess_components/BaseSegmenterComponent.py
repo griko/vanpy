@@ -24,7 +24,6 @@ class BaseSegmenterComponent(PipelineComponent, ABC):
         self.segment_name_separator = self.config.get('segment_name_separator', '_')
         self.segment_stop_column_name = None
         self.segment_start_column_name = None
-        self.file_performance_column_name = None
         self.classification_column_name = None
 
     def get_processed_path(self):
@@ -72,7 +71,7 @@ class BaseSegmenterComponent(PipelineComponent, ABC):
             f_d[self.segment_start_column_name] = [a]
             f_d[self.segment_stop_column_name] = [b]
 
-    def get_file_paths_and_processed_df_if_not_overwriting(self, p_df: pd.DataFrame, paths_list: List[str],
+    def get_file_paths_and_processed_df_if_not_overwriting(self, paths_list: List[str],
                                                            processed_path: str, input_column: str,
                                                            output_dir: str, use_dir_prefix: bool = False) -> Tuple[
         pd.DataFrame, List[str]]:
@@ -88,6 +87,7 @@ class BaseSegmenterComponent(PipelineComponent, ABC):
         :return: A tuple containing the updated `p_df` DataFrame and a list of unprocessed file paths.
         """
         unprocessed_paths_list = []
+        p_df = pd.DataFrame()
         if not self.config.get('overwrite', False):
             existing_file_list = get_audio_files_paths(output_dir)
             existing_file_list_names = ['.'.join(f.split("/")[-1].split('.')[0:-1]) for f in existing_file_list]

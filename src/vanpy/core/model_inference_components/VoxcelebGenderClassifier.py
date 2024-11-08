@@ -27,9 +27,9 @@ class VoxcelebGenderClassifier(PipelineComponent):
 
             self.logger.info("Loading SVM gender classification model, trained on Voxceleb2 dataset with ECAPA-TDNN speech_brain embedding [192 features]")
             model_path = cached_download('https://drive.google.com/uc?id=1ytf7wV1z-oarvjlAgZ1NbVE1VgsKRYBX',
-                                         f'{self.pretrained_models_dir}/vc_svm_cls_bal_pyannote_192_gender_optuna.pkl')
+                                         f'{self.pretrained_models_dir}/vc_svm_cls_bal_speechbrain_ecapa_192_gender_optuna.pkl')
             processor_path = cached_download('https://drive.google.com/uc?id=1OEeI0nqECXSiA7B_8otCW0lVYF0bFWmW',
-                                            f'{self.pretrained_models_dir}/processor_vc_svm_cls_bal_pyannote_192_gender_optuna.pkl')
+                                            f'{self.pretrained_models_dir}/processor_vc_svm_cls_bal_speechbrain_ecapa_192_gender_optuna.pkl')
             self.expected_feature_columns = [f'{i}_speechbrain_embedding' for i in range(192)]  # expecting features_columns to be ['0_speechbrain_embedding','1_speechbrain_embedding',...'191_speechbrain_embedding']
         elif model_name == 'svm_xvect_512_sb_voxceleb':
             self.logger.info(

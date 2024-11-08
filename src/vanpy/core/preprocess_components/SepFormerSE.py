@@ -38,7 +38,7 @@ class SepFormerSE(BaseSegmenterComponent):
                                                               savedir="pretrained_models/sepformer-wham16k-enhancement",)
         self.logger.info(f'Loaded model to {"GPU" if torch.cuda.is_available() else "CPU"}')
 
-    def process_item(self, f, p_df, processed_path, input_column, output_dir):
+    def process_item(self, f, processed_path, input_column, output_dir):
         import torchaudio
         output_file = f'{output_dir}/{f.split("/")[-1]}'
         t_start_segmentation = time.time()
@@ -48,8 +48,7 @@ class SepFormerSE(BaseSegmenterComponent):
         f_d = {processed_path: [output_file], input_column: [f]}
         self.add_performance_metadata(f_d, t_start_segmentation, t_end_segmentation)
         f_df = pd.DataFrame.from_dict(f_d)
-        p_df = pd.concat([p_df, f_df], ignore_index=True)
-        return p_df
+        return f_df
 
     def process(self, input_payload: ComponentPayload) -> ComponentPayload:
         """
@@ -63,28 +62,26 @@ class SepFormerSE(BaseSegmenterComponent):
 
         metadata, df = input_payload.unpack()
         input_column = metadata['paths_column']
-        paths_list = df[input_column].tolist()
+        paths_list = df[input_column].dropna().tolist()
         output_dir = self.config['output_dir']
         create_dirs_if_not_exist(output_dir)
 
         processed_path = self.get_processed_path()
-        p_df = pd.DataFrame()
-        p_df, paths_list = self.get_file_paths_and_processed_df_if_not_overwriting(p_df, paths_list, processed_path,
+        p_df, paths_list = self.get_file_paths_and_processed_df_if_not_overwriting(paths_list, processed_path,
                                                                                    input_column, output_dir)
         metadata = self.add_processed_path_to_metadata(self.get_processed_path(), metadata)
         metadata = self.add_performance_column_to_metadata(metadata)
 
         if not paths_list:
             self.logger.warning('You\'ve supplied an empty list to process')
-            df = pd.merge(left=df, right=p_df, how='outer', left_on=input_column, right_on=input_column)
+            df = pd.merge(left=df, right=p_df, how='left', on=input_column)
             return ComponentPayload(metadata=metadata, df=df)
-        self.config['records_count'] = len(paths_list)
 
-        p_df = self.process_with_progress(paths_list, metadata, self.process_item, p_df, processed_path,
+        p_df = self.process_with_progress(paths_list, metadata, processed_path,
                                           input_column, output_dir)
 
         SepFormerSE.cleanup_softlinks()
-        df = pd.merge(left=df, right=p_df, how='outer', left_on=input_column, right_on=input_column)
+        df = pd.merge(left=df, right=p_df, how='left', on=input_column)
         return ComponentPayload(metadata=metadata, df=df)
 
     @staticmethod

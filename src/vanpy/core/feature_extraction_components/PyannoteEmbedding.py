@@ -36,13 +36,12 @@ class PyannoteEmbedding(PipelineComponent):
                                    step=self.config['sliding_window_step'])
         self.logger.info(f'Loaded model to {"GPU" if torch.cuda.is_available() else "CPU"}')
 
-    def process_item(self, f, p_df, input_column):
+    def process_item(self, f, input_column):
         embedding = self.model(f)
         f_df = pd.DataFrame(np.mean(embedding, axis=0)).T
         f_df[input_column] = f
         f_df.rename(columns={i: c for i, c in enumerate(self.get_feature_columns())}, inplace=True)
-        p_df = pd.concat([p_df, f_df], ignore_index=True)
-        return p_df
+        return f_df
 
     def process(self, input_payload: ComponentPayload) -> ComponentPayload:
         if not self.model:
@@ -50,14 +49,13 @@ class PyannoteEmbedding(PipelineComponent):
 
         metadata, df = input_payload.unpack()
         input_column = metadata['paths_column']
-        paths_list = df[input_column].tolist()
+        paths_list = df[input_column].dropna().tolist()
 
-        p_df = pd.DataFrame()
         metadata = self.add_performance_column_to_metadata(metadata)
 
-        p_df = self.process_with_progress(paths_list, metadata, self.process_item, p_df, input_column)
+        p_df = self.process_with_progress(paths_list, metadata, input_column)
 
-        df = pd.merge(left=df, right=p_df, how='outer', left_on=input_column, right_on=input_column)
+        df = pd.merge(left=df, right=p_df, how='left', on=input_column)
         return ComponentPayload(metadata=metadata, df=df)
 
     def get_feature_columns(self):

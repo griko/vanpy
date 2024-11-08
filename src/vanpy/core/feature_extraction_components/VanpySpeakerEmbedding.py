@@ -38,8 +38,8 @@
 #         metadata, df = input_payload.unpack()
 #         df = df.reset_index().drop(['index'], axis=1, errors='ignore')
 #         input_column = metadata['paths_column']
-#         paths_list = df[input_column].tolist()
-#         self.config['records_count'] = len(paths_list)
+#         paths_list = df[input_column].dropna().tolist().dropna().tolist()
+#         records_count = len(paths_list)
 #
 #         file_performance_column_name = ''
 #         if self.config['performance_measurement']:

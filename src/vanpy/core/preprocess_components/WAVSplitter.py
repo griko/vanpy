@@ -32,22 +32,18 @@ class WAVSplitter(BaseSegmenterComponent):
         input_column = metadata['paths_column']
         if not self.max_audio_length and not self.max_wav_file_size:
             raise KeyError("WAV splitter cannot run without specifying either 'max_audio_length' or 'max_wav_file_size' in the configuration.")
-        paths_list = df[input_column].tolist()
+        paths_list = df[input_column].dropna().tolist()
         output_dir = self.config['output_dir']
         create_dirs_if_not_exist(output_dir)
 
-        p_df = pd.DataFrame()
         processed_path = self.get_processed_path()
-        p_df, paths_list = self.get_file_paths_and_processed_df_if_not_overwriting(p_df, paths_list, processed_path,
+        p_df, paths_list = self.get_file_paths_and_processed_df_if_not_overwriting(paths_list, processed_path,
                                                                                    input_column, output_dir,
                                                                                    use_dir_prefix=self.config.get('use_dir_name_as_prefix', False))
-        metadata = self.enhance_metadata(metadata)
-
         if not paths_list:
             self.logger.warning('You\'ve supplied an empty list to process')
-            df = pd.merge(left=df, right=p_df, how='outer', left_on=input_column, right_on=input_column)
+            df = pd.merge(left=df, right=p_df, how='left', on=input_column)
             return ComponentPayload(metadata=metadata, df=df)
-        self.config['records_count'] = len(paths_list)
 
         for j, f in enumerate(tqdm(paths_list)):
             try:
@@ -67,7 +63,8 @@ class WAVSplitter(BaseSegmenterComponent):
                 self.logger.error(f'Error processing {f}: {e}')
                 continue
 
-        df = pd.merge(left=df, right=p_df, how='outer', left_on=input_column, right_on=input_column)
+        df = pd.merge(left=df, right=p_df, how='outer', on=input_column)
+        metadata = self.enhance_metadata(metadata)
         return ComponentPayload(metadata=metadata, df=df)
 
     def split_audio_by_length(self, audio, original_path, output_dir, p_df, input_column, file_index):

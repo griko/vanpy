@@ -20,32 +20,56 @@ class GMMClusterer(BaseClassificationComponent):
 
     def process(self, input_payload: ComponentPayload) -> ComponentPayload:
         payload_metadata, payload_df = input_payload.unpack()
-        self.config['records_count'] = len(payload_df)
-
-        payload_df[self.classification_column_name] = None
-        if payload_df.empty:
+        features_columns = [column for column in payload_df.columns if column in self.requested_feature_list]
+        if len(features_columns) != len(self.requested_feature_list):
+            self.logger.warning('Some requested features are not present in the input payload. Skipping diarization.')
             return ComponentPayload(metadata=payload_metadata, df=payload_df)
 
-        performance_metric = []
-        X = payload_df[self.requested_feature_list].fillna(-100).values
-        gmm = GaussianMixture(n_components=self.n_components, covariance_type=self.covariance_type)
-        gmm.fit(X)
+        # Create mask for rows with all features present
+        valid_rows_mask = payload_df[features_columns].notna().all(axis=1)
 
-        for i in range(self.config['records_count']):
-            t_start_transcribing = time.time()
-            emb = X[i, :]
-            label = f'SPEAKER_{gmm.predict(emb.reshape(1, -1))[0]}' if -100 not in emb else ''
-            payload_df.at[i, self.classification_column_name] = label
-            t_end_transcribing = time.time()
-            performance_metric.append(t_end_transcribing - t_start_transcribing)
-            self.latent_info_log(
-                f'GMM clustering done in {t_end_transcribing - t_start_transcribing} seconds, {i + 1}/{self.config["records_count"]}',
-                iteration=i)
-
-        payload_metadata['classification_columns'].extend([self.classification_column_name])
+        # Initialize columns with None
+        payload_df[self.classification_column_name] = None
         if self.config.get('performance_measurement', True):
             file_performance_column_name = f'perf_{self.get_name()}_get_cluster'
-            payload_df[file_performance_column_name] = performance_metric
+            payload_df[file_performance_column_name] = None
+
+        if payload_df.empty or not valid_rows_mask.any():
+            return ComponentPayload(metadata=payload_metadata, df=payload_df)
+
+        # Get indices and features of valid rows
+        valid_indices = valid_rows_mask[valid_rows_mask].index
+        valid_features = payload_df.loc[valid_indices, features_columns].values
+
+        # Fit GMM on valid features
+        gmm = GaussianMixture(
+            n_components=self.n_components,
+            covariance_type=self.covariance_type
+        )
+        gmm.fit(valid_features)
+
+        # Predict all valid samples at once
+        t_start = time.time()
+        speaker_labels = gmm.predict(valid_features)
+        processing_time = time.time() - t_start
+
+        # Convert numerical labels to speaker strings
+        speaker_strings = [f'SPEAKER_{label}' for label in speaker_labels]
+
+        # Assign speaker labels only to valid rows
+        payload_df.loc[valid_indices, self.classification_column_name] = speaker_strings
+
+        # Add performance measurements if enabled
+        if self.config.get('performance_measurement', True):
+            processing_times = [processing_time / len(valid_indices)] * len(valid_indices)
+            payload_df.loc[valid_indices, file_performance_column_name] = processing_times
             payload_metadata['meta_columns'].extend([file_performance_column_name])
+
+        payload_metadata['classification_columns'].extend([self.classification_column_name])
+
+        if self.latent_logger_enabled:
+            self.logger.info(
+                f'GMM clustering completed in {processing_time} seconds for {len(valid_indices)} samples'
+            )
 
         return ComponentPayload(metadata=payload_metadata, df=payload_df)

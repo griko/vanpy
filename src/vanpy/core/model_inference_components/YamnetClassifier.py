@@ -1,3 +1,4 @@
+import pandas as pd
 from yaml import YAMLObject
 import numpy as np
 import requests
@@ -73,14 +74,15 @@ class YamnetClassifier(PipelineComponent):
 
         payload_metadata, payload_df = input_payload.unpack()
         input_column = payload_metadata['paths_column']
-        paths_list = payload_df[input_column].tolist()
+        paths_list = payload_df[input_column].dropna().tolist()
 
         if not paths_list:
             self.logger.warning('You\'ve supplied an empty list to process')
             return input_payload
-        
+
         class_prediction = []
 
+        p_df = pd.DataFrame()
         for j, f in enumerate(paths_list):
             try:
                 sample_rate, wav_data = wavfile.read(f)
@@ -93,12 +95,15 @@ class YamnetClassifier(PipelineComponent):
                     if mean_scores[idx] >= self.threshold:
                         top_class_indices_refined.append(idx)
                 inferred_class = '; '.join([self.class_names[x] for x in top_class_indices_refined])  # self.class_names[scores_np.mean(axis=0).argmax()]
-                class_prediction.append(inferred_class)
-            except (RuntimeError, TypeError) as e:
-                class_prediction.append(None)
+                f_df = pd.DataFrame({input_column: [f], self.classification_column_name: [inferred_class]})
+                p_df = pd.concat([p_df, f_df], ignore_index=True)
+                # class_prediction.append(inferred_class)
+            except (FileNotFoundError, RuntimeError, TypeError) as e:
+                # class_prediction.append(None)
                 self.logger.error(f"An error occurred in {f}, {j + 1}/{len(paths_list)}: {e}")
 
-        payload_df[self.classification_column_name] = class_prediction
+        payload_df = pd.merge(left=payload_df, right=p_df, how='left', on=input_column)
+        # payload_df[self.classification_column_name] = class_prediction
         payload_metadata['classification_columns'].extend([self.classification_column_name])
         return ComponentPayload(metadata=payload_metadata, df=payload_df)
     #

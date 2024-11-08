@@ -53,25 +53,33 @@ class PyannoteVAD(BaseSegmenterComponent):
             segments.append((start, stop))
         return segments
 
-    def process_item(self, f, p_df, processed_path, input_column, output_dir):
+    def process_item(self, f, processed_path, input_column, output_dir):
         t_start_segmentation = time.time()
         v_segments = self.get_voice_segments(f)
         t_end_segmentation = time.time()
+
+        if not v_segments:
+            return pd.DataFrame({
+                processed_path: [None],
+                input_column: [f]
+            })
+
+        f_df = pd.DataFrame()
 
         for i, segment in enumerate(v_segments):
             output_path = cut_segment(f, output_dir=output_dir, segment=segment, segment_id=i,
                                       separator=self.segment_name_separator,
                                       keep_only_first_segment=self.keep_only_first_segment)
-            f_d = {processed_path: [output_path], input_column: [f]}
-            self.add_segment_metadata(f_d, segment[0], segment[1])
-            self.add_performance_metadata(f_d, t_start_segmentation, t_end_segmentation)
+            s_d = {processed_path: [output_path], input_column: [f]}
+            self.add_segment_metadata(s_d, segment[0], segment[1])
+            self.add_performance_metadata(s_d, t_start_segmentation, t_end_segmentation)
 
-            f_df = pd.DataFrame.from_dict(f_d)
-            p_df = pd.concat([p_df, f_df], ignore_index=True)
+            s_df = pd.DataFrame.from_dict(s_d)
+            f_df = pd.concat([f_df, s_df], ignore_index=True)
 
             if self.keep_only_first_segment:
                 break
-        return p_df
+        return f_df
 
 
     def process(self, input_payload: ComponentPayload) -> ComponentPayload:
@@ -80,23 +88,21 @@ class PyannoteVAD(BaseSegmenterComponent):
 
         metadata, df = input_payload.unpack()
         input_column = metadata['paths_column']
-        paths_list = df[input_column].tolist()
+        paths_list = df[input_column].dropna().tolist()
         output_dir = self.config['output_dir']
         create_dirs_if_not_exist(output_dir)
 
         processed_path = self.get_processed_path()
-        p_df = pd.DataFrame()
-        p_df, paths_list = self.get_file_paths_and_processed_df_if_not_overwriting(p_df, paths_list, processed_path,
-                                                                                   input_column, output_dir)
         metadata = self.enhance_metadata(metadata)
 
+        p_df, paths_list = self.get_file_paths_and_processed_df_if_not_overwriting(paths_list, processed_path,
+                                                                                   input_column, output_dir)
         if not paths_list:
             self.logger.warning('You\'ve supplied an empty list to process')
-            df = pd.merge(left=df, right=p_df, how='outer', left_on=input_column, right_on=input_column)
-            return ComponentPayload(metadata=metadata, df=df)
-        self.config['records_count'] = len(paths_list)
+        else:
+            fp_df = self.process_with_progress(paths_list, metadata, processed_path, input_column, output_dir)
+            p_df = pd.concat([p_df, fp_df], ignore_index=True)
 
-        p_df = self.process_with_progress(paths_list, metadata, self.process_item, p_df, processed_path, input_column, output_dir)
-
-        df = pd.merge(left=df, right=p_df, how='outer', left_on=input_column, right_on=input_column)
+        df = pd.merge(left=df, right=p_df, how='outer', on=input_column)
         return ComponentPayload(metadata=metadata, df=df)
+

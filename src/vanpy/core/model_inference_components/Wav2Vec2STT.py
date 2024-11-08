@@ -25,7 +25,7 @@ class Wav2Vec2STT(PipelineComponent):
         self.model = Wav2Vec2ForCTC.from_pretrained("facebook/wav2vec2-base-960h", cache_dir=self.pretrained_models_dir)
 
 
-    def process_item(self, f, p_df, input_column):
+    def process_item(self, f, input_column):
         try:
             # Loading the audio file
             audio, rate = librosa.load(f, sr=self.sampling_rate)
@@ -44,16 +44,14 @@ class Wav2Vec2STT(PipelineComponent):
                 self.classification_column_name: [transcription]
             })
 
-        except (RuntimeError, TypeError, EOFError) as e:
+        except (FileNotFoundError, RuntimeError, TypeError, EOFError) as e:
             self.logger.error(f"An error occurred in {f}: {e}")
             f_df = pd.DataFrame({
                 input_column: [f],
                 self.classification_column_name: [None]
             })
 
-        p_df = pd.concat([p_df, f_df], ignore_index=True)
-
-        return p_df
+        return f_df
 
     def process(self, input_payload: ComponentPayload) -> ComponentPayload:
         """
@@ -66,8 +64,8 @@ class Wav2Vec2STT(PipelineComponent):
 
         payload_metadata, payload_df = input_payload.unpack()
         input_column = payload_metadata['paths_column']
-        paths_list = payload_df[input_column].tolist()
-        self.config['records_count'] = len(paths_list)
+        paths_list = payload_df[input_column].dropna().tolist()
+        records_count = len(paths_list)
 
         if not paths_list:
             self.logger.warning('You\'ve supplied an empty list to process')
@@ -80,9 +78,9 @@ class Wav2Vec2STT(PipelineComponent):
         payload_metadata = self.add_classification_columns_to_metadata(payload_metadata, self.classification_column_name)
 
         # Call process_with_progress
-        p_df = self.process_with_progress(paths_list, payload_metadata, self.process_item, p_df, input_column)
+        p_df = self.process_with_progress(paths_list, payload_metadata, input_column)
 
         # Merge the processed DataFrame back into the original DataFrame
-        payload_df = pd.merge(left=payload_df, right=p_df, how='outer', left_on=input_column, right_on=input_column)
+        payload_df = pd.merge(left=payload_df, right=p_df, how='left', on=input_column)
 
         return ComponentPayload(metadata=payload_metadata, df=payload_df)

@@ -85,6 +85,7 @@ preprocessing:
     add_segment_metadata: true
     performance_measurement: true
     keep_only_first_segment: true
+    max_workers: 1  # doesn't support multi-threading
     model_params:
       threshold: 0.8  # default 0.5. larger - more segmentized
 #      sampling_rate: 16000,

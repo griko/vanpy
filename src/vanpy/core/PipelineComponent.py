@@ -49,6 +49,8 @@ class PipelineComponent(ABC):
         self.logger = self.get_logger()
         self.latent_logger_enabled = self.config.get('latent_logger', False) and self.config['latent_logger'].get(
             'enabled', False)
+        self.log_each_x_records = self.config.get('log_each_x_records', self.config['latent_logger'].get(
+            'log_each_x_records', 10) if self.config.get('latent_logger', False) else 10)
         self.pretrained_models_dir = self.config.get('pretrained_models_dir',
                                                      f'pretrained_models/{self.component_name}')
         self.performance_measurement = self.config.get('performance_measurement', False)
@@ -67,11 +69,7 @@ class PipelineComponent(ABC):
         :param last_item: whether this is the last item in the paths list
         :type last_item: bool
         """
-        log_each_x_records = self.config.get('log_each_x_records', 10)
-        last_item = False
-        if self.config['records_count']:
-            last_item = iteration == self.config['records_count'] - 1
-        if iteration % log_each_x_records == 0 or last_item:
+        if iteration % self.log_each_x_records == 0 or last_item:
             self.logger.info(message)
 
     def import_config(self, yaml_config: YAMLObject) -> Dict:
@@ -136,11 +134,10 @@ class PipelineComponent(ABC):
         q.put(end_time - start_time)
         return result
 
-    def process_with_progress(self, iterable, metadata, process_func, *args, **kwargs) -> pd.DataFrame:
+    def process_with_progress(self, iterable, metadata,  *args, **kwargs) -> pd.DataFrame:
         self.logger.debug(f"Executing process_with_progress using {self.max_workers} thread workers")
-        p_df = pd.DataFrame()
+        n_df = pd.DataFrame()
         time_queue = Queue()
-        # cpu_count = os.cpu_count()
 
         with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
             futures = {executor.submit(self.wrapper_process_item, time_queue, elem, *args, **kwargs): elem for elem in
@@ -150,18 +147,18 @@ class PipelineComponent(ABC):
                 elem = futures[future]
                 try:
                     f_df = future.result()
-                    time_taken = time_queue.get()  # Retrieve the timing from the queue
+                    time_taken = time_queue.get()
                     self.add_performance_metadata(f_df, time_taken)
-                    p_df = pd.concat([p_df, f_df], ignore_index=True)
+                    n_df = pd.concat([n_df, f_df], ignore_index=True, axis=0)
                     if self.latent_logger_enabled:
                         self.latent_info_log(
                             f'{self.component_name} processed {elem}, {i + 1}/{len(iterable)} in {time_taken} seconds',
-                            iteration=i)
-                    self.save_intermediate_payload(i, ComponentPayload(metadata=metadata, df=p_df))
+                            iteration=i, last_item=(i == len(iterable) - 1))
+                    self.save_intermediate_payload(i, ComponentPayload(metadata=metadata, df=n_df))
                 except (RuntimeError, AssertionError, ValueError, TypeError) as e:
                     self.logger.error(f'An error occurred in {elem}: {e}')
 
-        return p_df
+        return n_df
 
     # def process_with_progress(self, iterable, metadata, process_func, *args, **kwargs) -> pd.DataFrame:
     #     """
