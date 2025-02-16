@@ -2,7 +2,7 @@
 **vanpy** is a Voice Analysis framework, built in a 
 flexible manner for easy extendability, that allows to extract and classify voice segments. 
 
-![vanpy](https://user-images.githubusercontent.com/1709151/176196445-d80903ec-295f-4bc2-8a82-7f25f9f8dfc1.PNG)
+![VANPY](https://github.com/user-attachments/assets/a225897c-49bb-42c3-be95-612c0e6050e6)
 
 ## Examples
 You can use the following google colab notebook to inspect the capabilities of the library
