@@ -96,12 +96,20 @@ def yaml_placeholder_replacement(full, val=None, initial=True) -> yaml.YAMLObjec
 def load_config(config_yaml_path: str = 'pipeline.yaml') -> Dict:
     """
     Load a YAML configuration file and replace any placeholders with their corresponding values.
+    If there is a .env file, load it and add content to config
+    
     :param config_yaml_path: path of the configuration file
     :return: configuration as a dictionary
     """
     with open(config_yaml_path, 'r') as f:
         config = yaml.load(f, Loader=yaml.FullLoader)
         config = yaml_placeholder_replacement(config)
+    # if there is a .env file, load it and add content to config
+    if os.path.exists('.env'):
+        with open('.env', 'r') as f:
+            for line in f:
+                key, value = line.strip().split('=', 1)
+                config[key] = value
     return config
 
 

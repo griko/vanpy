@@ -2,7 +2,6 @@ input_dir: '../cut_preprocessed'  # 'speech_examples', 'speech_examples_small'
 segment_name_separator: "_"
 intermediate_payload_path: 'results/pulp_fiction'
 # device: 'cpu'  # 'cpu'/'cuda'
-huggingface_ACCESS_TOKEN: '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'
 max_workers: 1  # set the number of workers for parallel threads
 sampling_rate: 16000
 latent_logger:
@@ -247,7 +246,7 @@ segment_classifier:
   gmm_clustering_diarization:
     classification_column_name: 'gmm_clustering_diarization'
     n_components: 6
-    covariance_type: 'full'  # ‘full’, ‘tied’, ‘diag’, ‘spherical’
+    covariance_type: 'full'  # ï¿½fullï¿½, ï¿½tiedï¿½, ï¿½diagï¿½, ï¿½sphericalï¿½
     features_list: # assumes multiple column features are labeled 'i_<component_name>' where i is between
       # start_index (inclusive) and stop_index (exclusive)
       - speechbrain_embedding:

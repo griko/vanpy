@@ -3,7 +3,6 @@ segment_name_separator: "_"
 intermediate_payload_path: 'results/example'
 # device: 'cpu'  # 'cpu'/'cuda'
 log_each_x_records: 100
-huggingface_ACCESS_TOKEN: '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'
 sampling_rate: 16000
 
 preprocessing:

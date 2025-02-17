@@ -32,7 +32,8 @@ execute the first pipline only. If your task is to generate text from a given au
 an audio file as input - use (1) and (3). If you are training a new model and features is of the highest importance - 
 go for (1) and (2) and consider expanding the library when you are satisfied with the result (see example 3).  
 
-Configuration of all the components is made through the `pipline.yaml` configuration file.
+Configuration of all the components is made through the `pipline.yaml` configuration file. If using components that require a huggingface token, 
+create a `.env` file in the root directory and add the token as `huggingface_ACCESS_TOKEN=<your_token>` (currently required for pyannote-embedding, pyannote-vad and pyannote-sd).
 
 ## Pre-processing components
 ### Filelist-DataFrame Creator
