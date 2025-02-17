@@ -1,4 +1,4 @@
-input_dir: 'speech_examples_small'  # 'speech_examples', 'speech_examples_small', 'streams'
+input_dir: 'speech_examples_small' 
 segment_name_separator: "_"
 intermediate_payload_path: 'results'
 # device: 'cpu'  # 'cpu'/'cuda'
@@ -135,12 +135,7 @@ feature_extraction:
     save_payload: true
     save_payload_periodicity: 50000  # save intermediate payload results every X processed files
     model: spkrec-ecapa-voxceleb  # e.g. spkrec-ecapa-voxceleb, spkrec-xvect-voxceleb, ...
-  vanpy_speaker_embedding:
-    pretrained_models_dir: 'pretrained_models/vanpy_speaker_embedding'
-    performance_measurement: true
-    save_payload: true
-    save_payload_periodicity: 50000  # save intermediate payload results every X processed files
-#    model: 20230517-020537_loss_0.005514454140314478-ep_24-batch_128-lr_1e-06.pt
+
 
 segment_classifier:
   vanpy_gender:
@@ -175,18 +170,6 @@ segment_classifier:
     classification_column_name: 'vanpy_emotion_classification'
     verbal_labels: true
     save_payload: true
-
-#  common_voices_gender:
-#    pretrained_models_dir: 'pretrained_models/common_voice'
-#    classification_column_name: 'common_voices_gender_classification'
-#    verbal_labels: true
-#    save_payload: true
-#
-#  common_voices_age:
-#    pretrained_models_dir: 'pretrained_models/common_voice'
-#    classification_column_name: 'common_voices_age_classification'
-#    verbal_labels: true
-#    save_payload: true
 
   speech_brain_iemocap_emotion:
     pretrained_models_dir: 'pretrained_models/speech_brain_iemocap_emotion'
