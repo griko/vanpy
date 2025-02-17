@@ -15,7 +15,13 @@ from vanpy.core.PipelineComponent import PipelineComponent
 
 
 class RegressionHead(nn.Module):
-    r"""Classification head."""
+    """
+    Neural network head for regression tasks on wav2vec features.
+
+    :ivar dense: Linear layer for feature transformation.
+    :ivar dropout: Dropout layer for regularization.
+    :ivar out_proj: Output projection layer.
+    """
 
     def __init__(self, config):
 
@@ -26,6 +32,13 @@ class RegressionHead(nn.Module):
         self.out_proj = nn.Linear(config.hidden_size, config.num_labels)
 
     def forward(self, features, **kwargs):
+        """
+        Forward pass of the regression head.
+
+        :param features: Input features from wav2vec model.
+        :param kwargs: Additional keyword arguments.
+        :return: Transformed feature representations.
+        """
 
         x = features
         x = self.dropout(x)
@@ -37,7 +50,12 @@ class RegressionHead(nn.Module):
         return x
 
 class EmotionModel(Wav2Vec2PreTrainedModel):
-    r"""Speech emotion classifier."""
+    """
+    Speech emotion analysis model based on wav2vec2.
+
+    :ivar wav2vec2: Base wav2vec2 model for feature extraction.
+    :ivar classifier: Regression head for emotion prediction.
+    """
 
     def __init__(self, config):
 
@@ -52,6 +70,12 @@ class EmotionModel(Wav2Vec2PreTrainedModel):
             self,
             input_values,
     ):
+        """
+        Forward pass of the emotion model.
+
+        :param input_values: Input audio features.
+        :return: Tuple of (hidden_states, logits).
+        """
 
         outputs = self.wav2vec2(input_values)
         hidden_states = outputs[0]
@@ -61,6 +85,14 @@ class EmotionModel(Wav2Vec2PreTrainedModel):
         return hidden_states, logits
 
 class Wav2Vec2ADV(PipelineComponent):
+    """
+    Component for predicting arousal, dominance, and valence from speech using wav2vec2.
+
+    :ivar model: Loaded emotion prediction model.
+    :ivar tokenizer: Wav2vec2 tokenizer for processing audio input.
+    :ivar device: Device for model computation (CPU/GPU).
+    :ivar sampling_rate: Audio sampling rate for processing.
+    """
     # A prediction model for arousal, dominance and valence
     model = None
     tokenizer = None
@@ -83,7 +115,13 @@ class Wav2Vec2ADV(PipelineComponent):
         x: np.ndarray,
         sampling_rate: int,
     ) -> np.ndarray:
-        r"""Predict emotions or extract arousal, dominance and valence from raw audio signal."""
+        """
+        Process raw audio signal to predict emotion dimensions.
+
+        :param x: Raw audio signal array.
+        :param sampling_rate: Sampling rate of the audio.
+        :return: Array of predicted arousal, dominance, and valence values.
+        """
 
         # run through processor to normalize signal
         # always returns a batch, so we just get the first entry
@@ -102,6 +140,13 @@ class Wav2Vec2ADV(PipelineComponent):
         return y
 
     def process_item(self, f, input_column):
+        """
+        Process a single audio file for emotion prediction.
+
+        :param f: Path to the audio file.
+        :param input_column: Name of the input column.
+        :return: DataFrame with predicted emotion dimensions.
+        """
         try:
             # Loading the audio file
             audio, rate = librosa.load(f, sr=self.sampling_rate)

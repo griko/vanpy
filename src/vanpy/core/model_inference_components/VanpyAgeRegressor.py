@@ -9,18 +9,35 @@ from vanpy.core.PipelineComponent import PipelineComponent
 from vanpy.utils.utils import cached_download, create_dirs_if_not_exist
 
 
-class VoxcelebAgeRegressor(PipelineComponent):
+class VanpyAgeRegressor(PipelineComponent):
+    """
+    Age regression component using various models trained on speech embeddings.
+
+    :ivar model: Loaded regression model instance.
+    :ivar transformer: Feature transformation pipeline instance.
+    :ivar classification_column_name: Name of the output estimation column.
+    """
     model = None
     transformer = None
     classification_column_name: str = ''
     verbal_labels: bool = False
 
     def __init__(self, yaml_config: YAMLObject):
+        """
+        Initialize the age regressor component.
+
+        :param yaml_config: Configuration parameters for the regressor.
+        """
         super().__init__(component_type='segment_classifier', component_name='vanpy_age',
                          yaml_config=yaml_config)
         self.classification_column_name = self.config.get('classification_column_name', f'{self.component_name}_estimation')
 
     def load_model(self):
+        """
+        Load the age regression model and its feature transformer.
+        
+        :raises ValueError: If an unknown model name is provided.
+        """
         model_name = self.config.get('model', 'ann_ecapa_192_sb_librosa_31_combined')
         if model_name == 'svr_ecapa_192_sb_voxceleb':
             self.logger.info(

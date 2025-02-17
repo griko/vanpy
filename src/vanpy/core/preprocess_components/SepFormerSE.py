@@ -10,7 +10,12 @@ import time
 
 class SepFormerSE(BaseSegmenterComponent):
     """
-    Pipeline component for SepFormer speech enhancement.
+    Speech enhancement component using SepFormer model.
+
+    Enhances speech quality by separating speech from noise using the
+    SepFormer model from SpeechBrain.
+
+    :ivar model: Loaded SepFormer enhancement model instance.
     """
     model = None
 
@@ -25,7 +30,10 @@ class SepFormerSE(BaseSegmenterComponent):
 
     def load_model(self):
         """
-        Loads the SepFormerSeparation pretrained model from huggingface and saves it to self.model.
+        Load SepFormer model from SpeechBrain.
+
+        Downloads pretrained model and moves to GPU if available.
+        Sets model to evaluation mode.
         """
         import torch
         from speechbrain.pretrained import SepformerSeparation
@@ -39,6 +47,15 @@ class SepFormerSE(BaseSegmenterComponent):
         self.logger.info(f'Loaded model to {"GPU" if torch.cuda.is_available() else "CPU"}')
 
     def process_item(self, f, processed_path, input_column, output_dir):
+        """
+        Process a single audio file for speech enhancement.
+
+        :param f: Path to the audio file.
+        :param processed_path: Column name for processed file paths.
+        :param input_column: Column name for input file paths.
+        :param output_dir: Directory to save enhanced audio.
+        :return: DataFrame containing enhanced audio information.
+        """
         import torchaudio
         output_file = f'{output_dir}/{f.split("/")[-1]}'
         t_start_segmentation = time.time()

@@ -7,10 +7,23 @@ from vanpy.utils.utils import create_dirs_if_not_exist
 import pandas as pd
 
 class WhisperSTT(PipelineComponent):
+    """
+    Speech-to-text component using OpenAI's Whisper model.
+
+    :ivar model: Loaded Whisper model instance.
+    :ivar stt_column_name: Name of the transcription output column.
+    :ivar language_classification_column_name: Name of the detected language column.
+    :ivar model_size: Size of the Whisper model to use.
+    """
     model = None
     classification_column_name: str = ''
 
     def __init__(self, yaml_config: YAMLObject):
+        """
+        Initialize the WhisperSTT component.
+
+        :param yaml_config: Configuration parameters for the component.
+        """
         super().__init__(component_type='segment_classifier', component_name='openai_whisper_stt',
                          yaml_config=yaml_config)
         self.stt_column_name = self.config.get('stt_column_name', 'whisper_transcript')
@@ -19,6 +32,9 @@ class WhisperSTT(PipelineComponent):
         self.model_size = self.config.get('model_size', 'small')
 
     def load_model(self):
+        """
+        Load the Whisper model and move to appropriate device.
+        """
         import torch
         self.logger.info("Loading openai-whisper speech-to-text model")
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -27,6 +43,15 @@ class WhisperSTT(PipelineComponent):
         self.logger.info(f'Loaded model to {"GPU" if torch.cuda.is_available() else "CPU"}')
 
     def process_item(self, f, input_column, stt_column_name, language_column_name):
+        """
+        Process a single audio file for transcription and language detection.
+
+        :param f: Path to the audio file.
+        :param input_column: Name of the input column.
+        :param stt_column_name: Name of the transcription output column.
+        :param language_column_name: Name of the language detection column.
+        :return: DataFrame with transcription and language detection results.
+        """
         try:
             transcription = self.model.transcribe(f)
             stt = transcription['text']

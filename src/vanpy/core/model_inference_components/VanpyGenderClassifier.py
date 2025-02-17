@@ -6,7 +6,17 @@ from vanpy.core.PipelineComponent import PipelineComponent
 from vanpy.utils.utils import cached_download, create_dirs_if_not_exist
 
 
-class VoxcelebGenderClassifier(PipelineComponent):
+class VanpyGenderClassifier(PipelineComponent):
+    """
+    Binary gender classification component using SVM models trained on speech embeddings.
+
+    :ivar model: Loaded classification model instance.
+    :ivar transformer: Feature transformation pipeline instance.
+    :ivar label_conversion_list: List of string labels for gender classes.
+    :ivar label_conversion_dict: Dictionary mapping numeric indices to gender labels.
+    :ivar classification_column_name: Name of the output classification column.
+    :ivar verbal_labels: Whether to use string labels (True) or numeric indices (False).
+    """
     model = None
     transformer = None
     label_conversion_list = ['female', 'male']
@@ -15,6 +25,11 @@ class VoxcelebGenderClassifier(PipelineComponent):
     verbal_labels: bool = True
 
     def __init__(self, yaml_config: YAMLObject):
+        """
+        Initialize the gender classifier component.
+
+        :param yaml_config: Configuration parameters for the classifier.
+        """
         super().__init__(component_type='segment_classifier', component_name='vanpy_gender',
                          yaml_config=yaml_config)
         self.verbal_labels = self.config.get('verbal_labels', True)
@@ -22,6 +37,11 @@ class VoxcelebGenderClassifier(PipelineComponent):
                                                           f'{self.component_name}_classification')
 
     def load_model(self):
+        """
+        Load the gender classification model and its feature transformer.
+        
+        :raises ValueError: If an unknown model name is provided.
+        """
         model_name = self.config.get('model', 'svm_ecapa_192_sb_voxceleb')
         if model_name == 'svm_ecapa_192_sb_voxceleb':
 
@@ -47,6 +67,12 @@ class VoxcelebGenderClassifier(PipelineComponent):
         self.transformer = pickle.load(open(processor_path, "rb"))
 
     def process(self, input_payload: ComponentPayload) -> ComponentPayload:
+        """
+        Process audio features to predict gender classifications.
+
+        :param input_payload: Input payload containing audio features and metadata.
+        :return: Output payload containing gender classifications.
+        """
         if not self.model:
             self.load_model()
 

@@ -9,7 +9,15 @@ import time
 
 class PyannoteVAD(BaseSegmenterComponent):
     """
-    Pyannote Voice Activity Detection (VAD) component for segmenting audio files into voice segments.
+    Voice Activity Detection component using Pyannote models.
+
+    Segments audio files into voice segments using Pyannote's VAD model.
+    Supports GPU acceleration if available.
+
+    :ivar model: Loaded Pyannote VAD model instance.
+    :ivar params: Model parameters from configuration.
+    :ivar ACCESS_TOKEN: HuggingFace access token for model download.
+    :ivar keep_only_first_segment: Whether to keep only the first detected segment.
     """
     model = None
 
@@ -27,7 +35,10 @@ class PyannoteVAD(BaseSegmenterComponent):
 
     def load_model(self):
         """
-        Load the pretrained PyannoteVAD segmentation model.
+        Load Pyannote VAD model and initialize with configuration parameters.
+
+        Uses HuggingFace access token to download pretrained model.
+        Automatically selects GPU if available.
         """
         from pyannote.audio import Model
         from pyannote.audio.pipelines import VoiceActivityDetection
@@ -41,10 +52,10 @@ class PyannoteVAD(BaseSegmenterComponent):
 
     def get_voice_segments(self, f: str) -> List[Tuple[float, float]]:
         """
-        Get voice segments from the given audio file.
+        Extract voice segments from an audio file.
 
-        :param f: Audio file path.
-        :return: A list of tuples representing the start and end times of voice segments.
+        :param f: Path to the audio file.
+        :return: List of (start_time, end_time) tuples in seconds.
         """
         annotation = self.model(f)
         segments = []
@@ -54,6 +65,15 @@ class PyannoteVAD(BaseSegmenterComponent):
         return segments
 
     def process_item(self, f, processed_path, input_column, output_dir):
+        """
+        Process a single audio file for voice activity detection.
+
+        :param f: Path to the audio file.
+        :param processed_path: Column name for processed file paths.
+        :param input_column: Column name for input file paths.
+        :param output_dir: Directory to save processed segments.
+        :return: DataFrame containing segment information.
+        """
         t_start_segmentation = time.time()
         v_segments = self.get_voice_segments(f)
         t_end_segmentation = time.time()
@@ -82,7 +102,13 @@ class PyannoteVAD(BaseSegmenterComponent):
         return f_df
 
 
-    def process(self, input_payload: ComponentPayload) -> ComponentPayload:
+    def process(self, input_payload: ComponentPayload) -> ComponentPayload: 
+        """
+        Process audio files for voice activity detection.
+
+        :param input_payload: Input payload containing audio files and metadata.
+        :return: Output payload containing voice activity detection results.
+        """
         if not self.model:
             self.load_model()
 

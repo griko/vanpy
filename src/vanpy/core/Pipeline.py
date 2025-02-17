@@ -17,18 +17,16 @@ from vanpy.core.ModelInferencePipeline import ClassificationPipeline
 @dataclass
 class Pipeline:
     """
-    The main class for processing data through a sequence of pipelines.
+    Main pipeline orchestrator managing multiple sub-pipelines.
 
-    :param pipelines: List of pipelines (subclasses of `BasePipeline`) to process data through
-    :type pipelines: List[BasePipeline]
-    :param logger: Logger instance to record events during pipeline processing
-    :type logger: Logger
-    :param preprocessed_files_dir: Directory where preprocessed files are stored
-    :type preprocessed_files_dir: str
-    :param speaker_classification_df: Dataframe containing speaker classification results
-    :type speaker_classification_df: pd.DataFrame
-    :param segment_classification_df: Dataframe containing segment classification results
-    :type segment_classification_df: pd.DataFrame
+    Coordinates the execution of preprocessing, feature extraction, and classification
+    pipelines in sequence. Handles data flow between pipeline stages.
+
+    :ivar pipelines: List of sub-pipelines to execute.
+    :ivar logger: Logger for recording pipeline events.
+    :ivar preprocessed_files_dir: Directory for storing intermediate files.
+    :ivar speaker_classification_df: Results of speaker classification.
+    :ivar segment_classification_df: Results of segment classification.
     """
     pipelines: List[BasePipeline]
     logger: Logger
@@ -42,11 +40,8 @@ class Pipeline:
         Initializes the Pipeline object with a list of pipeline components, pipelines, or YAML configuration.
 
         :param components: List of pipeline components (instances of `PipelineComponent`) to add to the pipeline
-        :type components: List[PipelineComponent], optional
         :param pipelines: List of pipelines (instances of `BasePipeline`) to add to the pipeline
-        :type pipelines: List[BasePipeline], optional
         :param config: YAML configuration for the pipeline
-        :type config: YAMLObject, optional
         """
         self.config = config
         self.input_dir = self.config['input_dir']
@@ -63,9 +58,7 @@ class Pipeline:
         Processes the input data through all pipelines in the sequence.
 
         :param initial_payload: Initial payload to be processed
-        :type initial_payload: ComponentPayload, optional
         :return: Processed payload after all pipelines
-        :rtype: ComponentPayload
         """
         cp: Union[None, ComponentPayload] = None
 
@@ -88,11 +81,8 @@ class Pipeline:
         Static method to generate a sequence of pipelines from a list of pipeline components.
 
         :param components: List of pipeline components (instances of `PipelineComponent`) to add to the pipelines
-        :type components: List[PipelineComponent]
         :param config: YAML configuration for the pipeline
-        :type config: YAMLObject, optional
         :return: List of pipelines generated from the components
-        :rtype: List[BasePipeline]
         """
         preprocessing_pipeline = Pipeline.generate_pipeline_from_components(components=components,
                                                                             pipeline_class=PreprocessPipeline,
@@ -119,13 +109,9 @@ class Pipeline:
         Static method to generate a pipeline from a list of pipeline components.
 
         :param components: List of pipeline components (instances of `PipelineComponent`) to add to the pipeline
-        :type components: List[PipelineComponent]
         :param pipeline_class: The class of pipeline to generate
-        :type pipeline_class: BasePipeline
         :param config: YAML configuration for the pipeline
-        :type config: YAMLObject, optional
         :return: A pipeline generated from the components
-        :rtype: BasePipeline
         """
         pipeline_components = []
         for component in components:

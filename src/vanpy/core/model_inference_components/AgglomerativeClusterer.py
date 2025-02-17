@@ -9,10 +9,23 @@ from sklearn.cluster import AgglomerativeClustering
 
 
 class AgglomerativeClusterer(BaseClassificationComponent):
+    """
+    Agglomerative clustering component for speaker diarization.
+    
+    :ivar model: Agglomerative clustering model instance.
+    :ivar classification_column_name: Name of the column containing speaker labels.
+    :ivar threshold: Distance threshold for merging clusters.
+    :ivar n_clusters: Maximum number of clusters to form.
+    """
     model = None
     classification_column_name: str = ''
 
     def __init__(self, yaml_config: YAMLObject):
+        """
+        Initialize the agglomerative clusterer.
+
+        :param yaml_config: Configuration parameters for the clusterer.
+        """
         super().__init__(component_type='segment_classifier', component_name='agglomerative_clustering_diarization',
                          yaml_config=yaml_config)
         self.classification_column_name = self.config.get('classification_column_name',
@@ -22,6 +35,12 @@ class AgglomerativeClusterer(BaseClassificationComponent):
         self.requested_feature_list = self.build_requested_feature_list()
 
     def process(self, input_payload: ComponentPayload) -> ComponentPayload:
+        """
+        Process input features using agglomerative clustering for speaker diarization.
+
+        :param input_payload: Input payload containing features and metadata.
+        :return: Output payload containing speaker diarization results.
+        """
         payload_metadata, payload_df = input_payload.unpack()
         features_columns = [column for column in payload_df.columns if column in self.requested_feature_list]
         if len(features_columns) != len(self.requested_feature_list):

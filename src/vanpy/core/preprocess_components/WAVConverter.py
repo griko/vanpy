@@ -11,7 +11,12 @@ from tqdm.auto import tqdm
 
 class WAVConverter(BaseSegmenterComponent):
     """
-    A preprocessing component to convert audio files to WAV format using FFMPEG.
+    Audio conversion component for standardizing audio format.
+
+    Converts audio files to WAV format with configurable parameters including
+    bit rate, channels, sample rate, and codec.
+
+    :ivar params_list: List of FFMPEG parameters from configuration.
     """
     def __init__(self, yaml_config: YAMLObject):
         """
@@ -23,6 +28,14 @@ class WAVConverter(BaseSegmenterComponent):
         self.params_list = self.get_parameters_from_config()
 
     def get_parameters_from_config(self):
+        """
+        Build FFMPEG parameters list from configuration.
+
+        Processes configuration to set audio bitrate, channels, sampling rate,
+        and codec parameters with defaults if not specified.
+
+        :return: List of FFMPEG command-line parameters.
+        """
         params_list =[]
         available_parameters = {'ab': "256k", 'ac': "1", 'ar': "16000", 'acodec': "pcm_s16le"}
         for ap in available_parameters.keys():

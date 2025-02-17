@@ -22,9 +22,7 @@ class PipelineComponent(ABC):
     The base class for all pipeline components.
 
     :param component_type: the type of component (e.g. "preprocessing", "feature_extraction", etc.)
-    :type component_type: str
     :param component_name: the name of the component (e.g. "pyannote_vad", "speechbrain_embedding", etc.)
-    :type component_name: str
     """
     component_type: str
     component_name: str
@@ -37,11 +35,8 @@ class PipelineComponent(ABC):
         Initializes the PipelineComponent object with the given component type, component name, and YAML configuration.
 
         :param component_type: the type of component (e.g. "preprocessing", "feature_extraction", etc.)
-        :type component_type: str
         :param component_name: the name of the component (e.g. "pyannote_vad", "speechbrain_embedding", etc.)
-        :type component_name: str
         :param yaml_config: the YAML configuration for the component
-        :type yaml_config: YAMLObject
         """
         self.component_type = component_type
         self.component_name = component_name
@@ -63,11 +58,8 @@ class PipelineComponent(ABC):
         Logs the given message if the current iteration is a multiple of the log_each_x_records configuration or if it is the last item in the paths list.
 
         :param message: the message to log
-        :type message: str
         :param iteration: the current iteration
-        :type iteration: int
         :param last_item: whether this is the last item in the paths list
-        :type last_item: bool
         """
         if iteration % self.log_each_x_records == 0 or last_item:
             self.logger.info(message)
@@ -77,9 +69,7 @@ class PipelineComponent(ABC):
         Imports the YAML configuration for the component and returns it as a dictionary.
 
         :param yaml_config: the YAML configuration for the component
-        :type yaml_config: YAMLObject
         :return: the imported configuration as a dictionary
-        :rtype: Dict
         """
         if self.component_type in yaml_config and self.component_name in yaml_config[self.component_type]:
             config = yaml_config[self.component_type][self.component_name]
@@ -95,7 +85,6 @@ class PipelineComponent(ABC):
         Returns the logger for the component.
 
         :return: the logger for the component
-        :rtype: Logger
         """
         return logging.getLogger(f'{self.component_type} - {self.component_name}')
 
@@ -104,7 +93,6 @@ class PipelineComponent(ABC):
         Returns the name of the component.
 
         :return: the name of the component
-        :rtype: str
         """
         return self.component_name
 
@@ -116,7 +104,6 @@ class PipelineComponent(ABC):
         :param input_payload: the input payload to process
         :type input_payload: ComponentPayload
         :return: the output payload after processing
-        :rtype: ComponentPayload
         """
         raise NotImplementedError
 
@@ -128,6 +115,10 @@ class PipelineComponent(ABC):
         raise NotImplementedError
 
     def wrapper_process_item(self, q: Queue, *args, **kwargs):
+        """
+        Wrapper function to process a single item from the input payload.
+        To be used in process_with_progress.
+        """
         start_time = time.time()
         result = self.process_item(*args, **kwargs)
         end_time = time.time()
@@ -135,6 +126,18 @@ class PipelineComponent(ABC):
         return result
 
     def process_with_progress(self, iterable, metadata,  *args, **kwargs) -> pd.DataFrame:
+        """
+        Process items in parallel with progress tracking.
+
+        Handles parallel processing of items using ThreadPoolExecutor, with
+        progress bar and performance monitoring.
+
+        :param iterable: Items to process.
+        :param metadata: Metadata for processing.
+        :param args: Additional positional arguments for processing.
+        :param kwargs: Additional keyword arguments for processing.
+        :return: DataFrame containing processed results.
+        """
         self.logger.debug(f"Executing process_with_progress using {self.max_workers} thread workers")
         n_df = pd.DataFrame()
         time_queue = Queue()
@@ -160,38 +163,13 @@ class PipelineComponent(ABC):
 
         return n_df
 
-    # def process_with_progress(self, iterable, metadata, process_func, *args, **kwargs) -> pd.DataFrame:
-    #     """
-    #     Iterable: the list or other iterable to loop over
-    #     process_func: the function that takes an element from the iterable
-    #     *args, **kwargs: additional arguments to pass to process_func
-    #     """
-    #     p_df = pd.DataFrame()
-    #     for i, elem in enumerate(tqdm(iterable)):
-    #         try:
-    #             start_time = time.time()
-    #             f_df = process_func(elem, *args, **kwargs)
-    #             p_df = pd.concat([p_df, f_df], ignore_index=True)
-    #             end_time = time.time()
-    #             if self.latent_logger_enabled:
-    #                 self.latent_info_log(
-    #                     f'{self.component_name} processed {elem}, {i + 1}/{len(iterable)} in {end_time - start_time} seconds',
-    #                     iteration=i)
-    #             self.save_intermediate_payload(i, ComponentPayload(metadata=metadata, df=p_df))
-    #         except (RuntimeError, AssertionError, ValueError) as e:
-    #             self.logger.error(f'An error occurred in {elem}, {i + 1}/{len(iterable)}: {e}')
-    #             continue
-    #     return p_df
-
     # @staticmethod
     def save_component_payload(self, input_payload: ComponentPayload, intermediate=False) -> None:
         """
         Saves the input payload to disk, if specified in the configuration.
 
         :param input_payload: the input payload to save
-        :type input_payload: ComponentPayload
         :param intermediate: whether this is an intermediate payload or the final payload
-        :type intermediate: bool
         """
         subscript = 'intermediate' if intermediate else 'final'
         self.get_logger().info(
@@ -215,20 +193,31 @@ class PipelineComponent(ABC):
         Save intermediate payload based on the save_payload_periodicity configuration.
 
         :param i: current iteration count
-        :type i: int
         :param input_payload: the payload to be saved
-        :type input_payload: ComponentPayload
         """
         if 'save_payload_periodicity' in self.config and i % self.config['save_payload_periodicity'] == 0 and i > 0:
             self.save_component_payload(input_payload, intermediate=True)
 
     def add_performance_column_to_metadata(self, metadata: Dict) -> Dict:
+        """
+        Adds a performance column to the metadata.
+
+        :param metadata: the metadata to add the performance column to
+        :return: the metadata with the performance column added
+        """
         if self.config.get('performance_measurement', True):
             self.file_performance_column_name = f'perf_{self.get_name()}'
             metadata['meta_columns'].extend([self.file_performance_column_name])
         return metadata
 
     def add_classification_columns_to_metadata(self, metadata: Dict, cols: Union[List[str], str]) -> Dict:
+        """
+        Adds classification columns to the metadata.
+
+        :param metadata: the metadata to add the classification columns to
+        :param cols: the classification columns to add
+        :return: the metadata with the classification columns added
+        """
         if cols:
             if isinstance(cols, str):
                 cols = [cols]

@@ -9,7 +9,13 @@ from yaml import YAMLObject
 
 class WAVSplitter(BaseSegmenterComponent):
     """
-    A preprocessing component to split WAV audio files by maximum length or file size.
+    Audio splitting component for handling large files.
+
+    Splits WAV files based on either maximum duration or file size while
+    maintaining audio quality.
+
+    :ivar max_audio_length: Maximum length of each segment in seconds.
+    :ivar max_wav_file_size: Maximum size of each segment in bytes.
     """
     def __init__(self, yaml_config: YAMLObject):
         """
@@ -69,7 +75,14 @@ class WAVSplitter(BaseSegmenterComponent):
 
     def split_audio_by_length(self, audio, original_path, output_dir, p_df, input_column, file_index):
         """
-        Splits the audio file by the maximum audio length and saves the segments as separate files.
+        Split audio file based on maximum duration.
+
+        :param audio: AudioSegment object to split.
+        :param original_path: Path to original audio file.
+        :param output_dir: Directory to save split segments.
+        :param p_df: DataFrame to store processing results.
+        :param input_column: Column name for input file paths.
+        :param file_index: Index for progress tracking.
         """
         filename = os.path.splitext(os.path.basename(original_path))[0]
         dir_prefix = os.path.basename(os.path.dirname(original_path)) + '_' if self.config.get('use_dir_name_as_prefix',
@@ -106,7 +119,14 @@ class WAVSplitter(BaseSegmenterComponent):
 
     def split_audio_by_size(self, audio, original_path, output_dir, p_df, input_column, file_index):
         """
-        Splits the audio file by the maximum WAV file size (specified in MB) and saves the segments as separate files.
+        Split audio file based on maximum file size.
+
+        :param audio: AudioSegment object to split.
+        :param original_path: Path to original audio file.
+        :param output_dir: Directory to save split segments.
+        :param p_df: DataFrame to store processing results.
+        :param input_column: Column name for input file paths.
+        :param file_index: Index for progress tracking.
         """
         filename = os.path.splitext(os.path.basename(original_path))[0]
         dir_prefix = os.path.basename(os.path.dirname(original_path)) + '_' if self.config.get('use_dir_name_as_prefix',

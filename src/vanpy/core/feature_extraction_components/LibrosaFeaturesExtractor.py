@@ -10,10 +10,21 @@ import logging
 
 
 class LibrosaFeaturesExtractor(PipelineComponent):
+    """
+    A feature extraction component that uses librosa to extract audio features.
+
+    :ivar features: List of feature types to extract.
+    :ivar sampling_rate: Target sampling rate for audio processing.
+    """
     features: List[str] = None
     sampling_rate: int
 
     def __init__(self, yaml_config: YAMLObject):
+        """
+        Initialize the librosa feature extractor.
+
+        :param yaml_config: Configuration parameters for the component.
+        """
         super().__init__(component_type='feature_extraction', component_name='librosa_features_extractor',
                          yaml_config=yaml_config)
         self.sampling_rate = self.config.get('sampling_rate', 16000)
@@ -27,6 +38,13 @@ class LibrosaFeaturesExtractor(PipelineComponent):
         numba_logger.setLevel(logging.WARNING)
 
     def process_item(self, f, input_column):
+        """
+        Process a single audio file to extract librosa features.
+
+        :param f: Path to the audio file.
+        :param input_column: Name of the column containing file paths.
+        :return: DataFrame containing the extracted features.
+        """
         try:
             y, sr = librosa.load(f, sr=self.sampling_rate)
             f_df = pd.DataFrame()
@@ -74,6 +92,12 @@ class LibrosaFeaturesExtractor(PipelineComponent):
         return f_df
 
     def process(self, input_payload: ComponentPayload) -> ComponentPayload:
+        """
+        Process a batch of audio files to extract librosa features.
+
+        :param input_payload: Input payload containing audio file paths and metadata.
+        :return: Output payload containing the extracted features.
+        """
         metadata, df = input_payload.unpack()
         input_column = metadata['paths_column']
         paths_list = df[input_column].dropna().tolist()
@@ -91,6 +115,11 @@ class LibrosaFeaturesExtractor(PipelineComponent):
         return ComponentPayload(metadata=metadata, df=df)
 
     def get_feature_columns(self):
+        """
+        Generate the list of feature column names based on configured features.
+
+        :return: List of column names for the extracted features.
+        """
         feature_columns = []
         # Add MFCC columns
         if 'mfcc' in self.features:

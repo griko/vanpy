@@ -9,23 +9,46 @@ import pandas as pd
 
 
 class Wav2Vec2STT(PipelineComponent):
+    """
+    Speech-to-text component using wav2vec2 model.
+
+    :ivar model: Loaded wav2vec2 model for speech recognition.
+    :ivar tokenizer: Tokenizer for processing audio and text.
+    :ivar classification_column_name: Name of the output transcription column.
+    :ivar sampling_rate: Audio sampling rate for processing.
+    """
     model = None
     tokenizer = None
     classification_column_name: str = ''
 
     def __init__(self, yaml_config: YAMLObject):
+        """
+        Initialize the Wav2Vec2STT component.
+
+        :param yaml_config: Configuration parameters for the component.
+        """
         super().__init__(component_type='segment_classifier', component_name='wav2vec2stt',
                          yaml_config=yaml_config)
         self.classification_column_name = self.config.get('classification_column_name', f'{self.component_name}_stt')
         self.sampling_rate = self.config.get('sampling_rate', 16000)
 
     def load_model(self):
+        """
+        Load the wav2vec2 model and tokenizer.
+        """
         self.logger.info("Loading wav2vec 2.0 Speech-To-Text model")
         self.tokenizer = Wav2Vec2Tokenizer.from_pretrained("facebook/wav2vec2-base-960h", cache_dir=self.pretrained_models_dir)
         self.model = Wav2Vec2ForCTC.from_pretrained("facebook/wav2vec2-base-960h", cache_dir=self.pretrained_models_dir)
 
 
     def process_item(self, f, input_column):
+        """
+        Process a single audio file to extract transcription.
+
+        :param f: Path to the audio file.
+        :param input_column: Name of the input column.
+        :return: DataFrame with transcription results.
+        """
         try:
             # Loading the audio file
             audio, rate = librosa.load(f, sr=self.sampling_rate)

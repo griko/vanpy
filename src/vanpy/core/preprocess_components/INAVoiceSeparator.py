@@ -9,6 +9,14 @@ import time
 
 
 class INAVoiceSeparator(BaseSegmenterComponent):
+    """
+    Voice separation component using INA Speech Segmenter.
+
+    Separates audio into voice segments, distinguishing between male and female speakers
+    while filtering out non-voice segments.
+
+    :ivar model: Loaded INA Speech Segmenter model instance.
+    """
     model = None
 
     def __init__(self, yaml_config: YAMLObject):
@@ -16,10 +24,20 @@ class INAVoiceSeparator(BaseSegmenterComponent):
                          yaml_config=yaml_config)
 
     def load_model(self):
+        """
+        Load the INA Speech Segmenter model with configured VAD engine.
+        """
         self.model = Segmenter(vad_engine=self.config['vad_engine'])
 
     @staticmethod
     def get_voice_segments(segmentation):
+        """
+        Extract voice segments from segmentation results.
+
+        :param segmentation: Raw segmentation output from INA model.
+        :return: Tuple of (voice_sections, filtered_sections), where each section is
+                a list of (start, stop) time pairs.
+        """
         voice_sections, filtered_sections = [], []
         for s in segmentation:
             kind, start, stop = s
@@ -30,6 +48,15 @@ class INAVoiceSeparator(BaseSegmenterComponent):
         return voice_sections, filtered_sections
 
     def process_item(self, f, processed_path, input_column, output_dir):
+        """
+        Process a single audio file for voice segmentation.
+
+        :param f: Path to the audio file.
+        :param processed_path: Column name for output file paths.
+        :param input_column: Column name for input file paths.
+        :param output_dir: Directory to save processed segments.
+        :return: DataFrame containing processed segment information.
+        """
         t_start_segmentation = time.time()
         segmentation = self.model(f)
         v_segments, f_segments = INAVoiceSeparator.get_voice_segments(segmentation)
@@ -53,6 +80,12 @@ class INAVoiceSeparator(BaseSegmenterComponent):
         return f_df
 
     def process(self, input_payload: ComponentPayload) -> ComponentPayload:
+        """
+        Process audio files to extract voice segments.
+
+        :param input_payload: Input payload containing audio files and metadata.
+        :return: Output payload containing voice segment information.
+        """
         if not self.model:
             self.load_model()
 

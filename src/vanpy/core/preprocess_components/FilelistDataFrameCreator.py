@@ -9,8 +9,13 @@ import pickle
 
 class FilelistDataFrameCreator(PipelineComponent):
     """
-    A `PipelineComponent` that creates a DataFrame containing file paths of audio files within a given input_path. Or
-    takes an existent ComponentPayload by reading the csv mentioned in the configuration yaml.
+    Component for creating a DataFrame of audio file paths.
+
+    Creates a DataFrame containing paths to audio files from either:
+    - A directory specified in the input path
+    - An existing CSV file specified in configuration
+
+    :ivar config: Configuration dictionary containing load/save paths.
     """
     def __init__(self, yaml_config: YAMLObject):
         """
@@ -22,11 +27,14 @@ class FilelistDataFrameCreator(PipelineComponent):
 
     def process(self, input_payload: ComponentPayload) -> ComponentPayload:
         """
-        Process the input_payload by creating a DataFrame containing file paths of audio files or loads an
-        existing DataFrame from csv, configuring metadata path for further components that pick up the returned
-        ComponentPayload
-        :param input_payload: A `ComponentPayload` object containing the input data and input_path in metadata.
-        :return: A modified `ComponentPayload` object containing the new DataFrame.
+        Create a DataFrame of audio file paths.
+
+        Either loads paths from an existing CSV or scans a directory for audio files.
+        Updates metadata with path column information.
+
+        :param input_payload: Input payload containing path information.
+        :return: Output payload containing file path DataFrame.
+        :raises AttributeError: If neither input_path nor load_payload is provided.
         """
         metadata, df = input_payload.unpack()
 

@@ -12,12 +12,15 @@ from vanpy.core.PipelineComponent import PipelineComponent
 @dataclass
 class BasePipeline(ABC):
     """
-    BasePipeline
+    Abstract base class for all pipeline types in the system.
 
-    This is an abstract base class for a pipeline. It holds a list of PipelineComponent objects and processes the input
-    payload through each component in order. The components_mapper attribute should be set in a subclass to map
-    component names to their corresponding class. The process method is used to process the input payload and pass it
-    through each component.
+    Provides core functionality for managing and executing sequences of processing
+    components. Each pipeline maintains a list of components and processes data
+    through them in order.
+
+    :ivar components_mapper: Maps component names to their implementing classes.
+    :ivar components: List of instantiated pipeline component objects.
+    :ivar logger: Logger instance for recording pipeline events.
     """
     components_mapper: Dict  # A dictionary that maps component names to their corresponding class
     components: List[PipelineComponent]  # A list of `PipelineComponent` objects that the input payload will be passed through
@@ -25,10 +28,10 @@ class BasePipeline(ABC):
 
     def __init__(self, components: List[str], config: YAMLObject):
         """
-        Initialize the pipeline with a list of components and a configuration object.
+        Initialize pipeline with components and configuration.
 
-        :param components: A list of component names
-        :param config: A YAML object containing configuration for the pipeline and its components
+        :param components: List of component names to include in pipeline.
+        :param config: Configuration parameters for pipeline and components.
         """
         self.components = []
         for component in components:
@@ -46,10 +49,10 @@ class BasePipeline(ABC):
 
     def process(self, input_payload: ComponentPayload) -> ComponentPayload:
         """
-        Process the input payload by passing it through each component in the pipeline.
+        Process input data through all pipeline components sequentially.
 
-        :param input_payload: A `ComponentPayload` object to be processed
-        :return: A processed `ComponentPayload` object
+        :param input_payload: Data to be processed through the pipeline.
+        :return: Processed data after passing through all components.
         """
         payload_object = input_payload
         for component in self.components:

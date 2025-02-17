@@ -10,7 +10,14 @@ import torch
 
 
 class MetricGANSE(BaseSegmenterComponent):
-    # MagicGAN speech enhancement component
+    """
+    Speech enhancement component using MetricGAN model.
+
+    Enhances audio quality by reducing noise and improving speech clarity using
+    the MetricGAN+ model from SpeechBrain.
+
+    :ivar model: Loaded MetricGAN enhancement model instance.
+    """
     model = None
 
     def __init__(self, yaml_config: YAMLObject):
@@ -18,6 +25,9 @@ class MetricGANSE(BaseSegmenterComponent):
                          yaml_config=yaml_config)
 
     def load_model(self):
+        """
+        Load the MetricGAN enhancement model.
+        """
         from speechbrain.pretrained import SpectralMaskEnhancement
         if torch.cuda.is_available():
             self.model = SpectralMaskEnhancement.from_hparams(source="speechbrain/metricgan-plus-voicebank",
@@ -29,6 +39,15 @@ class MetricGANSE(BaseSegmenterComponent):
         self.logger.info(f'Loaded model to {"GPU" if torch.cuda.is_available() else "CPU"}')
 
     def process_item(self, f, processed_path, input_column, output_dir):
+        """
+        Process a single audio file for speech enhancement.
+
+        :param f: Path to the audio file.
+        :param processed_path: Column name for output file paths.
+        :param input_column: Column name for input file paths.
+        :param output_dir: Directory to save enhanced audio.
+        :return: DataFrame containing enhanced audio information.
+        """
         import torch
         import torchaudio
 
@@ -50,7 +69,13 @@ class MetricGANSE(BaseSegmenterComponent):
         f_df = pd.DataFrame.from_dict(f_d)
         return f_df
 
-    def process(self, input_payload: ComponentPayload) -> ComponentPayload:
+    def process(self, input_payload: ComponentPayload) -> ComponentPayload: 
+        """
+        Process audio files for speech enhancement.
+
+        :param input_payload: Input payload containing audio files and metadata.
+        :return: Output payload containing enhanced audio information.
+        """
         if not self.model:
             self.load_model()
 
@@ -80,6 +105,9 @@ class MetricGANSE(BaseSegmenterComponent):
 
     @staticmethod
     def cleanup_softlinks():
+        """
+        Clean up temporary softlinks created during processing.
+        """
         for link in os.listdir():
             if '.wav' in link and os.path.islink(link):
                 os.unlink(link)

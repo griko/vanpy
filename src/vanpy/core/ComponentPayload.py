@@ -7,21 +7,25 @@ import pickle
 @dataclass
 class ComponentPayload:
     """
-    A class that represents a container for payload (dataframe and metadata) passed between pipline components.
+    Container for data and metadata passed between pipeline components.
+
+    Manages a DataFrame containing the actual data along with metadata describing
+    columns, paths, features, and classifications.
+
+    :ivar metadata: Dictionary containing metadata about the payload contents.
+    :ivar df: DataFrame containing the actual data being processed.
     """
     metadata: dict
     df: pd.DataFrame
 
     def __init__(self, input_path: str = '', metadata: Dict = None, df: pd.DataFrame = None):
         """
-        Initializes the ComponentPayload class with the given input_path, metadata and dataframe.
+        Initialize a new payload container.
 
-        :param input_path: the input path of the data
-        :type input_path: str
-        :param metadata: the metadata of the data
-        :type metadata: Dict
-        :param df: the dataframe containing the data
-        :type df: pd.DataFrame
+        :param input_path: Path to input data directory.
+        :param metadata: Initial metadata dictionary.
+        :param df: Initial DataFrame.
+        :raises AttributeError: If neither input_path nor paths_column is provided.
         """
         self.metadata = metadata
         self.df = df
@@ -56,11 +60,8 @@ class ComponentPayload:
         Returns the list of column names stored in metadata, filtered based on the input parameters.
 
         :param all_paths_columns: whether to include all paths columns in the returned list
-        :type all_paths_columns: bool
         :param meta_columns: whether to include meta columns in the returned list
-        :type meta_columns: bool
         :return: list of column names
-        :rtype: List[str]
         """
         if not all_paths_columns:
             columns = [self.metadata['paths_column']]
@@ -75,13 +76,9 @@ class ComponentPayload:
         Returns a payload's dataframe containing the specified columns.
 
         :param ext_columns: the list of columns to include in the returned dataframe
-        :type ext_columns: List[str]
-        :param all_paths_columns: whether to include all paths columns in the returned dataframe
-        :type all_paths_columns: bool
+        :param all_paths_columns: whether to include all paths columns in the returned dataframe 
         :param meta_columns: whether to include meta columns in the returned dataframe
-        :type meta_columns: bool
         :return: a dataframe containing the specified columns
-        :rtype: pd.DataFrame
         """
         columns = self.get_columns(all_paths_columns, meta_columns)
         for cols in ext_columns:
@@ -91,27 +88,21 @@ class ComponentPayload:
 
     def get_features_df(self, all_paths_columns=False, meta_columns=False):
         """
-        Returns a dataframe containing the feature columns of the payload.
+        Extract feature columns from the payload.
 
-        :param all_paths_columns: whether to include all paths columns in the returned dataframe
-        :type all_paths_columns: bool
-        :param meta_columns: whether to include meta columns in the returned dataframe
-        :type meta_columns: bool
-        :return: a dataframe containing the feature columns
-        :rtype: pd.DataFrame
+        :param all_paths_columns: Whether to include all path columns.
+        :param meta_columns: Whether to include metadata columns.
+        :return: DataFrame containing only feature columns.
         """
         return self.get_declared_columns(['feature_columns'], all_paths_columns, meta_columns)
 
     def get_classification_df(self, all_paths_columns=False, meta_columns=False):
         """
-        Returns a dataframe containing the classification columns of the payload.
+        Extract classification columns from the payload.
 
-        :param all_paths_columns: whether to include all paths columns in the returned dataframe
-        :type all_paths_columns: bool
-        :param meta_columns: whether to include meta columns in the returned dataframe
-        :type meta_columns: bool
-        :return: a dataframe containing the classification columns
-        :rtype: pd.DataFrame
+        :param all_paths_columns: Whether to include all path columns.
+        :param meta_columns: Whether to include metadata columns.
+        :return: DataFrame containing only classification columns.
         """
         return self.get_declared_columns(['classification_columns'], all_paths_columns, meta_columns)
 
@@ -120,11 +111,8 @@ class ComponentPayload:
         Returns a dataframe containing the feature and classification columns of the payload.
 
         :param all_paths_columns: whether to include all paths columns in the returned dataframe
-        :type all_paths_columns: bool
         :param meta_columns: whether to include meta columns in the returned dataframe
-        :type meta_columns: bool
         :return: a dataframe containing the feature and classification columns
-        :rtype: pd.DataFrame
         """
         return self.get_declared_columns(['feature_columns', 'classification_columns'], all_paths_columns, meta_columns)
 
@@ -141,11 +129,8 @@ class ComponentPayload:
         Saves the payload's dataframe to a csv file and metadata as pickle in the given output directory.
 
         :param output_dir: the output directory
-        :type output_dir: str
         :param name: the name of the output file
-        :type name: str
         :param index: whether to include the index in the output file
-        :type index: bool
         """
         self.df.to_csv(f'{output_dir}/{name}.csv', index=index)
         pickle.dump(self.metadata, open(f'{output_dir}/{name}.pkl', 'wb'))

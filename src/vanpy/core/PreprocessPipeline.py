@@ -6,13 +6,17 @@ from vanpy.core.PipelineComponent import PipelineComponent
 
 class PreprocessPipeline(BasePipeline):
     """
-    Class representing a preprocessing pipeline, which is a specific type of BasePipeline.
-    It comprises various predefined components for audio preprocessing.
+    Pipeline for audio preprocessing tasks.
 
-    :ivar components_mapper: Dictionary mapping component names to component classes or None.
-        Each key is a string (the name of the component), and each value is either None or an instance of a class
-        that inherits from PipelineComponent.
-    :vartype components_mapper: Dict[str, Optional[PipelineComponent]]
+    Manages components that prepare audio for feature extraction including:
+    - File format conversion
+    - Audio segmentation
+    - Voice activity detection
+    - Speech enhancement
+    - Speaker diarization
+
+    :ivar components_mapper: Maps preprocessor names to their implementing classes.
+                           Supports various preprocessing tasks and models.
     """
     components_mapper: Dict[str, Optional[PipelineComponent]] = {
         'file_mapper': None,
@@ -35,9 +39,7 @@ class PreprocessPipeline(BasePipeline):
         with the corresponding component class.
 
         :param components: List of names of the preprocessing components to include in this pipeline.
-        :type components: List[str]
         :param config: YAML configuration for the pipeline.
-        :type config: YAMLObject
         """
         for component in components:
             if component == 'file_mapper':

@@ -9,7 +9,15 @@ import pandas as pd
 
 class BaseSegmenterComponent(PipelineComponent, ABC):
     """
-    Base class for `PipelineComponent`s for segmenting audio files into smaller segments.
+    Base class for audio segmentation components.
+
+    Provides common functionality for components that process audio files into
+    smaller segments based on various criteria (voice activity, speaker change, etc.).
+
+    :ivar segment_name_separator: Character used to separate parts in segment filenames.
+    :ivar segment_stop_column_name: Column name for segment end times.
+    :ivar segment_start_column_name: Column name for segment start times.
+    :ivar classification_column_name: Column name for segment classifications.
     """
 
     def __init__(self, component_type: str, component_name: str, yaml_config: YAMLObject):
@@ -31,7 +39,10 @@ class BaseSegmenterComponent(PipelineComponent, ABC):
 
     def add_segment_columns_to_metadata(self, metadata: Dict) -> Dict:
         """
-        Creates the columns for ComponentPayload for the segmented audio files.
+        Add segment timing columns to component metadata.
+
+        :param metadata: Current metadata dictionary.
+        :return: Updated metadata with segment columns added.
         """
         self.segment_start_column_name = self.segment_stop_column_name = ''
         if self.config.get('add_segment_metadata', True):
@@ -43,15 +54,37 @@ class BaseSegmenterComponent(PipelineComponent, ABC):
         return metadata
 
     def add_processed_path_to_metadata(self, processed_path, metadata: Dict) -> Dict:
+        """
+        Add processed file path information to metadata.
+
+        :param processed_path: Path column name for processed files.
+        :param metadata: Current metadata dictionary.
+        :return: Updated metadata with processed path information.
+        """
         metadata['paths_column'] = processed_path
         metadata['all_paths_columns'].append(processed_path)
         return metadata
 
     def add_classification_column_to_metadata(self, metadata: Dict) -> Dict:
+        """
+        Add classification column to metadata.
+
+        :param metadata: Current metadata dictionary.
+        :return: Updated metadata with classification column added.
+        """
         metadata['classification_columns'].extend([self.classification_column_name])
         return metadata
 
     def enhance_metadata(self, metadata: Dict) -> Dict:
+        """
+        Add all required columns to component metadata.
+
+        Adds segment timing, performance metrics, processed paths, and 
+        classification columns if applicable.
+
+        :param metadata: Current metadata dictionary.
+        :return: Fully enhanced metadata dictionary.
+        """
         metadata = self.add_segment_columns_to_metadata(metadata)
         metadata = self.add_performance_column_to_metadata(metadata)
         metadata = self.add_processed_path_to_metadata(self.get_processed_path(), metadata)
@@ -61,11 +94,11 @@ class BaseSegmenterComponent(PipelineComponent, ABC):
 
     def add_segment_metadata(self, f_d: Union[pd.DataFrame, Dict], a: float, b: float):
         """
-        Adds metadata for the start and stop time of audio segments to the temporal DataFrame.
+        Add timing information for an audio segment.
 
-        :param f_d: The temporal DataFrame that is enhanced with the start and stop time of audio segments.
-        :param a: The start time of the audio segment in the input audio file.
-        :param b: The stop time of the audio segment in the input audio file.
+        :param f_d: DataFrame or dictionary to update.
+        :param a: Start time of the segment in seconds.
+        :param b: End time of the segment in seconds.
         """
         if self.config.get('add_segment_metadata', True):
             f_d[self.segment_start_column_name] = [a]
@@ -76,15 +109,17 @@ class BaseSegmenterComponent(PipelineComponent, ABC):
                                                            output_dir: str, use_dir_prefix: bool = False) -> Tuple[
         pd.DataFrame, List[str]]:
         """
-        Returns a processed DataFrame and a list of unprocessed file paths if not overwriting existing files.
+        Handle file path management for incremental processing.
 
-        :param p_df: A pandas DataFrame to append processed file paths and input file paths to.
-        :param paths_list: A list of file paths to process.
-        :param processed_path: The column name to append the processed file path to the `p_df`.
-        :param input_column: The column name to append the input file path to the `p_df`.
-        :param output_dir: The output directory path.
-        :param use_dir_prefix: If True, the directory name is added as a prefix to the processed file name.
-        :return: A tuple containing the updated `p_df` DataFrame and a list of unprocessed file paths.
+        Manages which files need processing and which can be skipped based on
+        existing outputs and overwrite settings.
+
+        :param paths_list: List of input file paths.
+        :param processed_path: Column name for processed file paths.
+        :param input_column: Column name for input file paths.
+        :param output_dir: Directory containing processed files.
+        :param use_dir_prefix: Whether to include parent directory in output names.
+        :return: Tuple of (processed_df, unprocessed_paths).
         """
         unprocessed_paths_list = []
         p_df = pd.DataFrame()

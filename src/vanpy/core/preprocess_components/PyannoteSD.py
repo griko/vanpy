@@ -9,7 +9,18 @@ from vanpy.utils.utils import create_dirs_if_not_exist, cut_segment
 
 
 class PyannoteSD(BaseSegmenterComponent):
-    """Pyannote speaker diarization model."""
+    """
+    Speaker diarization component using Pyannote's speaker diarization pipeline.
+
+    Performs speaker diarization on audio files using Pyannote's state-of-the-art
+    pipeline, identifying different speakers and their speaking segments.
+
+    :ivar model: Loaded Pyannote speaker diarization pipeline instance.
+    :ivar ACCESS_TOKEN: HuggingFace access token for model download.
+    :ivar skip_overlap: Whether to skip overlapping speech segments.
+    :ivar classification_column_name: Name of the output classification column.
+    :ivar keep_only_first_segment: Whether to keep only the first detected segment.
+    """
 
     def __init__(self, yaml_config: YAMLObject):
         """Initialize the PyannoteSD class."""
@@ -23,7 +34,15 @@ class PyannoteSD(BaseSegmenterComponent):
         self.keep_only_first_segment = self.config.get('keep_only_first_segment', False)
 
     def load_model(self):
-        """Load the pretrained Pyannote speaker diarization model."""
+        """
+        Load and configure the Pyannote speaker diarization pipeline.
+
+        Downloads the pretrained model using HuggingFace access token and configures
+        it with custom hyperparameters if provided. Automatically selects GPU if available.
+
+        Supports custom hyperparameters through 'hparams' configuration section,
+        which will be saved to 'pyannote_sd.yaml' if provided.
+        """
         from pyannote.audio import Pipeline
         import torch
         import yaml
@@ -45,13 +64,17 @@ class PyannoteSD(BaseSegmenterComponent):
 
     def get_voice_segments(self, audio_file: str) -> List[Dict[str, Any]]:
         """
-        Get voice segments from the given audio file.
+        Extract speaker segments from an audio file.
 
-        Args:
-            audio_file (str): Path to the audio file.
+        Processes the audio file through the diarization pipeline to identify
+        different speakers and their speaking segments.
 
-        Returns:
-            List[Dict[str, Any]]: List of dictionaries containing segment information.
+        :param audio_file: Path to the audio file to process.
+        :return: List of dictionaries containing segment information:
+                - "start": Start time in seconds
+                - "stop": End time in seconds
+                - "label": Speaker label
+        :raises ValueError: If audio file processing fails.
         """
         try:
             annotation = self.model(audio_file)
@@ -72,15 +95,14 @@ class PyannoteSD(BaseSegmenterComponent):
         """
         Process a single audio file for speaker diarization.
 
-        Args:
-            audio_file (str): Path to the audio file.
-            p_df (pd.DataFrame): DataFrame to store processed data.
-            processed_path (str): Column name for processed file paths.
-            input_column (str): Column name for input file paths.
-            output_dir (str): Directory to save processed audio segments.
+        Extracts speaker segments and creates separate audio files for each segment,
+        with timing and speaker label information.
 
-        Returns:
-            pd.DataFrame: Updated DataFrame with processed data.
+        :param audio_file: Path to the audio file to process.
+        :param processed_path: Column name for processed file paths.
+        :param input_column: Column name for input file paths.
+        :param output_dir: Directory to save processed segments.
+        :return: DataFrame containing segment information and file paths.
         """
         t_start_segmentation = time.time()
         segments = self.get_voice_segments(audio_file)
@@ -115,13 +137,14 @@ class PyannoteSD(BaseSegmenterComponent):
 
     def process(self, input_payload: ComponentPayload) -> ComponentPayload:
         """
-        Process the input payload for speaker diarization.
+        Process a batch of audio files for speaker diarization.
 
-        Args:
-            input_payload (ComponentPayload): Input data to be processed.
+        Handles batch processing of audio files, creating separate segments for
+        different speakers while maintaining metadata and timing information.
+        Supports incremental processing by checking for existing outputs.
 
-        Returns:
-            ComponentPayload: Processed data.
+        :param input_payload: Input payload containing audio files and metadata.
+        :return: Output payload containing diarization results and segment files.
         """
         if not hasattr(self, 'model'):
             self.load_model()

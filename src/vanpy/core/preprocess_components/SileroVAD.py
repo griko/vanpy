@@ -10,7 +10,16 @@ from vanpy.utils.utils import cut_segment, create_dirs_if_not_exist
 
 class SileroVAD(BaseSegmenterComponent):
     """
-    A class for performing speech segmentation using Silero VAD.
+    Voice Activity Detection component using Silero VAD model.
+
+    Segments audio files into voice segments using Silero's state-of-the-art
+    voice activity detection model.
+
+    :ivar model: Loaded Silero VAD model instance.
+    :ivar utils: Silero utility functions for audio processing.
+    :ivar sampling_rate: Target sampling rate for audio processing.
+    :ivar params: Model parameters from configuration.
+    :ivar keep_only_first_segment: Whether to keep only the first detected segment.
     """
     model = None
     utils = None
@@ -29,7 +38,9 @@ class SileroVAD(BaseSegmenterComponent):
 
     def load_model(self):
         """
-        Loads the Silero VAD pretrained model and utilities.
+        Load Silero VAD model and utility functions.
+        
+        Downloads model from torch hub and configures for GPU if available.
         """
         import torch
         torch.hub.set_dir('pretrained_models/')
@@ -38,6 +49,15 @@ class SileroVAD(BaseSegmenterComponent):
         self.logger.info(f'Loaded model to {"GPU" if torch.cuda.is_available() else "CPU"}')
 
     def process_item(self, f, processed_path, input_column, output_dir) -> pd.DataFrame:
+        """
+        Process a single audio file for voice activity detection.
+
+        :param f: Path to the audio file.
+        :param processed_path: Column name for processed file paths.
+        :param input_column: Column name for input file paths.
+        :param output_dir: Directory to save processed segments.
+        :return: DataFrame containing segment information.
+        """
         (get_speech_timestamps,
          save_audio,
          read_audio,

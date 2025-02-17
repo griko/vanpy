@@ -6,7 +6,17 @@ from vanpy.core.PipelineComponent import PipelineComponent
 from vanpy.utils.utils import cached_download, create_dirs_if_not_exist
 
 
-class RavdessEmotionClassifier(PipelineComponent):
+class VanpyEmotionClassifier(PipelineComponent):
+    """
+    Emotion classification component using SVM model trained on RAVDESS dataset.
+
+    :ivar model: Loaded classification model instance.
+    :ivar transformer: Feature transformation pipeline instance.
+    :ivar label_conversion_list: List of emotion labels supported by the model.
+    :ivar label_conversion_dict: Dictionary mapping emotion labels to numeric indices.
+    :ivar classification_column_name: Name of the output classification column.
+    :ivar verbal_labels: Whether to use string labels (True) or numeric indices (False).
+    """
     model = None
     transformer = None
     label_conversion_list = ['angry', 'disgust', 'fearful', 'happy', 'neutral/calm', 'sad', 'surprised']
@@ -15,6 +25,11 @@ class RavdessEmotionClassifier(PipelineComponent):
     verbal_labels: bool = True
 
     def __init__(self, yaml_config: YAMLObject):
+        """
+        Initialize the emotion classifier component.
+
+        :param yaml_config: Configuration parameters for the classifier.
+        """
         super().__init__(component_type='segment_classifier', component_name='vanpy_emotion',
                          yaml_config=yaml_config)
         self.verbal_labels = self.config.get('verbal_labels', True)
@@ -22,6 +37,12 @@ class RavdessEmotionClassifier(PipelineComponent):
                                                           f'{self.component_name}_classification')
 
     def load_model(self):
+        """
+        Load the emotion classification model from pretrained files.
+        
+        The model is a 7-class SVM trained on the RAVDESS dataset using speechbrain
+        embeddings as features.
+        """
         self.logger.info("Loading 7-class SVM emotion classification model, trained on RAVDESS dataset with speech_brain embedding [192 features]")
         model_path = cached_download('https://drive.google.com/uc?id=1-kQ7eschXQeYiK7wpLTrBnVv6PTSZPfO',
                                      f'{self.pretrained_models_dir}/ravdess_svm_speechbrain_ecapa_voxceleb_no_processor_cv.pkl')
@@ -29,6 +50,12 @@ class RavdessEmotionClassifier(PipelineComponent):
         self.expected_feature_columns = [f'{i}_speechbrain_embedding' for i in range(192)]  # expecting features_columns to be ['0_speechbrain_embedding','1_speechbrain_embedding',...'191_speechbrain_embedding']
 
     def process(self, input_payload: ComponentPayload) -> ComponentPayload:
+        """
+        Process audio features to predict emotion classifications.
+
+        :param input_payload: Input payload containing audio features and metadata.
+        :return: Output payload containing emotion classifications.
+        """
         if not self.model:
             self.load_model()
 

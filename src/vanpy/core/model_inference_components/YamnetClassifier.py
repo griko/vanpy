@@ -9,12 +9,25 @@ from vanpy.utils.utils import create_dirs_if_not_exist
 
 
 class YamnetClassifier(PipelineComponent):
+    """
+    Audio classification component using the YAMNet model for sound event detection.
+    
+    :ivar model: Loaded YAMNet model instance.
+    :ivar classification_column_name: Output column name for sound classifications.
+    :ivar class_names: List of available sound classes.
+    :ivar threshold: Confidence threshold for class prediction.
+    """
     model = None
     classification_column_name: str = ''
     class_names = None
     threshold = 0.
 
     def __init__(self, yaml_config: YAMLObject):
+        """
+        Initialize the YAMNet classifier.
+
+        :param yaml_config: Configuration parameters for the classifier.
+        """
         super().__init__(component_type='segment_classifier', component_name='yamnet_classifier',
                          yaml_config=yaml_config)
         self.classification_column_name = self.config.get('classification_column_name', f'{self.component_name}_classification')
@@ -24,6 +37,12 @@ class YamnetClassifier(PipelineComponent):
     @staticmethod
     # Find the name of the class with the top score when mean-aggregated across frames.
     def class_names_from_csv(class_map_csv_text):
+        """
+        Extract class names from the YAMNet class mapping file.
+
+        :param class_map_csv_text: Path to the class mapping CSV file.
+        :return: List of class names for sound classification.
+        """
         import tensorflow as tf
         import csv
         """Returns list of class names corresponding to score vector."""
@@ -38,6 +57,14 @@ class YamnetClassifier(PipelineComponent):
     @staticmethod
     def ensure_sample_rate(original_sample_rate, waveform,
                            desired_sample_rate=16000):
+        """
+        Resample audio waveform to the desired sample rate.
+
+        :param original_sample_rate: Current sampling rate of the waveform.
+        :param waveform: Audio waveform data.
+        :param desired_sample_rate: Target sampling rate (default: 16000).
+        :return: Tuple of (new_sample_rate, resampled_waveform).
+        """
         import scipy
         """Resample waveform if required."""
         if original_sample_rate != desired_sample_rate:
@@ -47,6 +74,11 @@ class YamnetClassifier(PipelineComponent):
         return desired_sample_rate, waveform
 
     def load_model(self):
+        """
+        Load the YAMNet model and class mappings.
+        
+        Downloads and extracts the model if not present in the pretrained models directory.
+        """
         import os.path
         from os import path
         import tensorflow_hub as hub
@@ -66,6 +98,12 @@ class YamnetClassifier(PipelineComponent):
         self.class_names = YamnetClassifier.class_names_from_csv(class_map_path)
 
     def process(self, input_payload: ComponentPayload) -> ComponentPayload:
+        """
+        Process audio files to predict sound event classes.
+
+        :param input_payload: Input payload containing audio file paths and metadata.
+        :return: Output payload containing sound classifications.
+        """
         import tensorflow as tf
         from scipy.io import wavfile
 

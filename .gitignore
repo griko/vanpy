@@ -20,6 +20,10 @@
 /src/pretrained_models
 /src/pyannote_sd.yaml
 /src/speech_examples/**
+/src/results/**
+/src/split_preprocessed/**
+/src/notebook_examples/pretrained_models/**
+/src/notebook_examples/wav2vec2_checkpoints/**
 
 
 
