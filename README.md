@@ -1,24 +1,24 @@
-# vanpy 
-**vanpy** is a Voice Analysis framework, built in a 
+# VANPY 
+**VANPY** is a Voice Analysis framework, built in a 
 flexible manner for easy extendability, that allows to extract and classify voice segments. 
 
-![vanpy](https://user-images.githubusercontent.com/1709151/176196445-d80903ec-295f-4bc2-8a82-7f25f9f8dfc1.PNG)
+![VANPY](https://user-images.githubusercontent.com/1709151/176196445-d80903ec-295f-4bc2-8a82-7f25f9f8dfc1.PNG)
 
 ## Examples
 You can use the following google colab notebook to inspect the capabilities of the library
  
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/griko/vanpy/blob/main/examples/vanpy_example.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/griko/VANPY/blob/main/examples/VANPY_example.ipynb)
 
-Voice emotion classification model training and evaluation on RAVDESS dataset using **vanpy**
+Voice emotion classification model training and evaluation on RAVDESS dataset using **VANPY**
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/griko/vanpy/blob/main/examples/using_vanpy_to_classify_emotions_on_RAVDESS_dataset.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/griko/VANPY/blob/main/examples/using_VANPY_to_classify_emotions_on_RAVDESS_dataset.ipynb)
 
 Expending the library with a new classifier
 
 *TODO*
 
 ## Description
-**vanpy** can be useful in multiple ways. It contains of 3 optional pipelines, that make preprocessing, feature 
+**VANPY** can be useful in multiple ways. It contains of 3 optional pipelines, that make preprocessing, feature 
 extraction and classification/STT of a voice segments an easy task:
 
 1. The preprocessing pipline deals with audio files format and voice segment cutting. 

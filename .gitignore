@@ -25,6 +25,7 @@
 /src/notebook_examples/pretrained_models/**
 /src/notebook_examples/wav2vec2_checkpoints/**
 
+.vscode/
 
 
 ### JetBrains template

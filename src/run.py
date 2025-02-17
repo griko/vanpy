@@ -72,8 +72,11 @@ def main():
 
 
     # pipeline = Pipeline(['file_mapper', 'pyannote_sd', 'speechbrain_embedding', 'openai_whisper_stt'], config=config)
-    pipeline = Pipeline(['file_mapper', 'pyannote_sd', 'librosa_features_extractor', 'speechbrain_embedding', 'vanpy_gender', 'vanpy_age', 'vanpy_height', 'vanpy_emotion'], config=config)
-
+    # pipeline = Pipeline(['file_mapper', 'pyannote_sd', 'librosa_features_extractor', 'speechbrain_embedding', 'vanpy_gender', 'vanpy_age', 'vanpy_height', 'vanpy_emotion'], config=config)
+    pipeline = Pipeline(['file_mapper', 'pyannote_vad', 'speechbrain_embedding', 'openai_whisper_stt', 'speech_brain_iemocap_emotion',
+                         'wav2vec2adv', 'yamnet_classifier', 'cosine_distance_diarization', 'agglomerative_clustering_diarization', 'gmm_clustering_diarization'], config=config)
+    pipeline = Pipeline(['file_mapper', 'metricgan_se', 'ina_speech_segmenter', 'sepformer_se', 'wav2vec2stt',
+                         'wav2vec2adv', 'yamnet_classifier'], config=config)
 
     # pipeline = Pipeline(['file_mapper', 'speechbrain_embedding', 'vanpy_ravdess_emotion'], config=config)
     # 'wav_converter', 'metricgan_se',, 'silero_vad', 'speechbrain_embedding', 'cosine_distance_diarization' , 'pyannote_sd', 'openai_whisper_stt'
