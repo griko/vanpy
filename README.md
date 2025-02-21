@@ -1,22 +1,20 @@
 # VANPY 
-**VANPY** (Voice Analysis Python) is a flexible and extensible framework for voice analysis, feature extraction, and classification. It provides a modular pipeline architecture for processing audio segments with near- and state-of-the-art deep learning models.
+**VANPY** (Voice Analysis framework in Python) is a flexible and extensible framework for voice analysis, feature extraction, and model inference. It provides a modular pipeline architecture for processing audio segments with near- and state-of-the-art deep learning models.
 
-![VANPY](https://github.com/griko/vanpy/blob/main/images/VANPY_architecture.png?raw=true)
+![VANPY](https://github.com/griko/vanpy/raw/main/images/VANPY_architecture.png)
 
-## Quick Start
+<!-- ## Quick Start
 Try VANPY in Google Colab:
 
 - [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/griko/VANPY/blob/main/examples/VANPY_example.ipynb)
   
   Basic VANPY capabilities demo
 
-<!-- Voice emotion classification model training and evaluation on RAVDESS dataset using **VANPY** -->
-
 - [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/griko/VANPY/blob/main/examples/using_VANPY_to_classify_emotions_on_RAVDESS_dataset.ipynb)
 
   Emotion classification on RAVDESS dataset
+ -->
 
-<!-- Expending the library with a new classifier -->
 
 ## Architecture
 **VANPY** consists of three optional pipelines that can be used independently or in combination:
@@ -85,7 +83,7 @@ You can use these pipelines flexibly based on your needs:
   </tr>
 </table>
 
-All of the models can be used as a part of the VANPY pipeline or separately and are available on [🤗HuggingFace](https://huggingface.co/griko)
+All of the models can be used as a part of the VANPY pipeline or separately and are available on 🤗[HuggingFace](https://huggingface.co/griko)
 
 
 ## Configuration
