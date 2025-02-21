@@ -1,7 +1,7 @@
 # VANPY 
 **VANPY** (Voice Analysis Python) is a flexible and extensible framework for voice analysis, feature extraction, and classification. It provides a modular pipeline architecture for processing audio segments with near- and state-of-the-art deep learning models.
 
-![VANPY](https://github.com/user-attachments/assets/a225897c-49bb-42c3-be95-612c0e6050e6)
+![VANPY](https://github.com/griko/vanpy/blob/main/images/VANPY_architecture.png?raw=true)
 
 ## Quick Start
 Try VANPY in Google Colab:
