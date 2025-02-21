@@ -4,7 +4,7 @@ from vanpy.core.BasePipeline import BasePipeline
 from vanpy.core.PipelineComponent import PipelineComponent
 
 
-class ClassificationPipeline(BasePipeline):
+class ModelInferencePipeline(BasePipeline):
     """
     Pipeline for audio classification and analysis tasks.
 
@@ -23,8 +23,6 @@ class ClassificationPipeline(BasePipeline):
         'vanpy_age': None,
         'vanpy_height': None,
         'vanpy_emotion': None,
-        # 'common_voices_gender': None,
-        # 'common_voices_age': None,
         'speech_brain_iemocap_emotion': None,
         'wav2vec2adv': None,
         'wav2vec2stt': None,

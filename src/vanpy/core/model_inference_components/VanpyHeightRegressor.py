@@ -1,7 +1,6 @@
 import pickle
 
 import joblib
-import keras
 from yaml import YAMLObject
 
 from vanpy.core.ComponentPayload import ComponentPayload

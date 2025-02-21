@@ -11,7 +11,7 @@ from yaml import YAMLObject
 from vanpy.core.PipelineComponent import PipelineComponent
 from vanpy.core.PreprocessPipeline import PreprocessPipeline
 from vanpy.core.FeatureExtractionPipeline import FeatureExtractionPipeline
-from vanpy.core.ModelInferencePipeline import ClassificationPipeline
+from vanpy.core.ModelInferencePipeline import ModelInferencePipeline
 
 
 @dataclass
@@ -91,7 +91,7 @@ class Pipeline:
                                                                                  pipeline_class=FeatureExtractionPipeline,
                                                                                  config=config)
         classification_and_stt_pipeline = Pipeline.generate_pipeline_from_components(components=components,
-                                                                                     pipeline_class=ClassificationPipeline,
+                                                                                     pipeline_class=ModelInferencePipeline,
                                                                                      config=config)
         pipelines = []
         if preprocessing_pipeline:

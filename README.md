@@ -1,103 +1,141 @@
 # VANPY 
-**VANPY** is a Voice Analysis framework, built in a 
-flexible manner for easy extendability, that allows to extract and classify voice segments. 
+**VANPY** (Voice Analysis Python) is a flexible and extensible framework for voice analysis, feature extraction, and classification. It provides a modular pipeline architecture for processing audio segments with near- and state-of-the-art deep learning models.
 
 ![VANPY](https://github.com/user-attachments/assets/a225897c-49bb-42c3-be95-612c0e6050e6)
 
-## Examples
-You can use the following google colab notebook to inspect the capabilities of the library
- 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/griko/VANPY/blob/main/examples/VANPY_example.ipynb)
+## Quick Start
+Try VANPY in Google Colab:
 
-Voice emotion classification model training and evaluation on RAVDESS dataset using **VANPY**
+- [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/griko/VANPY/blob/main/examples/VANPY_example.ipynb)
+  
+  Basic VANPY capabilities demo
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/griko/VANPY/blob/main/examples/using_VANPY_to_classify_emotions_on_RAVDESS_dataset.ipynb)
+<!-- Voice emotion classification model training and evaluation on RAVDESS dataset using **VANPY** -->
 
-Expending the library with a new classifier
+- [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/griko/VANPY/blob/main/examples/using_VANPY_to_classify_emotions_on_RAVDESS_dataset.ipynb)
 
-*TODO*
+  Emotion classification on RAVDESS dataset
 
-## Description
-**VANPY** can be useful in multiple ways. It contains of 3 optional pipelines, that make preprocessing, feature 
-extraction and classification/STT of a voice segments an easy task:
+<!-- Expending the library with a new classifier -->
 
-1. The preprocessing pipline deals with audio files format and voice segment cutting. 
-2. The feature extraction pipline runs
-on each segment and retrieves feature/latent vectors. 
-3. Classification and Speech-To-Text (SST) pipline executes classification/STT models. 
-There are classification components that might be used on the audio files themselves, while others require a feature-set.
+## Architecture
+**VANPY** consists of three optional pipelines that can be used independently or in combination:
 
-You can stop at any point, with respect to the expected achievement. If the voice separation is all what is needed, 
-execute the first pipline only. If your task is to generate text from a given audio with a pretrained model that expect 
-an audio file as input - use (1) and (3). If you are training a new model and features is of the highest importance - 
-go for (1) and (2) and consider expanding the library when you are satisfied with the result (see example 3).  
+1. **Preprocessing Pipeline**: Handles audio format conversion and voice segment extraction
+2. **Feature Extraction Pipeline**: Generates feature/latent vectors from voice segments
+3. **Model Inference Pipeline**
 
-Configuration of all the components is made through the `pipline.yaml` configuration file. If using components that require a huggingface token, 
-create a `.env` file in the root directory and add the token as `huggingface_ACCESS_TOKEN=<your_token>` (currently required for pyannote-embedding, pyannote-vad and pyannote-sd).
+You can use these pipelines flexibly based on your needs:
 
-## Pre-processing components
-### Filelist-DataFrame Creator
-Used to initialize the `ComponentPayload` with a list of paths to audio files from mapped in the *input_dir* directory in the config file **pipeline.yaml**
-### WAVConverter
-Converts files to a specific number of channels, sample and bit rate (e.g. 1-channel, 16KHz, 256k bitrate)
-### INA Voice Separator
-Separates voice and music segments
-### PyannoteVAD
-Voice Activity Detector by pyannote 2.0 - removes low amplitude sections, leaving intense voice segments. 
-### SileroVAD
-Voice Activity Detector by silero - removes low amplitude sections, leaving intense voice segments.
+- Use only preprocessing for voice separation
+- Combine preprocessing and classification for direct audio analysis
+- Use all pipelines for complete feature extraction and classification 
 
-## Feature extraction components
-### Pyannote Embedding
-Uses pyannote-audio 2.0 to extract mean 512-feature embedding vector from the segment
-### SpeechBrainEmbedding
-Uses SpeechBrain to extract mean 512-feature embedding vector from the segment
-### LibrosaFeaturesExtractor
-Uses librosa to extract MFCC, delta-MFCC and zero-cross-rate from the segment
 
-## Supported classification models:
-### Common Voices Gender Classifier
-Gender Classification, trained on undersampled Mozilla Common Voices Dataset v6.1 after extracting pyannote embedding.
+## Configuration
+### Environment Setup
 
-Predicts 'female'/'male'. Reaches 94.8% accuracy on the test set.
+1. Create a `pipeline.yaml` configuration file. You can use the `pipeline.yaml.example` as a template.
+2. For HuggingFace models (Pyannote components), create a `.env` file:
+```
+huggingface_ACCESS_TOKEN=<your_token>
+```
 
-*input*: 512 features of pyannote2.0 embedding
-### Common Voices Age Classifier
-Age group classification, trained on Mozilla Common Voices Dataset after extracting pyannote embedding.
-Predicts 'teens'/'twenties'/'thirties'/'fourties'/'fifties+'. Reaches 34% accuracy on the test set.
+## Components
+Each component expects as an input and returns as an output a `ComponentPayload` object.
 
-Confusion matrix:
+Each component supports:
+- Batch processing (if applicable)
+- Progress tracking
+- Performance monitoring and logging
+- Incremental processing (skip already processed files)
+- GPU acceleration where applicable
+- Configurable parameters
 
-![age_cm](https://user-images.githubusercontent.com/1709151/171154228-1ed8927e-37e2-4a6d-ad2d-68f8bb485d1f.PNG)
+### Preprocessing Components
 
-*input*: 512 features of pyannote2.0 embedding
-### IEMOCAP Emotion Classifier
-Emotion classification model, trained on IEMOCAP dataset with Speech Brain using fine-tuned wav2vec2.
+| Component | Description |
+|-----------|-------------|
+| **Filelist-DataFrame Creator** | Initializes data pipeline by creating a DataFrame of audio file paths. Supports both directory scanning and loading from existing CSV files. Manages path metadata for downstream components. |
+| **WAV Converter** | Standardizes audio format to WAV with configurable parameters including bit rate (default: 256k), channels (default: mono), sample rate (default: 16kHz), and codec (default: PCM 16-bit). Uses FFMPEG for robust conversion. |
+| **WAV Splitter** | Handles large audio files by splitting them into manageable segments based on either duration or file size limits. Maintains audio quality and creates properly labeled segments with original file references. |
+| **INA Voice Separator** | Separates audio into voice and non-voice segments, distinguishing between male and female speakers. Filters out non-speech content while preserving speaker gender information. |
+| **Pyannote VAD** | Performs Voice Activity Detection using Pyannote's state-of-the-art deep learning model. Identifies and extracts speech segments with configurable sensitivity.
+| **Silero VAD** | Alternative Voice Activity Detection using Silero's efficient model. Optimized for real-time performance with customizable parameters. |
+| **Pyannote SD** | Speaker Diarization component that identifies and separates different speakers in audio. Creates individual segments for each speaker with timing information. Supports overlapping speech handling. |
+| **MetricGAN SE** | Speech Enhancement using MetricGAN+ model from SpeechBrain. Reduces background noise and improves speech clarity. |
+| **SepFormer SE** | Speech Enhancement using SepFormer model, specialized in separating speech from complex background noise. |
 
-Predicts 'neu'/'ang'/'hap'/'sad'. Reaches 78.7% accuracy on the test set, as published [here](https://huggingface.co/speechbrain/emotion-recognition-wav2vec2-IEMOCAP).
+### Feature Extraction Components
 
-*input*: audio file (doesn't require feature extraction)
+| Component | Description |
+|-----------|-------------|
+| **Librosa Features Extractor** | Comprehensive audio feature extraction using the Librosa library. Supports multiple feature types including: MFCC (Mel-frequency cepstral coefficients), Delta-MFCC, zero-crossing rate, spectral features (centroid, bandwidth, contrast, flatness), fundamental frequency (F0), and tonnetz. |
+| **Pyannote Embedding** | Generates speaker embeddings using Pyannote's deep learning models. Uses sliding window analysis with configurable duration and step size. Outputs high-dimensional embeddings optimized for speaker differentiation. |
+| **SpeechBrain Embedding** | Extracts neural embeddings using SpeechBrain's pretrained models, particularly the ECAPA-TDNN architecture (default: spkrec-ecapa-voxceleb). |
 
-### Wav2Vec2STT
-Character-level speech-to-text model trained on *facebook/wav2vec2-base-960h* dataset.
+### Model Inference Components
 
-*input*: audio file (doesn't require feature extraction)
+| Component | Description |
+|-----------|-------------|
+| **VanpyGender Classifier** | SVM-based binary gender classification using speech embeddings. Supports two models: ECAPA-TDNN (192-dim) and XVECT (512-dim) embeddings from SpeechBrain. Trained on VoxCeleb2 dataset with optimized hyperparameters. Provides both verbal ('female'/'male') and numeric label options. |
+| **VanpyAge Regressor** | Multi-architecture age estimation supporting SVR and ANN models. Features multiple variants: pure SpeechBrain embeddings (192-dim), combined SpeechBrain and Librosa features (233-dim), and dataset-specific models (VoxCeleb2/TIMIT). |
+| **VanpyEmotion Classifier** | 7-class SVM emotion classifier trained on RAVDESS dataset using SpeechBrain embeddings. Classifies emotions into: angry, disgust, fearful, happy, neutral/calm, sad, surprised. |
+| **IEMOCAP Emotion** | SpeechBrain-based emotion classifier trained on the IEMOCAP dataset. Uses Wav2Vec2 for feature extraction. Supports four emotion classes: angry, happy, neutral, sad. |
+| **Wav2Vec2 ADV** | Advanced emotion analysis using Wav2Vec2, providing continuous scores for arousal, dominance, and valence dimensions. |
+| **Wav2Vec2 STT** | Speech-to-text transcription using Facebook's Wav2Vec2 model. |
+| **Whisper STT** | OpenAI's Whisper model for robust speech recognition. Supports multiple model sizes and languages. Includes automatic language detection. |
+| **Cosine Distance Clusterer** | a Clustering method that can be used for speaker diarization using cosine similarity metrics. Groups speech segments by speaker identity using embedding similarity. |
+| **GMM Clusterer** | Gaussian Mixture Model-based speaker clustering. |
+| **Agglomerative Clusterer** | Hierarchical clustering for speaker diarization. Uses distance-based merging with configurable threshold and maximum clusters. |
+| **YAMNet Classifier** | Google's YAMNet model for general audio classification. Supports 521 audio classes from AudioSet ontology. |
 
-## ComponentPayload
-Received and passed further between `PiplineComponent`s. Includes:
-- *metadata*: Dict
-  - 'input_path' - the path to the input directory to map audio files from
-  - 'paths_column' - rewritable parameter, each preprocessing component at the end of its action writes the column name of the **df** where the files' paths are listed
-  - 'all_paths_columns' - a list of all column names of **df** that were used as 'path_column' for preprocessing components
-  - 'feature_columns' - a list of column names of **df** where the features for classifiers are hold
-  - 'meta_columns' - a list of column names of **df** which contain additional information, such as time required to execute the component on a segment or VAD boundaries 
-  - 'classification_columns' - a list of column names of **df** with classification/STT results
-- *df*: pd.DataFrame
-  - includes all the collected information through the preprocessing and classification
-    - each preprocessor adds a column of paths where the processed files are hold
-    - embedding/feature extraction components add the embedding/features columns
-    - each classifier adds a classification column
 
-Methods:
-- *get_features_df* -> pd.DataFrame - get contents of *'paths_column'* and *'feature_columns'*. (optional: *'all_paths_columns'*, *'meta_columns'*) 
-- *get_classification_df* -> pd.DataFrame - get contents of *'paths_column'* and *'classification_columns'*. (optional: *'all_paths_columns'*, *'meta_columns'*)
+## ComponentPayload Structure
+The `ComponentPayload` class manages data flow between pipeline components:
+```
+class ComponentPayload:
+    metadata: Dict  # Pipeline metadata
+    df: pd.DataFrame  # Processing results
+```    
+### Metadata fields
+- `input_path`: Path to the input directory (required for `FilelistDataFrameCreator` if no `df` is provided)
+- `paths_column`: Column name for audio file paths
+- `all_paths_columns`: List of all path columns
+- `feature_columns`: List of feature columns
+- `meta_columns`: List of metadata columns
+- `classification_columns`: List of classification columns
+
+### df fields
+- `df`: pd.DataFrame
+  
+  Includes all the collected information through the preprocessing and classification
+  - each preprocessor adds a column of paths where the processed files are hold
+  - embedding/feature extraction components add the embedding/features columns
+  - each model adds a model-results column
+
+### Key Methods
+- `get_features_df()`: Extract features DataFrame
+- `get_classification_df()`: Extract classification results DataFrame
+
+
+## Coming Soon
+- Custom classifier integration guide
+- Additional preprocessing components
+- Extended model support
+- Newer python and dependencies version support
+
+## Citing VANPY
+Please, cite VANPY if you use it
+
+```bibtex
+@misc{vanpy,
+  title={VANPY: Voice Analysis Framework},
+  author={Gregory Koushnir, Michael Fire, Galit Fuhrmann Alpert, Dima Kagan},
+  year={2025},
+  eprint={TBD},
+  archivePrefix={arXiv},
+  primaryClass={TBD},
+  note={arXiv:TBD}
+}
+```
