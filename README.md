@@ -31,15 +31,72 @@ You can use these pipelines flexibly based on your needs:
 - Combine preprocessing and classification for direct audio analysis
 - Use all pipelines for complete feature extraction and classification 
 
+## Models Trained as part of the VANPY project
+
+<table>
+  <tr>
+    <th>Task</th>
+    <th>Dataset</th>
+    <th>Performance</th>
+  </tr>
+  <tr>
+    <td rowspan="3">Gender Identification (Accuracy)</td>
+    <td>VoxCeleb2</td>
+    <td>98.9%</td>
+  </tr>
+  <tr>
+    <td>Mozilla Common Voice v10.0</td>
+    <td>92.3%</td>
+  </tr>
+  <tr>
+    <td>TIMIT</td>
+    <td>99.6%</td>
+  </tr>
+  <tr>
+    <td rowspan="2">Emotion Recognition (Accuracy)</td>
+    <td>RAVDESS (8-class)</td>
+    <td>84.71%</td>
+  </tr>
+  <tr>
+    <td>RAVDESS (7-class)</td>
+    <td>86.24%</td>
+  </tr>
+  <tr>
+    <td rowspan="3">Age Estimation (MAE in years)</td>
+    <td>VoxCeleb2</td>
+    <td>7.88</td>
+  </tr>
+  <tr>
+    <td>TIMIT</td>
+    <td>4.95</td>
+  </tr>
+  <tr>
+    <td>Combined VoxCeleb2-TIMIT</td>
+    <td>6.93</td>
+  </tr>
+  <tr>
+    <td rowspan="2">Height Estimation (MAE in cm)</td>
+    <td>VoxCeleb2</td>
+    <td>6.01</td>
+  </tr>
+  <tr>
+    <td>TIMIT</td>
+    <td>6.02</td>
+  </tr>
+</table>
+
+All of the models can be used as a part of the VANPY pipeline or separately and are available on [🤗HuggingFace](https://huggingface.co/griko)
+
 
 ## Configuration
 ### Environment Setup
 
-1. Create a `pipeline.yaml` configuration file. You can use the `pipeline.yaml.example` as a template.
+1. Create a `pipeline.yaml` configuration file. You can use the `src/pipeline.yaml` as a template.
 2. For HuggingFace models (Pyannote components), create a `.env` file:
 ```
 huggingface_ACCESS_TOKEN=<your_token>
 ```
+3. Pipelines examples are available in `src/run.py`.
 
 ## Components
 Each component expects as an input and returns as an output a `ComponentPayload` object.
