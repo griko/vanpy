@@ -184,13 +184,13 @@ class ComponentPayload:
 Please, cite VANPY if you use it
 
 ```bibtex
-@misc{vanpy,
-  title={VANPY: Voice Analysis Framework},
-  author={Gregory Koushnir, Michael Fire, Galit Fuhrmann Alpert, Dima Kagan},
-  year={2025},
-  eprint={TBD},
-  archivePrefix={arXiv},
-  primaryClass={TBD},
-  note={arXiv:TBD}
+@misc{koushnir2025vanpyvoiceanalysisframework,
+      title={VANPY: Voice Analysis Framework}, 
+      author={Gregory Koushnir and Michael Fire and Galit Fuhrmann Alpert and Dima Kagan},
+      year={2025},
+      eprint={2502.17579},
+      archivePrefix={arXiv},
+      primaryClass={cs.SD},
+      url={https://arxiv.org/abs/2502.17579}, 
 }
 ```
