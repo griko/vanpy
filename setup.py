@@ -36,7 +36,7 @@ setup(
         'pandas==1.3.5',
         'pydub==0.25.1',
         'PyYAML==6.0',
-        'scikit-learn==1.0.2',
+        'scikit-learn>=1.0.2',
         'speechbrain==0.5.13',
         'torch==1.13.1',
         'torchaudio==0.13.1'
