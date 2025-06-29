@@ -1,5 +1,7 @@
 from setuptools import setup, find_packages
-import vanpy
+# import vanpy
+__version__ = "0.92.15"  # Same as in meta.yaml
+
 # read the contents of your README file
 from pathlib import Path
 this_directory = Path(__file__).parent
@@ -18,28 +20,29 @@ speech_brain_iemocap_emotion = ['speechbrain==0.5.13']
 
 setup(
     name='vanpy',
-    version=vanpy.__version__,
+    version=__version__,
     description='VANPY - Voice Analysis framework in Python',
     author='Gregory Koushnir',
     author_email='koushgre@post.bgu.ac.il',
     long_description=long_description,
     long_description_content_type='text/markdown',
     package_dir={'': 'src'},
-    packages=find_packages('vanpy'),
+    # packages=find_packages('vanpy'),
+    packages=find_packages('src'),
     # packages=find_packages(include=['vanpy.core', 'vanpy.core.*', 'vanpy.utils', 'vanpy.utils.*']),
 
     install_requires=[
-        'gdown==4.4.0',
-        'huggingface-hub==0.8.1',
-        'keras==2.8.0',
-        'librosa==0.9.1',
-        'pandas==1.3.5',
-        'pydub==0.25.1',
-        'PyYAML==6.0',
+        'gdown>=4.4.0',
+        'huggingface-hub>=0.8.1',
+        'keras>=2.8.0',
+        'librosa>=0.9.1',
+        'pandas>=1.3.5',
+        'pydub>=0.25.1',
+        'PyYAML>=6.0',
         'scikit-learn>=1.0.2',
-        'speechbrain==0.5.13',
-        'torch==1.13.1',
-        'torchaudio==0.13.1'
+        'speechbrain>=0.5.13',
+        'torch>=1.13.1',
+        'torchaudio>=0.13.1'
     ],
     dependency_links=[
         'https://pypi.anaconda.org/scipy-wheels-nightly/simple/scikit-learn/'
