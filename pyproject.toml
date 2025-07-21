@@ -1,3 +1,110 @@
+# pyproject.toml
 [build-system]
-requires = ["setuptools>=42.0", "wheel"]
+requires = ["setuptools>=42", "wheel"]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "vanpy"
+version = "0.92.18"
+description = "VANPY – Voice Analysis framework in Python"
+readme = "README.md"
+requires-python = ">=3.8,<3.13"
+authors = [
+  { name = "Gregory Koushnir", email = "koushgre@post.bgu.ac.il" }
+]
+license = "Apache-2.0"
+
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11"
+]
+
+# core run-time deps  (== setup.py: install_requires)
+dependencies = [
+  "gdown>=4.4.0",
+  "huggingface-hub>=0.8.1",
+  "pandas>=1.3.5",
+  "pydub>=0.25.1",
+  "PyYAML>=6.0",
+  "scikit-learn>=1.0.2",
+  "setuptools>=65.0.0",
+]
+
+[project.optional-dependencies]
+# 1-to-1 copy of extras you already expose in setup.py
+whisper = ["openai-whisper==20230314"]
+
+ina      = ["inaspeechsegmenter==0.7.3"]
+
+pyannote = [
+  "pyannote.audio==2.1.1",
+  "soundfile==0.10.3.post1",
+]
+
+yamnet   = [
+  "tensorflow==2.8.0",
+  "tensorflow-hub==0.13.0"
+]
+
+librosa = [
+  "librosa>=0.9.1",
+  "numba>=0.58.0"
+]
+
+wav2vec2 = ["transformers==4.19.2"]
+
+speechbrain_embedding = [
+  "speechbrain==0.5.13",
+  "numpy==1.23.5"
+]
+
+speechbrain-iemocap-emotion = [
+  "speechbrain==0.5.13",
+  "transformers==4.19.2",
+  "numpy==1.23.5"
+]
+
+vanpy_models = [
+  "tensorflow==2.8.0",
+  "tensorflow-io-gcs-filesystem==0.25.0"
+]
+
+cpu = [
+  "torch==1.13.1",          # will resolve to 1.13.1+cpu wheels
+  "torchaudio==0.13.1",
+]
+gpu = [
+  "torch==1.13.1+cu117",
+  "torchaudio==0.13.1+cu117",
+]
+
+[tool.uv]
+# tell the resolver that cpu and gpu wheels are exclusive
+conflicts = [
+  [ { extra = "cpu" }, { extra = "gpu" } ],
+]
+
+# Where to get the wheels for each extra
+[tool.uv.sources]
+torch = [
+  { index = "pytorch-cpu", extra = "cpu" },
+  { index = "pytorch-cu117", extra = "gpu" },
+]
+torchaudio = [
+  { index = "pytorch-cpu", extra = "cpu" },
+  { index = "pytorch-cu117", extra = "gpu" },
+]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url  = "https://download.pytorch.org/whl/cpu"
+explicit = true            # only used for the packages listed above
+
+[[tool.uv.index]]
+name = "pytorch-cu117"
+url  = "https://download.pytorch.org/whl/cu117"
+explicit = true

@@ -1,3 +1,4 @@
+import os
 import time
 import numpy as np
 import pandas as pd
@@ -126,13 +127,13 @@ class Wav2Vec2ADV(PipelineComponent):
         # run through processor to normalize signal
         # always returns a batch, so we just get the first entry
         # then we put it on the device
-        y = self.processor(x, sampling_rate=sampling_rate)
+        y = self.processor(x, sampling_rate=sampling_rate, return_tensors="pt")
         y = y['input_values'][0]
-        y = torch.from_numpy(y).to(self.device)
+        y = y.to(self.device)
 
         # run through model
         with torch.no_grad():
-            y = self.model(y)[1]
+            y = self.model(y.unsqueeze(0))[1]  # Add batch dimension for model
 
         # convert to numpy
         y = y.detach().cpu().numpy()
@@ -150,7 +151,7 @@ class Wav2Vec2ADV(PipelineComponent):
         try:
             # Loading the audio file
             audio, rate = librosa.load(f, sr=self.sampling_rate)
-            arousal, dominance, valence = self.process_func(np.reshape(audio, [1, len(audio)]), rate)[0]
+            arousal, dominance, valence = self.process_func(audio, rate)[0]
 
             # Create a DataFrame to hold the results
             f_df = pd.DataFrame({
@@ -199,4 +200,15 @@ class Wav2Vec2ADV(PipelineComponent):
         # Merge the processed DataFrame back into the original DataFrame
         payload_df = pd.merge(left=payload_df, right=p_df, how='left', left_on=input_column, right_on=input_column)
 
+        Wav2Vec2ADV.cleanup_softlinks()
+
         return ComponentPayload(metadata=payload_metadata, df=payload_df)
+
+    @staticmethod
+    def cleanup_softlinks():
+        """
+        Clean up temporary softlinks created during processing.
+        """
+        for link in os.listdir():
+            if '.wav' in link and os.path.islink(link):
+                os.unlink(link)

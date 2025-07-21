@@ -2,6 +2,7 @@ from sklearn.mixture import GaussianMixture
 from vanpy.core.ComponentPayload import ComponentPayload
 from yaml import YAMLObject
 import time
+import numpy as np
 from vanpy.core.model_inference_components.BaseClassificationComponent import BaseClassificationComponent
 
 
@@ -29,6 +30,7 @@ class GMMClusterer(BaseClassificationComponent):
                                                           f'{self.component_name}_classification')
         self.n_components = self.config.get('n_components', 3)  # Number of Gaussian components
         self.covariance_type = self.config.get('covariance_type', 'full')  # Covariance type
+        self.reg_covar = self.config.get('reg_covar', 1e-6)  # Regularization for covariance
         self.requested_feature_list = self.build_requested_feature_list()
 
     def process(self, input_payload: ComponentPayload) -> ComponentPayload:
@@ -58,12 +60,15 @@ class GMMClusterer(BaseClassificationComponent):
 
         # Get indices and features of valid rows
         valid_indices = valid_rows_mask[valid_rows_mask].index
-        valid_features = payload_df.loc[valid_indices, features_columns].values
+        # Ensure features are in float64 for better numerical stability
+        valid_features = payload_df.loc[valid_indices, features_columns].values.astype(np.float64)
 
-        # Fit GMM on valid features
+        # Limit the number of components to the number of available samples and add regularization
+        n_components = min(self.n_components, len(valid_indices))
         gmm = GaussianMixture(
-            n_components=self.n_components,
-            covariance_type=self.covariance_type
+            n_components=n_components,
+            covariance_type=self.covariance_type,
+            reg_covar=self.reg_covar
         )
         gmm.fit(valid_features)
 

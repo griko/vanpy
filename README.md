@@ -96,6 +96,72 @@ huggingface_ACCESS_TOKEN=<your_token>
 ```
 3. Pipelines examples are available in `src/run.py`.
 
+## Installation with uv
+
+VANPY now leverages the [uv](https://github.com/astral-sh/uv) package manager for ultra-fast, reproducible dependency management.  
+The `pyproject.toml` already contains all dependency metadata, so **no `requirements.txt` is needed**.
+
+### Prerequisites
+* Python 3.8+
+* uv – install via `pip install uv` / `brew install uv` / `sudo snap install astral-uv --classic`
+
+### 1&nbsp;· Create & activate a virtual environment (recommended)
+```bash
+uv venv .venv --python 3.11
+# Linux/macOS
+source .venv/bin/activate
+# Windows PowerShell
+.\.venv\Scripts\Activate.ps1
+```
+
+### 2&nbsp;· Install the core (CPU) dependencies
+```bash
+uv sync
+```
+
+### 3&nbsp;· Choose **CPU** *or* **GPU** build
+`cpu` and `gpu` extras are **mutually exclusive** (this rule is enforced in *pyproject.toml*).
+```bash
+# Explicitly request CPU wheels (also default)
+uv sync --extra cpu
+
+# Install GPU wheels (CUDA 11.7)
+uv sync --extra gpu
+```
+
+### 4&nbsp;· Add optional component extras
+Pass one or many `--extra` flags to pull in additional capabilities:
+
+| Extra flag | Unlocks component(s) |
+|------------|----------------------|
+| `librosa`  | `LibrosaFeaturesExtractor` |
+| `speechbrain_embedding` | `SpeechBrainEmbedding` |
+| `vanpy_models` | Pre-trained VANPY TensorFlow models |
+| `pyannote` | Pyannote-based VAD / SD / Embedding |
+| `wav2vec2` | Wav2Vec2-based STT & emotion components |
+| `whisper` | OpenAI Whisper STT component |
+| `yamnet` | Google YAMNet audio classifier |
+| `ina` | INA Voice Separator |
+
+Example installations:
+```bash
+# Librosa + SpeechBrain on CPU
+uv sync --extra librosa --extra speechbrain_embedding
+
+# Everything + GPU
+uv sync --extra gpu \
+        --extra librosa \
+        --extra speechbrain_embedding \
+        --extra vanpy_models \
+        --extra pyannote \
+        --extra wav2vec2 \
+        --extra whisper \
+        --extra yamnet \
+        --extra ina
+```
+
+
+
 ## Components
 Each component expects as an input and returns as an output a `ComponentPayload` object.
 

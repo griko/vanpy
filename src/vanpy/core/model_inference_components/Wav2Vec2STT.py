@@ -1,3 +1,4 @@
+import os
 import time
 import torch
 import librosa
@@ -106,4 +107,15 @@ class Wav2Vec2STT(PipelineComponent):
         # Merge the processed DataFrame back into the original DataFrame
         payload_df = pd.merge(left=payload_df, right=p_df, how='left', on=input_column)
 
+        Wav2Vec2STT.cleanup_softlinks()
+
         return ComponentPayload(metadata=payload_metadata, df=payload_df)
+
+    @staticmethod
+    def cleanup_softlinks():
+        """
+        Clean up temporary softlinks created during processing.
+        """
+        for link in os.listdir():
+            if '.wav' in link and os.path.islink(link):
+                os.unlink(link)
