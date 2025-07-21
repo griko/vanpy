@@ -96,14 +96,25 @@ huggingface_ACCESS_TOKEN=<your_token>
 ```
 3. Pipelines examples are available in `src/run.py`.
 
-## Installation with uv
+## Installation with uv (usage)
 
-VANPY now leverages the [uv](https://github.com/astral-sh/uv) package manager for ultra-fast, reproducible dependency management.  
-The `pyproject.toml` already contains all dependency metadata, so **no `requirements.txt` is needed**.
+VANPY now leverages the [uv](https://github.com/astral-sh/uv) package manager for ultra-fast, reproducible dependency management.
+
+
+
+```bash
+uv init
+# depending on your needs, you can choose to install the core dependencies or all the extras (cpu and gpu are mutually exclusive)
+uv add vanpy[cpu,librosa,speechbrain_embedding,vanpy_models,pyannote,wav2vec2,whisper,yamnet,ina]
+
+```
+
+## Installation with uv (development)
+
 
 ### Prerequisites
 * Python 3.8+
-* uv – install via `pip install uv` / `brew install uv` / `sudo snap install astral-uv --classic`
+
 
 ### 1&nbsp;· Create & activate a virtual environment (recommended)
 ```bash
