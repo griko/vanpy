@@ -98,31 +98,17 @@ huggingface_ACCESS_TOKEN=<your_token>
 
 ## Installation with uv (usage)
 
-VANPY now leverages the [uv](https://github.com/astral-sh/uv) package manager for ultra-fast, reproducible dependency management.
-
-
-
-```bash
-uv init
-# depending on your needs, you can choose to install the core dependencies or all the extras (cpu and gpu are mutually exclusive)
-uv add vanpy[cpu,librosa,speechbrain_embedding,vanpy_models,pyannote,wav2vec2,whisper,yamnet,ina]
-
-```
+Please see [the minimal example repository](https://github.com/griko/vanpy-minimal-usage) for a quick start.
 
 ## Installation with uv (development)
 
+VANPY now leverages the [uv](https://github.com/astral-sh/uv) package manager for ultra-fast, reproducible dependency management.
 
-### Prerequisites
-* Python 3.8+
+* uv – install via `pip install uv` / `brew install uv` / `sudo snap install astral-uv --classic`
 
-
-### 1&nbsp;· Create & activate a virtual environment (recommended)
+### 1&nbsp;· Initialize a project
 ```bash
-uv venv .venv --python 3.11
-# Linux/macOS
-source .venv/bin/activate
-# Windows PowerShell
-.\.venv\Scripts\Activate.ps1
+uv init
 ```
 
 ### 2&nbsp;· Install the core (CPU) dependencies
